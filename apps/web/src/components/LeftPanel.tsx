@@ -7,13 +7,15 @@ import { EventTimeline } from './panels/EventTimeline.js';
 import { SimulationPanel } from './panels/SimulationPanel.js';
 import { ImportPanel } from './panels/ImportPanel.js';
 import { FoundNearYou } from './discovery/FoundNearYou.js';
+import { DeviceCatalog } from './catalog/DeviceCatalog.js';
 
-type Tab = 'plan' | 'devices' | 'found' | 'simulate' | 'import' | 'events';
+type Tab = 'plan' | 'devices' | 'found' | 'catalog' | 'simulate' | 'import' | 'events';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'plan', label: 'Plan' },
   { id: 'devices', label: 'Devices' },
   { id: 'found', label: 'Found near you' },
+  { id: 'catalog', label: 'Catalog' },
   { id: 'simulate', label: 'Simulate' },
   { id: 'import', label: 'Import' },
   { id: 'events', label: 'Events' },
@@ -51,6 +53,7 @@ export function LeftPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
           </>
         )}
         {tab === 'found' && <FoundNearYou />}
+        {tab === 'catalog' && <DeviceCatalog />}
         {tab === 'simulate' && <SimulationPanel onOpenWizard={onOpenWizard} />}
         {tab === 'import' && <ImportPanel />}
         {tab === 'events' && <EventTimeline />}

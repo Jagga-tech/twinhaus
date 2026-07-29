@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
 import { recommend, type Ownership, type Tier } from '../../lib/recommendations.js';
+import { suggestForCategory } from '@twinhaus/discovery';
 import { BluetoothQuickScan } from '../discovery/BluetoothQuickScan.js';
 
 /**
@@ -92,13 +93,22 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
           </div>
           <p className="hint">{result.tier.blurb}</p>
           <ul className="recommend-list">
-            {result.tier.devices.map((device, index) => (
-              <li key={index}>
-                {device.label} — ~${device.approxPriceUsd}
-                {device.note ? ` · ${device.note}` : ''}
-              </li>
-            ))}
+            {result.tier.devices.map((device, index) => {
+              const pick = suggestForCategory(device.category);
+              return (
+                <li key={index}>
+                  {device.label} — ~${device.approxPriceUsd}
+                  {device.note ? ` · ${device.note}` : ''}
+                  {pick && (
+                    <span className="recommend-pick">
+                      e.g. {pick.brand} {pick.model}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
+          <p className="hint">Browse every option in the Catalog tab.</p>
           {result.notes.map((note, index) => (
             <p key={index} className="wizard-note">
               💡 {note}

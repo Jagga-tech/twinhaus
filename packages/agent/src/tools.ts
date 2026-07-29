@@ -24,6 +24,12 @@ export interface HomeContext {
    * the config flow in the UI — the agent must never complete a config flow itself.
    */
   listDiscoveredDevices(): Promise<string>;
+  /**
+   * Search the catalog of smart-home devices Home Assistant can add, so the agent can recommend a
+   * real product for a category, protocol, or budget ("suggest a cheap local smart lock"). Read-only
+   * and advisory: it never buys or configures anything — the user adds the device through HA.
+   */
+  searchDeviceCatalog(query?: string): Promise<string>;
   /** Call a Home Assistant service against one entity, e.g. `light` / `turn_on`. */
   callService(args: {
     domain: string;
@@ -77,6 +83,21 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     inputSchema: { type: 'object', properties: {} },
   },
   {
+    name: 'search_device_catalog',
+    description:
+      'Search the catalog of smart-home devices Home Assistant can add, to recommend products ("what smart lock should I buy?", "cheap local Zigbee sensor"). Optional query matches brand, category, protocol, or setup. Read-only and advisory — you recommend, the user adds the device through Home Assistant. Never claim to have purchased or configured anything.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description:
+            'Optional search text, e.g. "smart lock", "local zigbee light", "camera under 60".',
+        },
+      },
+    },
+  },
+  {
     name: 'call_service',
     description:
       'Control a device by calling a Home Assistant service on one entity. Examples: domain "light" service "turn_on"; domain "lock" service "lock"; domain "climate" service "set_temperature"; domain "scene" service "turn_on"; domain "automation" service "trigger". To run a routine like "turn off everything", list the relevant entities first, then call this once per entity.',
@@ -116,6 +137,8 @@ export async function executeTool(
       return context.getEnergyByRoom();
     case 'list_discovered_devices':
       return context.listDiscoveredDevices();
+    case 'search_device_catalog':
+      return context.searchDeviceCatalog(input.query ? String(input.query) : undefined);
     case 'call_service':
       return context.callService({
         domain: String(input.domain),

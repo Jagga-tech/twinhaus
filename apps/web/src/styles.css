@@ -699,3 +699,102 @@ select {
   gap: 0.4rem;
   align-items: flex-start;
 }
+
+/* Device catalog — search everything we can recommend */
+.catalog-search {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: inherit;
+  font-size: 0.85rem;
+}
+.catalog-filters {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+.catalog-filters select {
+  flex: 1;
+  min-width: 0;
+}
+.catalog-count {
+  margin: 0.25rem 0;
+}
+.catalog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.catalog-item {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+}
+.catalog-glyph {
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+.catalog-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.catalog-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.catalog-price {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.catalog-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.catalog-chip {
+  font-size: 0.66rem;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.catalog-chip.setup-local {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+.catalog-chip.setup-cloud {
+  background: #ffe0b2;
+  color: #b25a00;
+}
+.catalog-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+.catalog-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.catalog-actions a {
+  font-size: 0.78rem;
+}
+.recommend-pick {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
