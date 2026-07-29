@@ -22,6 +22,18 @@ Thanks for your interest! Twinhaus is early-stage, which means your contribution
 - Keep PRs small and focused — easier to review, faster to merge
 - Describe _what_ and _why_ in the PR body; screenshots/recordings for anything visual
 
+## Checks
+
+Before opening a PR, run the same checks CI runs:
+
+```bash
+npm run typecheck   # all workspaces
+npm test            # vitest (agent loop, geometry, energy, IO, controls, …)
+npm run build       # web production build
+```
+
+CI (`.github/workflows/ci.yml`) runs these on every pull request.
+
 ## Code style
 
 - TypeScript everywhere
