@@ -48,6 +48,15 @@ The smallest thing that's demo-able and useful.
 - [x] Optional, clearly-separated Web Bluetooth "Quick scan (beta)", informational only
 - [x] `docs/DISCOVERY.md` — how it works, `cors_allowed_origins`, ESPHome BT proxies
 
+## Catalog — search everything you can add
+
+- [x] Cross-brand `DEVICE_CATALOG` spanning every category, local & cloud setups, all radios — `packages/discovery/src/catalog.ts`
+- [x] `searchCatalog` free-text + category/protocol/setup/price filters, cheapest-first
+- [x] Catalog browse tab: search, filter, simulate-in-twin, and "How to add →" HA docs link
+- [x] Recommendation wizard names a real catalog pick per device (`suggestForCategory`)
+- [x] Read-only agent tool `search_device_catalog` (recommends only; HA still does the adding)
+- [x] `docs/CATALOG.md` — data model, search semantics, why it's curated
+
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant

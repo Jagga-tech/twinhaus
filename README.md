@@ -84,7 +84,7 @@ twinhaus/
 │   └── web/            # React + React Three Fiber frontend + twin state engine
 ├── packages/
 │   ├── agent/          # AI agent — provider-agnostic LLM tool-calling against HA services
-│   ├── discovery/      # consume HA config flows — discovered-but-unconfigured devices
+│   ├── discovery/      # consume HA config flows + device catalog we can recommend
 │   ├── ha-bridge/      # Home Assistant WebSocket client + state sync
 │   └── mcp-server/     # MCP server — query & control your home from any AI assistant
 ├── addon/              # Home Assistant add-on packaging (Ingress)
@@ -99,6 +99,7 @@ twinhaus/
 - [x] **Phase 3**: Simulation mode with coverage viz, device recommendation wizard, local LLM support (Ollama), `.glb`/`.gltf` + photo import, HA add-on packaging
 - [x] **Phase 4**: Built-in device model library, home templates, MCP server
 - [x] **Discovery**: "Found near you" tray — one-click add of HA-discovered devices with instant 3D placement ([docs](docs/DISCOVERY.md))
+- [x] **Catalog**: searchable cross-brand catalog of devices you can add, feeding the recommendation wizard and the agent ([docs](docs/CATALOG.md))
 
 Full details in [docs/ROADMAP.md](docs/ROADMAP.md).
 

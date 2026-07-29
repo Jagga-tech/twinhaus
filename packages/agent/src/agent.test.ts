@@ -36,6 +36,10 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
       calls.push('list_discovered_devices');
       return 'Hue Bridge';
     },
+    async searchDeviceCatalog(query) {
+      calls.push(`search_device_catalog:${query ?? ''}`);
+      return 'Nuki Smart Lock 4.0';
+    },
     async callService({ domain, service, entityId }) {
       calls.push(`call_service:${domain}.${service}:${entityId}`);
       return 'done';
@@ -89,6 +93,7 @@ describe('Agent', () => {
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
       listDiscoveredDevices: async () => 'ok',
+      searchDeviceCatalog: async () => 'ok',
       callService: async () => {
         throw new Error('HA offline');
       },

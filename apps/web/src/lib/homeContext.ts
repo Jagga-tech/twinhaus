@@ -1,5 +1,6 @@
 import type { HomeContext } from '@twinhaus/agent';
 import { entityDomain, type HaClient } from '@twinhaus/ha-bridge';
+import { searchCatalog } from '@twinhaus/discovery';
 import { entitySummary } from './deviceState.js';
 import { computeRoomEnergy } from './energy.js';
 import { useTwinStore } from '../store/twinStore.js';
@@ -86,6 +87,25 @@ export function createHomeContext(client: HaClient): HomeContext {
       return discovered
         .map((device) => `${device.name} — ${device.brand} (via ${device.source})`)
         .join('\n');
+    },
+
+    async searchDeviceCatalog(query) {
+      const matches = searchCatalog(query ?? '');
+      if (matches.length === 0) {
+        return `No catalog devices match "${query ?? ''}". Try a category (light, lock, camera) or a protocol (zigbee, matter).`;
+      }
+      const shown = matches.slice(0, 12);
+      const lines = shown.map((device) => {
+        const protocols = device.protocols.join('/');
+        const note = device.note ? ` — ${device.note}` : '';
+        return `${device.brand} ${device.model} (${device.category}) — ~$${device.approxPriceUsd}, ${protocols}, ${device.setup} setup via Home Assistant "${device.integration}"${note}`;
+      });
+      const suffix =
+        matches.length > shown.length ? `\n…and ${matches.length - shown.length} more.` : '';
+      return (
+        `${lines.join('\n')}${suffix}\n\n` +
+        'These are recommendations only — the user adds any device through Home Assistant.'
+      );
     },
 
     async callService({ domain, service, entityId, data }) {
