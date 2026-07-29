@@ -65,6 +65,7 @@ export function ChatPanel() {
 
     setInput('');
     appendItem({ role: 'user', text: message });
+    useTwinStore.getState().markAgentUsed();
     setBusy(true);
 
     try {

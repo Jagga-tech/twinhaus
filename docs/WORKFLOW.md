@@ -84,13 +84,19 @@ flowchart TD
 | Safety loop                     | `packages/agent` `safety.ts` + `agent.ts` · `verifyAction.ts`                                |
 | Connection resilience           | `packages/ha-bridge` `backoff.ts` + `client.ts`                                              |
 
-## The one gap this exposes
+## The spine — WelcomeFlow (built)
 
-Every node above is built — but they live in **separate tabs the user has to discover**. The single
-missing piece is the **spine**: a first-run `WelcomeFlow` that walks a new user through
-connect → scan → tour → gap-check → positioning nudge → first agent command, each step reusing the
-components in the table. That is the difference between "13 features on `main`" and "a product that
-sells itself in the first session" — and it's the recommended next build.
+The features used to live in separate tabs the user had to discover. The **`WelcomeFlow`** now
+threads them into one first-run journey — connect → build → control → locate (optional) → talk —
+steering the user to the right tab for each step and ticking steps off **live** as they're done
+(and re-opening one if a prerequisite regresses, e.g. Home Assistant disconnects).
+
+- **`apps/web/src/lib/welcomeFlow.ts`** — `resolveWelcome(input)`, a pure state-driven resolver
+  (no stored cursor), fully unit-tested.
+- **`apps/web/src/components/WelcomeFlow.tsx`** — a dismissible checklist overlay; the app stays
+  fully usable underneath, and finishing/skipping hides it for good (persisted).
+- Progress derives from real signals: `connected`, `hasLayout`, `hasDevices`,
+  `positioningStatus().ready`, and `agentUsed` — so it can't lie about where you are.
 
 ## Monetization edges (free core, paid rim — the Nabu Casa model)
 

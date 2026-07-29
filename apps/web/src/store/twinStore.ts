@@ -48,7 +48,15 @@ interface TwinState {
   haConfig: HaConnectionConfig;
   llmConfig: LlmConfig;
 
+  // --- Onboarding (persisted) ---
+  /** True once the user has finished or skipped the first-run WelcomeFlow. */
+  welcomeDismissed: boolean;
+  /** True once the user has sent a message to the agent (drives the "talk" onboarding step). */
+  agentUsed: boolean;
+
   // --- Editor / view UI state (not persisted) ---
+  /** The active tab in the left workspace column; lifted here so onboarding can steer it. */
+  activeLeftTab: string;
   editorMode: EditorMode;
   viewMode: ViewMode;
   selectedEntityId: string | null;
@@ -87,7 +95,10 @@ interface TwinState {
   setDiscovered: (devices: DiscoveredDevice[]) => void;
   setPendingPlacement: (placement: { entityId: string; label: string } | null) => void;
   setLivePositions: (positions: Record<string, PositionEstimate>) => void;
+  setWelcomeDismissed: (dismissed: boolean) => void;
+  markAgentUsed: () => void;
 
+  setActiveLeftTab: (tab: string) => void;
   setEditorMode: (mode: EditorMode) => void;
   setViewMode: (mode: ViewMode) => void;
   setSelectedEntityId: (entityId: string | null) => void;
@@ -133,6 +144,9 @@ export const useTwinStore = create<TwinState>()(
       livePositions: {},
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
+      welcomeDismissed: false,
+      agentUsed: false,
+      activeLeftTab: 'plan',
       editorMode: 'view',
       viewMode: 'normal',
       selectedEntityId: null,
@@ -235,7 +249,10 @@ export const useTwinStore = create<TwinState>()(
       setDiscovered: (devices) => set(() => ({ discovered: devices })),
       setPendingPlacement: (placement) => set(() => ({ pendingPlacement: placement })),
       setLivePositions: (positions) => set(() => ({ livePositions: positions })),
+      setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
+      markAgentUsed: () => set(() => ({ agentUsed: true })),
 
+      setActiveLeftTab: (tab) => set(() => ({ activeLeftTab: tab })),
       setEditorMode: (mode) => set(() => ({ editorMode: mode })),
       setViewMode: (mode) => set(() => ({ viewMode: mode })),
       setSelectedEntityId: (entityId) => set(() => ({ selectedEntityId: entityId })),
@@ -280,6 +297,8 @@ export const useTwinStore = create<TwinState>()(
         virtualDevices: state.virtualDevices,
         haConfig: state.haConfig,
         llmConfig: state.llmConfig,
+        welcomeDismissed: state.welcomeDismissed,
+        agentUsed: state.agentUsed,
       }),
     },
   ),
