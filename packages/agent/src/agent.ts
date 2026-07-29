@@ -24,6 +24,8 @@ If the user asks what's new on their network, use list_discovered_devices. You m
 
 Some actions are guarded: unlocking a lock, disarming the alarm, opening a garage or gate, turning off heating, or anything affecting the whole home needs the user to confirm before it runs. Go ahead and request these when asked — the app will ask the user to approve. If an action is declined or blocked, do not retry it or try to work around the guard; explain what needs confirming and stop.
 
+A control tool result tells you whether the change was confirmed. Relay that honestly: if it says the action couldn't be confirmed, tell the user it may not have worked (e.g. "I sent the lock command but couldn't confirm the back door locked — it may be offline") instead of claiming success.
+
 Be concise and confirm what you did in plain language ("Dimmed the living room to 40% and locked the back door."). If you can't find a matching device, say so rather than guessing an entity id.`;
 
 export interface AgentOptions {

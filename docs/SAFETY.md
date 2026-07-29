@@ -48,6 +48,22 @@ A hard cap of `maxActions` (default 12) control actions per user message. A misf
 tries to fan out dozens of service calls is stopped at the budget, with the remaining calls skipped
 and a `loop_halted` event emitted.
 
+### 5. Verify-after-act
+
+A confident lie is its own kind of serious issue. After a control call, the adapter confirms the
+device actually reached the intended state instead of assuming success:
+
+- **Retry transient failures.** `withRetry` re-runs the service call on connection-level errors
+  (dropped/timed-out) with backoff, but never retries a deliberate Home Assistant rejection (bad
+  service, unknown entity) — that would just repeat the error.
+- **Confirm the outcome.** For unambiguous transitions (`expectedStateFor` — on/off, lock/unlock,
+  cover open/close), `confirmState` polls the live state for a couple of seconds. If it lands, the
+  tool reports "confirmed it is now …"; if not, it reports "couldn't confirm it took effect (still
+  …)" and the agent is instructed to tell the user rather than claim success.
+
+Lives in `apps/web/src/lib/verifyAction.ts` (pure and injectable, so it's unit-tested without
+timers), wired into the `call_service` adapter in `homeContext.ts`.
+
 ## Events
 
 The loop emits safety events alongside the usual tool activity, so any UI can surface them:
