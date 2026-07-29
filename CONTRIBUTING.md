@@ -20,7 +20,7 @@ Thanks for your interest! Twinhaus is early-stage, which means your contribution
 
 - Branch from `main`, one feature per PR
 - Keep PRs small and focused — easier to review, faster to merge
-- Describe *what* and *why* in the PR body; screenshots/recordings for anything visual
+- Describe _what_ and _why_ in the PR body; screenshots/recordings for anything visual
 
 ## Code style
 

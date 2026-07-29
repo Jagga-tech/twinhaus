@@ -1,0 +1,15 @@
+{
+  "name": "@twinhaus/agent",
+  "version": "0.1.0",
+  "description": "The AI brain. Provider-agnostic LLM tool-calling mapped to Home Assistant services and twin queries.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

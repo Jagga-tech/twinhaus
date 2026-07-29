@@ -21,15 +21,15 @@
 
 Twinhaus is a live, walkable 3D replica of your real home that runs in the browser. Every smart device in your house appears in the model exactly where it is in real life — and an AI agent controls all of it through natural language.
 
-Say *"dim the living room and lock the back door"* and watch it happen in the twin as it happens in your house.
+Say _"dim the living room and lock the back door"_ and watch it happen in the twin as it happens in your house.
 
 Your home already has the data. Home Assistant already talks to 2000+ devices. What's missing is a spatial, intelligent way to see and control it all. That's Twinhaus.
 
 ## Why?
 
-- **Dashboards are lists. Homes are spaces.** A motion alert means more when you see *which door* it came from, in 3D.
+- **Dashboards are lists. Homes are spaces.** A motion alert means more when you see _which door_ it came from, in 3D.
 - **Works with the home you already have.** Old house, rented apartment, zero smart devices — start with a floor plan and grow from there.
-- **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, *then* spend money.
+- **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, _then_ spend money.
 - **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM — cloud APIs or fully local via Ollama.
 
 ## How it works

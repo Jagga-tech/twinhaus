@@ -1,0 +1,348 @@
+:root {
+  --bg: #f5f7f8;
+  --panel: #ffffff;
+  --ink: #263238;
+  --muted: #607d8b;
+  --line: #e0e4e7;
+  --accent: #00897b;
+  --accent-ink: #ffffff;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Top bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.25rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+.brand strong {
+  color: var(--accent);
+}
+
+.mode-switch {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg);
+  padding: 0.2rem;
+  border-radius: 8px;
+}
+.mode-switch button {
+  text-transform: capitalize;
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.mode-switch button.active {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.provider-tag {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Workspace layout */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(400px, 1.4fr) minmax(300px, 1fr);
+  gap: 1px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.pane {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 0.75rem;
+}
+.pane-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.pane-viewer {
+  padding: 0;
+}
+.pane-viewer .pane-title {
+  padding: 0.75rem 0.75rem 0;
+}
+
+/* Editor */
+.editor-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  min-height: 2rem;
+  flex-wrap: wrap;
+}
+.editor-canvas {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* 3D canvas */
+.twin-canvas {
+  flex: 1;
+  min-height: 400px;
+}
+.device-label {
+  background: rgba(38, 50, 56, 0.85);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  transform: translateY(-4px);
+}
+
+/* Entity panel */
+.entity-panel {
+  margin-top: 0.75rem;
+}
+.entity-panel h4 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.entity-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.entity {
+  width: 100%;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+.entity.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.entity-id {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.entity-placed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+/* Chat */
+.pane-chat {
+  padding: 0.75rem;
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.chat-log {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem;
+}
+.chat-empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.chat-item {
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  max-width: 90%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.chat-assistant {
+  align-self: flex-start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.chat-tool {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--muted);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.78rem;
+  padding: 0.1rem 0.4rem;
+}
+.chat-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.chat-input input {
+  flex: 1;
+}
+
+/* Forms & buttons */
+button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.link {
+  border: none;
+  background: none;
+  color: var(--accent);
+  padding: 0;
+}
+input,
+select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+/* Status pill */
+.status {
+  font-size: 0.78rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.status-connected {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+.status-connecting,
+.status-authenticating {
+  background: #fff3cd;
+  color: #8a6d3b;
+}
+
+/* Settings overlay */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 50, 56, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5vh;
+  z-index: 20;
+}
+.settings {
+  background: var(--panel);
+  width: min(480px, 92vw);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.settings section {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+.settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.settings-error {
+  color: #c62828;
+  font-size: 0.85rem;
+}

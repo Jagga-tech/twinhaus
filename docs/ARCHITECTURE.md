@@ -7,14 +7,17 @@ Twinhaus is a **3D + AI layer on top of Home Assistant**, never a replacement fo
 ## Layers
 
 ### 1. Browser (frontend)
+
 - **3D twin viewer** — React Three Fiber renders the home model. Devices are 3D objects positioned in rooms; their visual state mirrors real state (a light entity that's `on` glows in the model).
 - **Chat control** — a chat panel wired to the agent. Commands and questions in natural language.
 
 ### 2. Twinhaus core
+
 - **Twin state engine** — the source of truth for the twin: room geometry, device-to-room assignments, and a live mirror of HA entity states. Geometry is stored as JSON (floor plan polygons + heights, extruded to 3D at load).
 - **AI agent** — an LLM with tool-calling. Tools map to HA services (`light.turn_on`, `lock.lock`, `climate.set_temperature`) plus twin-specific tools (`get_room_devices`, `get_energy_by_room`). Provider-agnostic: Anthropic/OpenAI APIs or local models via Ollama.
 
 ### 3. Home Assistant (device layer)
+
 - Connected via long-lived access token over the WebSocket API
 - We subscribe to `state_changed` events for live updates
 - We call HA services for all device control
