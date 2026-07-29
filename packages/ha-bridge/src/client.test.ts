@@ -40,12 +40,14 @@ interface Harness {
   client: HaClient;
   sockets: FakeSocket[];
   fireTimer: () => void;
+  fireAllTimers: () => void;
   hasTimer: () => boolean;
 }
 
-function harness(options: { maxAttempts?: number } = {}): Harness {
+function harness(options: { maxAttempts?: number; commandTimeoutMs?: number } = {}): Harness {
   const sockets: FakeSocket[] = [];
-  let timer: (() => void) | null = null;
+  const timers = new Map<number, () => void>();
+  let nextHandle = 1;
   const client = new HaClient({
     socketFactory: () => {
       const socket = new FakeSocket();
@@ -53,23 +55,39 @@ function harness(options: { maxAttempts?: number } = {}): Harness {
       return socket;
     },
     setTimeoutFn: (cb) => {
-      timer = cb;
-      return 0 as unknown as ReturnType<typeof setTimeout>;
+      const handle = nextHandle++;
+      timers.set(handle, cb);
+      return handle as unknown as ReturnType<typeof setTimeout>;
     },
-    clearTimeoutFn: () => {
-      timer = null;
+    clearTimeoutFn: (handle) => {
+      timers.delete(handle as unknown as number);
     },
-    reconnect: { enabled: true, random: () => 0, baseMs: 10, ...options },
+    commandTimeoutMs: options.commandTimeoutMs,
+    reconnect: {
+      enabled: true,
+      random: () => 0,
+      baseMs: 10,
+      maxAttempts: options.maxAttempts,
+    },
   });
   return {
     client,
     sockets,
+    // Fire the oldest pending timer (the reconnect timer is scheduled before any queue timeout).
     fireTimer: () => {
-      const cb = timer;
-      timer = null;
-      cb?.();
+      const first = [...timers.keys()][0];
+      if (first === undefined) return;
+      const cb = timers.get(first)!;
+      timers.delete(first);
+      cb();
     },
-    hasTimer: () => timer !== null,
+    fireAllTimers: () => {
+      for (const [handle, cb] of [...timers]) {
+        timers.delete(handle);
+        cb();
+      }
+    },
+    hasTimer: () => timers.size > 0,
   };
 }
 
@@ -157,5 +175,49 @@ describe('HaClient reconnection', () => {
     await expect(promise).rejects.toThrow();
     expect(h.client.getStatus()).toBe('disconnected');
     expect(h.hasTimer()).toBe(false);
+  });
+});
+
+describe('HaClient command queue during reconnect', () => {
+  it('holds a command issued mid-reconnect and flushes it once reconnected', async () => {
+    const h = harness();
+    await connect(h);
+    h.sockets[0].drop();
+    expect(h.client.getStatus()).toBe('reconnecting');
+
+    const statesPromise = h.client.getStates();
+    expect(h.sockets[0].sent.some((m) => m.type === 'get_states')).toBe(false);
+
+    h.fireTimer(); // reconnect timer opens the next socket
+    handshake(h.sockets[1]); // auth_ok flushes the queue
+
+    const sent = h.sockets[1].sent.find((m) => m.type === 'get_states');
+    expect(sent).toBeDefined();
+    h.sockets[1].emitMessage({ type: 'result', id: sent!.id, success: true, result: [] });
+    await expect(statesPromise).resolves.toEqual([]);
+  });
+
+  it('times out a queued command if reconnection never completes', async () => {
+    const h = harness();
+    await connect(h);
+    h.sockets[0].drop();
+    const promise = h.client.getStates();
+    const rejection = expect(promise).rejects.toThrow(/timed out/i);
+    h.fireAllTimers();
+    await rejection;
+  });
+
+  it('rejects queued commands when the user disconnects', async () => {
+    const h = harness();
+    await connect(h);
+    h.sockets[0].drop();
+    const promise = h.client.getStates();
+    h.client.disconnect();
+    await expect(promise).rejects.toThrow(/disconnected/i);
+  });
+
+  it('rejects immediately when disconnected and not reconnecting', async () => {
+    const h = harness();
+    await expect(h.client.getStates()).rejects.toThrow(/not connected/i);
   });
 });

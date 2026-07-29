@@ -36,6 +36,11 @@ Key properties:
   forever; the default is unbounded (keep trying until told to stop).
 - **Snapshot resync.** Events missed while offline would leave the mirror wrong, so on reconnect the
   app reloads a full `get_states()` snapshot rather than trusting the gap.
+- **Commands survive the gap.** A command issued mid-reconnect (a light toggle, a service call) is
+  held in a queue and flushed the moment the socket is back, instead of failing outright. Each
+  queued command has a timeout (`commandTimeoutMs`, default 15s) so it can't hang forever, and the
+  queue is rejected if the user disconnects or reconnection gives up. Opt out with
+  `queueWhileReconnecting: false`.
 
 ## Where it lives
 

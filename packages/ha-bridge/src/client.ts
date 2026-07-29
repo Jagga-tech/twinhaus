@@ -29,6 +29,14 @@ interface Subscription {
   onEvent: EventListener;
 }
 
+/** A command issued while reconnecting, held until the connection is back (or it times out). */
+interface QueuedCommand {
+  payload: Record<string, unknown>;
+  resolve: (value: unknown) => void;
+  reject: (reason: Error) => void;
+  timer: ReturnType<typeof setTimeout>;
+}
+
 /** The subset of the WebSocket API the client needs; injectable so reconnection is testable. */
 export interface HaSocket {
   send(data: string): void;
@@ -50,6 +58,10 @@ export interface HaClientOptions {
   /** Override socket creation (tests inject a fake; the browser uses `WebSocket`). */
   socketFactory?: (url: string) => HaSocket;
   reconnect?: ReconnectOptions;
+  /** Hold commands issued mid-reconnect and flush them once reconnected. Default true. */
+  queueWhileReconnecting?: boolean;
+  /** Reject a queued command if it can't be sent within this window (ms). Default 15000. */
+  commandTimeoutMs?: number;
   setTimeoutFn?: (callback: () => void, ms: number) => ReturnType<typeof setTimeout>;
   clearTimeoutFn?: (handle: ReturnType<typeof setTimeout>) => void;
 }
@@ -77,6 +89,7 @@ export class HaClient {
   private readonly statusListeners = new Set<StatusListener>();
   private readonly reconnectListeners = new Set<ReconnectListener>();
 
+  private readonly commandQueue = new Set<QueuedCommand>();
   private closedByUser = false;
   private everConnected = false;
   private reconnectAttempts = 0;
@@ -84,6 +97,8 @@ export class HaClient {
   private connectResolve: (() => void) | null = null;
   private connectReject: ((reason: Error) => void) | null = null;
 
+  private readonly queueWhileReconnecting: boolean;
+  private readonly commandTimeoutMs: number;
   private readonly socketFactory: (url: string) => HaSocket;
   private readonly reconnectOptions: {
     enabled: boolean;
@@ -97,6 +112,8 @@ export class HaClient {
   private readonly clearTimeoutFn: (handle: ReturnType<typeof setTimeout>) => void;
 
   constructor(options: HaClientOptions = {}) {
+    this.queueWhileReconnecting = options.queueWhileReconnecting ?? true;
+    this.commandTimeoutMs = options.commandTimeoutMs ?? 15000;
     this.socketFactory =
       options.socketFactory ?? ((url) => new WebSocket(url) as unknown as HaSocket);
     this.reconnectOptions = {
@@ -157,6 +174,7 @@ export class HaClient {
       this.socket = null;
     }
     this.activeSubscriptions.clear();
+    this.failQueuedCommands(new Error('Client disconnected'));
     this.failPending(new Error('Client disconnected'));
     this.setStatus('disconnected');
   }
@@ -269,6 +287,7 @@ export class HaClient {
 
     if (wasReconnect) {
       this.reestablishSubscriptions();
+      this.flushCommandQueue();
       for (const listener of this.reconnectListeners) listener();
     }
 
@@ -299,6 +318,7 @@ export class HaClient {
       !this.reconnectOptions.enabled ||
       this.reconnectAttempts >= this.reconnectOptions.maxAttempts
     ) {
+      this.failQueuedCommands(new Error('Home Assistant reconnection gave up'));
       this.setStatus('disconnected');
       return;
     }
@@ -438,14 +458,63 @@ export class HaClient {
   }
 
   private sendCommand(payload: Record<string, unknown>): Promise<unknown> {
-    if (!this.socket || this.status !== 'connected') {
-      return Promise.reject(new Error('Not connected to Home Assistant'));
+    if (this.socket && this.status === 'connected') {
+      const id = this.messageId++;
+      return new Promise((resolve, reject) => {
+        this.pending.set(id, { resolve, reject });
+        this.rawSend({ id, ...payload });
+      });
     }
-    const id = this.messageId++;
+    // Mid-reconnect: hold the command and flush it once we're back, rather than failing outright.
+    if (this.queueWhileReconnecting && !this.closedByUser && this.isReconnecting()) {
+      return this.enqueueCommand(payload);
+    }
+    return Promise.reject(new Error('Not connected to Home Assistant'));
+  }
+
+  private isReconnecting(): boolean {
+    return (
+      this.reconnectOptions.enabled &&
+      this.everConnected &&
+      (this.status === 'reconnecting' ||
+        this.status === 'connecting' ||
+        this.status === 'authenticating')
+    );
+  }
+
+  private enqueueCommand(payload: Record<string, unknown>): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-      this.rawSend({ id, ...payload });
+      const command: QueuedCommand = {
+        payload,
+        resolve,
+        reject,
+        timer: this.setTimeoutFn(() => {
+          this.commandQueue.delete(command);
+          reject(new Error('Home Assistant command timed out while reconnecting'));
+        }, this.commandTimeoutMs),
+      };
+      this.commandQueue.add(command);
     });
+  }
+
+  /** Send every queued command on a freshly authenticated socket, wiring each to a pending result. */
+  private flushCommandQueue(): void {
+    const queued = [...this.commandQueue];
+    this.commandQueue.clear();
+    for (const command of queued) {
+      this.clearTimeoutFn(command.timer);
+      const id = this.messageId++;
+      this.pending.set(id, { resolve: command.resolve, reject: command.reject });
+      this.rawSend({ id, ...command.payload });
+    }
+  }
+
+  private failQueuedCommands(error: Error): void {
+    for (const command of this.commandQueue) {
+      this.clearTimeoutFn(command.timer);
+      command.reject(error);
+    }
+    this.commandQueue.clear();
   }
 
   private rawSend(payload: Record<string, unknown>): void {
