@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { RawArea, RawDeviceRegistryEntry, RawEntityRegistryEntry } from '@twinhaus/ha-bridge';
-import { buildHomeScan, packAreasIntoRooms, resolveEntityArea } from './homeScan.js';
+import { applyReview, buildHomeScan, packAreasIntoRooms, resolveEntityArea } from './homeScan.js';
 
 const areas: RawArea[] = [
   { area_id: 'living', name: 'Living Room' },
@@ -90,5 +90,60 @@ describe('buildHomeScan', () => {
     expect(result.placedCount).toBe(4);
     const living = result.model.devices.filter((d) => d.roomId === 'scan_living');
     expect(living[0].position).not.toEqual(living[1].position);
+  });
+});
+
+describe('applyReview', () => {
+  const result = buildHomeScan(
+    areas,
+    [{ id: 'dev_tv', area_id: 'living' }],
+    [
+      { entity_id: 'light.tv_backlight', device_id: 'dev_tv' },
+      { entity_id: 'lock.front', area_id: 'hall' },
+    ],
+  );
+
+  it('passes through unchanged with an empty review', () => {
+    const model = applyReview(result);
+    expect(model.rooms).toHaveLength(3);
+    expect(model.devices.map((d) => d.entityId).sort()).toEqual([
+      'light.tv_backlight',
+      'lock.front',
+    ]);
+  });
+
+  it('renames a room without changing its id', () => {
+    const model = applyReview(result, {
+      roomNames: { scan_living: 'Lounge' },
+      assignments: {},
+      excluded: [],
+    });
+    const room = model.rooms.find((r) => r.id === 'scan_living');
+    expect(room?.name).toBe('Lounge');
+  });
+
+  it('reassigns a device to another room', () => {
+    const model = applyReview(result, {
+      roomNames: {},
+      assignments: { 'light.tv_backlight': 'scan_kitchen' },
+      excluded: [],
+    });
+    const placement = model.devices.find((d) => d.entityId === 'light.tv_backlight');
+    expect(placement?.roomId).toBe('scan_kitchen');
+  });
+
+  it('drops excluded devices', () => {
+    const model = applyReview(result, { roomNames: {}, assignments: {}, excluded: ['lock.front'] });
+    expect(model.devices.map((d) => d.entityId)).not.toContain('lock.front');
+    expect(model.devices).toHaveLength(1);
+  });
+
+  it('ignores an assignment to a non-existent room', () => {
+    const model = applyReview(result, {
+      roomNames: {},
+      assignments: { 'lock.front': 'scan_nope' },
+      excluded: [],
+    });
+    expect(model.devices.find((d) => d.entityId === 'lock.front')).toBeUndefined();
   });
 });

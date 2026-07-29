@@ -140,3 +140,47 @@ export function buildHomeScan(
     skippedCount,
   };
 }
+
+/** User edits to a scan before applying it: rename rooms, move a device, or drop one entirely. */
+export interface ScanReview {
+  /** roomId → new name. */
+  roomNames: Record<string, string>;
+  /** entityId → the roomId it should live in (overrides the auto-assignment). */
+  assignments: Record<string, string>;
+  /** entityIds to leave out of the twin. */
+  excluded: string[];
+}
+
+const EMPTY_REVIEW: ScanReview = { roomNames: {}, assignments: {}, excluded: [] };
+
+/**
+ * Apply a user's {@link ScanReview} to a scan result, producing the final {@link TwinModel}. Rooms
+ * keep their identity (only names change); each device lands in its reviewed room with positions
+ * re-spread so a move looks tidy; excluded devices drop out. Pure, so the review UI stays testable.
+ */
+export function applyReview(result: HomeScanResult, review: ScanReview = EMPTY_REVIEW): TwinModel {
+  const excluded = new Set(review.excluded);
+  const rooms = result.model.rooms.map((room) => ({
+    ...room,
+    name: review.roomNames[room.id] ?? room.name,
+  }));
+  const roomIds = new Set(rooms.map((room) => room.id));
+  const centroidByRoomId = new Map(rooms.map((room) => [room.id, polygonCentroid(room.polygon)]));
+
+  const placements: DevicePlacement[] = [];
+  const countInRoom = new Map<string, number>();
+  for (const placement of result.model.devices) {
+    if (excluded.has(placement.entityId)) continue;
+    const roomId = review.assignments[placement.entityId] ?? placement.roomId;
+    if (!roomIds.has(roomId)) continue;
+    const indexInRoom = countInRoom.get(roomId) ?? 0;
+    countInRoom.set(roomId, indexInRoom + 1);
+    placements.push({
+      entityId: placement.entityId,
+      roomId,
+      position: spreadInRoom(centroidByRoomId.get(roomId)!, indexInRoom),
+    });
+  }
+
+  return { version: 1, rooms, devices: placements, virtualDevices: [] };
+}
