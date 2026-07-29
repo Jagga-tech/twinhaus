@@ -33,7 +33,8 @@ export interface CallServiceOptions {
   target?: ServiceTarget;
 }
 
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'authenticating' | 'connected';
+export type ConnectionStatus =
+  'disconnected' | 'connecting' | 'authenticating' | 'connected' | 'reconnecting';
 
 export interface HaConnectionConfig {
   /** Base URL of the Home Assistant instance, e.g. `http://homeassistant.local:8123`. */

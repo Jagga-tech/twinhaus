@@ -1,4 +1,5 @@
-export { HaClient } from './client.js';
+export { HaClient, type HaSocket, type HaClientOptions, type ReconnectOptions } from './client.js';
+export { backoffDelay, type BackoffOptions } from './backoff.js';
 export {
   entityDomain,
   type CallServiceOptions,

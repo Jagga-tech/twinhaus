@@ -11,6 +11,15 @@ haClient.onStateChanged((event) => {
   useTwinStore.getState().applyStateChange(event.entity_id, event.new_state);
 });
 
+// After an auto-reconnect the live mirror is stale (events were missed while offline), so reload a
+// full snapshot to heal it. Failures are swallowed — the next reconnect attempt will try again.
+haClient.onReconnected(() => {
+  haClient
+    .getStates()
+    .then((states) => useTwinStore.getState().setEntityStates(states))
+    .catch(() => undefined);
+});
+
 interface UseHaConnection {
   connect: () => Promise<void>;
   disconnect: () => void;

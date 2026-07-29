@@ -65,6 +65,15 @@ The smallest thing that's demo-able and useful.
 - [x] Inline Approve/Deny in the chat, with `confirmation_required` / `action_blocked` / `loop_halted` events
 - [x] `docs/SAFETY.md` — the four guards and how to tune them
 
+## Failure recovery — self-healing connection
+
+- [x] Auto-reconnect on unexpected WebSocket drop, with exponential backoff + jitter — `packages/ha-bridge/src/backoff.ts`
+- [x] Re-authenticate, re-subscribe to state_changed, and re-establish active subscriptions on reconnect
+- [x] `onReconnected` snapshot resync so missed-while-offline events don't leave the mirror stale
+- [x] Bounded by an optional `maxAttempts`; initial connect still fails fast on a bad URL/token
+- [x] `reconnecting` status surfaced in the UI; injectable socket/timer make it fully unit-tested
+- [x] `docs/RESILIENCE.md` — the recovery flow and how to tune it
+
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant
