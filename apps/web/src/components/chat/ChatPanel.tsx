@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import type { Agent, AgentEvent } from '@twinhaus/agent';
+import type { Agent, AgentEvent, ControlAction, SafetyVerdict } from '@twinhaus/agent';
 import { useTwinStore } from '../../store/twinStore.js';
 import { createAgent } from '../../lib/agentFactory.js';
 
@@ -8,10 +8,17 @@ interface TranscriptItem {
   text: string;
 }
 
+interface PendingConfirmation {
+  action: ControlAction;
+  verdict: SafetyVerdict;
+  resolve: (approved: boolean) => void;
+}
+
 /**
  * Talk to your home. Natural-language commands go to the agent, which calls Home Assistant
- * services; the results flow back into the twin visually. Tool activity is shown inline so
- * you can see what the agent actually did.
+ * services; the results flow back into the twin visually. Guarded actions (unlocking, disarming,
+ * opening, whole-home) pause here for an explicit Approve/Deny so the agent can never do something
+ * serious on its own.
  */
 export function ChatPanel() {
   const llmConfig = useTwinStore((state) => state.llmConfig);
@@ -20,17 +27,32 @@ export function ChatPanel() {
   const [transcript, setTranscript] = useState<TranscriptItem[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<PendingConfirmation | null>(null);
 
   // One agent per provider configuration; a new key rebuilds it with fresh settings.
   const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}`;
   const agentRef = useRef<{ key: string; agent: Agent } | null>(null);
   const agent = useMemo(() => {
     if (agentRef.current?.key !== agentKey) {
-      agentRef.current = { key: agentKey, agent: createAgent(llmConfig) };
+      agentRef.current = { key: agentKey, agent: createAgent(llmConfig, confirmAction) };
     }
     return agentRef.current.agent;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentKey]);
+
+  /** Gate a guarded action behind an inline Approve/Deny, resolving when the user chooses. */
+  function confirmAction(action: ControlAction, verdict: SafetyVerdict): Promise<boolean> {
+    return new Promise((resolve) => {
+      setPending({
+        action,
+        verdict,
+        resolve: (approved) => {
+          setPending(null);
+          resolve(approved);
+        },
+      });
+    });
+  }
 
   async function handleSend() {
     const message = input.trim();
@@ -61,6 +83,10 @@ export function ChatPanel() {
     } else if (event.type === 'tool_result') {
       const prefix = event.isError ? '✗' : '✓';
       appendItem({ role: 'tool', text: `${prefix} ${truncate(event.content)}` });
+    } else if (event.type === 'action_blocked') {
+      appendItem({ role: 'tool', text: `🛡️ Declined (${event.reason}) — not executed.` });
+    } else if (event.type === 'loop_halted') {
+      appendItem({ role: 'tool', text: `🛑 Stopped for safety: ${event.reason}.` });
     }
   }
 
@@ -81,6 +107,33 @@ export function ChatPanel() {
             {item.text}
           </div>
         ))}
+
+        {pending && (
+          <div className="confirm-card">
+            <div className="confirm-head">🛡️ Confirm {pending.verdict.risk} action</div>
+            <p className="confirm-body">
+              The agent wants to run{' '}
+              <code>
+                {pending.action.domain}.{pending.action.service}
+              </code>
+              {pending.action.entityId ? (
+                <>
+                  {' '}
+                  on <code>{pending.action.entityId}</code>
+                </>
+              ) : null}{' '}
+              — this {pending.verdict.reason}.
+            </p>
+            <div className="confirm-actions">
+              <button className="primary" onClick={() => pending.resolve(true)}>
+                Approve
+              </button>
+              <button className="link" onClick={() => pending.resolve(false)}>
+                Deny
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="chat-input">
         <input

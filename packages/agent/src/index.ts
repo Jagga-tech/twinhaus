@@ -1,4 +1,12 @@
 export { Agent, type AgentEvent, type AgentOptions } from './agent.js';
+export {
+  assessAction,
+  toControlAction,
+  CONTROL_TOOLS,
+  type ControlAction,
+  type ActionRisk,
+  type SafetyVerdict,
+} from './safety.js';
 export { executeTool, TOOL_DEFINITIONS, type HomeContext } from './tools.js';
 export {
   AnthropicProvider,

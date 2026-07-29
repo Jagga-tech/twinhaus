@@ -57,6 +57,14 @@ The smallest thing that's demo-able and useful.
 - [x] Read-only agent tool `search_device_catalog` (recommends only; HA still does the adding)
 - [x] `docs/CATALOG.md` — data model, search semantics, why it's curated
 
+## Agent safety loop
+
+- [x] Risk classification for every control action (safe / sensitive / critical) — `packages/agent/src/safety.ts`
+- [x] Confirmation gate: guarded actions (unlock, disarm, open, heating off, whole-home) need Approve/Deny; declined by default when unattended
+- [x] Circuit breaker on consecutive tool errors + hard per-request action budget
+- [x] Inline Approve/Deny in the chat, with `confirmation_required` / `action_blocked` / `loop_halted` events
+- [x] `docs/SAFETY.md` — the four guards and how to tune them
+
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant

@@ -3,7 +3,9 @@ import {
   AnthropicProvider,
   OllamaProvider,
   OpenAiProvider,
+  type ControlAction,
   type LlmProvider,
+  type SafetyVerdict,
 } from '@twinhaus/agent';
 import type { LlmConfig } from '../store/twinStore.js';
 import { createHomeContext } from './homeContext.js';
@@ -25,10 +27,18 @@ export function createProvider(config: LlmConfig): LlmProvider {
   }
 }
 
-/** Build a fresh {@link Agent} wired to the shared Home Assistant connection and twin. */
-export function createAgent(config: LlmConfig): Agent {
+/** Approve or decline a guarded action; the chat UI supplies this to gate sensitive control. */
+export type ConfirmAction = (action: ControlAction, verdict: SafetyVerdict) => Promise<boolean>;
+
+/**
+ * Build a fresh {@link Agent} wired to the shared Home Assistant connection and twin. Pass
+ * `confirmAction` to gate guarded actions (unlocking, disarming, opening, whole-home) behind a
+ * user prompt; without it the agent declines those actions rather than run them unattended.
+ */
+export function createAgent(config: LlmConfig, confirmAction?: ConfirmAction): Agent {
   return new Agent({
     provider: createProvider(config),
     context: createHomeContext(haClient),
+    confirmAction,
   });
 }

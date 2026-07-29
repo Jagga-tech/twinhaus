@@ -136,3 +136,113 @@ describe('Agent', () => {
     expect(reply).toBe('still going');
   });
 });
+
+describe('Agent safety loop', () => {
+  function unlockProvider(): LlmProvider {
+    return scriptedProvider([
+      {
+        text: '',
+        toolCalls: [
+          {
+            id: 't1',
+            name: 'call_service',
+            input: { domain: 'lock', service: 'unlock', entity_id: 'lock.front' },
+          },
+        ],
+      },
+      { text: 'I need your OK to unlock the front door.', toolCalls: [] },
+    ]);
+  }
+
+  it('never runs a guarded action when no approver is wired', async () => {
+    const { context, calls } = recordingContext();
+    const agent = new Agent({ provider: unlockProvider(), context });
+    const events: string[] = [];
+
+    await agent.send('unlock the front door', (event) => {
+      if (event.type === 'action_blocked') events.push(event.reason);
+    });
+
+    expect(calls).not.toContain('call_service:lock.unlock:lock.front');
+    expect(events).toContain('unlocks a lock');
+  });
+
+  it('runs a guarded action once the user approves it', async () => {
+    const { context, calls } = recordingContext();
+    const seen: string[] = [];
+    const agent = new Agent({
+      provider: unlockProvider(),
+      context,
+      confirmAction: async (action, verdict) => {
+        seen.push(`${action.domain}.${action.service}:${verdict.risk}`);
+        return true;
+      },
+    });
+
+    await agent.send('unlock the front door');
+
+    expect(seen).toContain('lock.unlock:critical');
+    expect(calls).toContain('call_service:lock.unlock:lock.front');
+  });
+
+  it('trips the circuit breaker after consecutive tool errors', async () => {
+    const context: HomeContext = {
+      describeHome: async () => 'ok',
+      getRoomDevices: async () => 'ok',
+      listEntities: async () => 'ok',
+      getEnergyByRoom: async () => 'ok',
+      listDiscoveredDevices: async () => 'ok',
+      searchDeviceCatalog: async () => 'ok',
+      callService: async () => {
+        throw new Error('HA offline');
+      },
+    };
+    const provider: LlmProvider = {
+      id: 'errloop',
+      async complete() {
+        return {
+          text: 'retrying',
+          toolCalls: [
+            {
+              id: 't',
+              name: 'call_service',
+              input: { domain: 'light', service: 'turn_on', entity_id: 'light.x' },
+            },
+          ],
+        };
+      },
+    };
+    let halted = '';
+    const agent = new Agent({ provider, context, maxConsecutiveErrors: 2, maxSteps: 10 });
+    await agent.send('turn on', (event) => {
+      if (event.type === 'loop_halted') halted = event.reason;
+    });
+    expect(halted).toMatch(/errors in a row/);
+  });
+
+  it('caps the number of control actions per request', async () => {
+    const { context, calls } = recordingContext();
+    const provider: LlmProvider = {
+      id: 'spam',
+      async complete() {
+        return {
+          text: 'spamming',
+          toolCalls: [
+            {
+              id: 't',
+              name: 'call_service',
+              input: { domain: 'light', service: 'turn_on', entity_id: 'light.x' },
+            },
+          ],
+        };
+      },
+    };
+    let halted = '';
+    const agent = new Agent({ provider, context, maxActions: 3, maxSteps: 20 });
+    await agent.send('go wild', (event) => {
+      if (event.type === 'loop_halted') halted = event.reason;
+    });
+    expect(halted).toMatch(/action budget/);
+    expect(calls.filter((c) => c.startsWith('call_service')).length).toBe(3);
+  });
+});
