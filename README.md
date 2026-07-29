@@ -80,20 +80,22 @@ Then open `http://localhost:5173`, draw your floor plan, and connect your Home A
 ```
 twinhaus/
 ├── apps/
-│   └── web/            # React + React Three Fiber frontend
+│   └── web/            # React + React Three Fiber frontend + twin state engine
 ├── packages/
-│   ├── agent/          # AI agent — LLM tool-calling against HA services
-│   └── ha-bridge/      # Home Assistant WebSocket client + state sync
+│   ├── agent/          # AI agent — provider-agnostic LLM tool-calling against HA services
+│   ├── ha-bridge/      # Home Assistant WebSocket client + state sync
+│   └── mcp-server/     # MCP server — query & control your home from any AI assistant
+├── addon/              # Home Assistant add-on packaging (Ingress)
 ├── assets/             # Logo, brand assets
 └── docs/               # Architecture, roadmap
 ```
 
 ## Roadmap
 
-- [ ] **Phase 1 — MVP**: 2D floor plan editor, 3D extrusion, HA connection, live light/sensor states, chat control of lights
-- [ ] **Phase 2**: LiDAR capture (iPhone RoomPlan), more device types, per-room energy heatmap, agent automations
-- [ ] **Phase 3**: Simulation mode (place virtual devices before buying), device recommendation wizard, local LLM support, HA add-on packaging
-- [ ] **Phase 4**: Community device model library, shared room templates, MCP server
+- [x] **Phase 1 — MVP**: 2D floor plan editor, 3D extrusion, HA connection, live light/sensor states, chat control
+- [x] **Phase 2**: RoomPlan/capture import, more device types + click-to-control, per-room energy heatmap, spatial security timeline, agent automations
+- [x] **Phase 3**: Simulation mode with coverage viz, device recommendation wizard, local LLM support (Ollama), `.glb`/`.gltf` + photo import, HA add-on packaging
+- [x] **Phase 4**: Built-in device model library, home templates, MCP server
 
 Full details in [docs/ROADMAP.md](docs/ROADMAP.md).
 

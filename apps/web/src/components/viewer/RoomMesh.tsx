@@ -8,10 +8,14 @@ const WALL_THICKNESS = 0.08;
 
 interface RoomMeshProps {
   room: Room;
+  /** Overrides the floor color (used by the energy heatmap). */
+  floorColor?: string;
+  /** Optional caption under the room name (e.g. "120 W" in energy mode). */
+  caption?: string;
 }
 
 /** Renders one room: an extruded floor slab, thin walls per edge, and a floating name label. */
-export function RoomMesh({ room }: RoomMeshProps) {
+export function RoomMesh({ room, floorColor, caption }: RoomMeshProps) {
   const floorGeometry = useMemo(() => {
     const shape = new THREE.Shape();
     room.polygon.forEach((point, index) => {
@@ -31,7 +35,7 @@ export function RoomMesh({ room }: RoomMeshProps) {
   return (
     <group>
       <mesh geometry={floorGeometry} receiveShadow position={[0, 0.01, 0]}>
-        <meshStandardMaterial color="#cfd8dc" side={THREE.DoubleSide} />
+        <meshStandardMaterial color={floorColor ?? '#cfd8dc'} side={THREE.DoubleSide} />
       </mesh>
 
       {walls.map((wall, index) => (
@@ -48,7 +52,7 @@ export function RoomMesh({ room }: RoomMeshProps) {
         anchorX="center"
         anchorY="middle"
       >
-        {room.name}
+        {caption ? `${room.name}\n${caption}` : room.name}
       </Text>
     </group>
   );

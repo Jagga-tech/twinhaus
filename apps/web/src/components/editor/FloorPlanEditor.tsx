@@ -15,22 +15,36 @@ export function FloorPlanEditor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [draft, setDraft] = useState<Point2D[]>([]);
 
+  const [underlay, setUnderlay] = useState<HTMLImageElement | null>(null);
+
   const rooms = useTwinStore((state) => state.rooms);
   const devices = useTwinStore((state) => state.devices);
   const entityStates = useTwinStore((state) => state.entityStates);
   const mode = useTwinStore((state) => state.editorMode);
   const selectedEntityId = useTwinStore((state) => state.selectedEntityId);
+  const underlayUrl = useTwinStore((state) => state.underlayUrl);
   const addRoom = useTwinStore((state) => state.addRoom);
   const placeDevice = useTwinStore((state) => state.placeDevice);
   const setSelectedEntityId = useTwinStore((state) => state.setSelectedEntityId);
+
+  // Load the traced-over photo/blueprint whenever it changes.
+  useEffect(() => {
+    if (!underlayUrl) {
+      setUnderlay(null);
+      return;
+    }
+    const image = new Image();
+    image.onload = () => setUnderlay(image);
+    image.src = underlayUrl;
+  }, [underlayUrl]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    drawScene(ctx, canvas.width, canvas.height, { rooms, devices, entityStates, draft });
-  }, [rooms, devices, entityStates, draft]);
+    drawScene(ctx, canvas.width, canvas.height, { rooms, devices, entityStates, draft, underlay });
+  }, [rooms, devices, entityStates, draft, underlay]);
 
   function toMeters(event: React.MouseEvent<HTMLCanvasElement>): Point2D {
     const canvas = canvasRef.current!;
@@ -112,6 +126,7 @@ interface SceneInput {
   devices: ReturnType<typeof useTwinStore.getState>['devices'];
   entityStates: ReturnType<typeof useTwinStore.getState>['entityStates'];
   draft: Point2D[];
+  underlay: HTMLImageElement | null;
 }
 
 function drawScene(
@@ -124,6 +139,17 @@ function drawScene(
   const cx = width / 2;
   const cy = height / 2;
   const toPx = (p: Point2D) => ({ x: cx + p.x * PIXELS_PER_METER, y: cy + p.z * PIXELS_PER_METER });
+
+  // Traced-over photo / blueprint underlay, fit inside the canvas at reduced opacity.
+  if (scene.underlay) {
+    const image = scene.underlay;
+    const scale = Math.min(width / image.width, height / image.height);
+    const w = image.width * scale;
+    const h = image.height * scale;
+    ctx.globalAlpha = 0.4;
+    ctx.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
+    ctx.globalAlpha = 1;
+  }
 
   // 1-meter grid.
   ctx.strokeStyle = '#eceff1';

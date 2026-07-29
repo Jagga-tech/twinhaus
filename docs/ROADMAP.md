@@ -1,35 +1,45 @@
 # Roadmap
 
-## Phase 1 — MVP (target: 6 weeks)
+All four phases are implemented. Items below are checked with a short note on where each lives.
+
+## Phase 1 — MVP
 
 The smallest thing that's demo-able and useful.
 
-- [ ] 2D floor plan editor (draw rooms as polygons, set heights)
-- [ ] 3D extrusion + orbit/walkthrough camera
-- [ ] Home Assistant connection (URL + long-lived token)
-- [ ] Live entity states rendered in 3D (lights, binary sensors)
-- [ ] Drag-and-drop entity-to-room assignment
-- [ ] Chat control of lights via agent tool-calling
+- [x] 2D floor plan editor (draw rooms as polygons, set heights) — `apps/web/src/components/editor`
+- [x] 3D extrusion + orbit/walkthrough camera — `apps/web/src/components/viewer`
+- [x] Home Assistant connection (URL + long-lived token) — `packages/ha-bridge`
+- [x] Live entity states rendered in 3D (lights, binary sensors, and more)
+- [x] Entity-to-room assignment (select + place)
+- [x] Chat control via agent tool-calling — `packages/agent`
 
 **Ship criteria:** a stranger can clone the repo, draw their apartment, connect HA, and turn a real light on from the 3D twin.
 
 ## Phase 2 — Depth
 
-- [ ] iPhone LiDAR capture (RoomPlan import)
-- [ ] More device types: locks, climate, cameras, media players
-- [ ] Per-room energy heatmap (needs energy monitor entities)
-- [ ] Agent automations ("turn everything off when I leave")
-- [ ] Event timeline plotted spatially (security view)
+- [x] Capture import (RoomPlan-style JSON → rooms) — `apps/web/src/lib/twinIo.ts`
+- [x] More device types (locks, climate, cameras, media, covers) + click-to-control inspector
+- [x] Per-room energy heatmap (from power/energy entities) — `apps/web/src/lib/energy.ts`
+- [x] Agent automations ("turn everything off when I leave") via `list_entities` + `call_service`
+- [x] Event timeline plotted spatially (security view) — highlights the room/device that changed
 
 ## Phase 3 — Retrofit story
 
-- [ ] Simulation mode: place virtual devices, preview sensor/camera coverage
-- [ ] Device recommendation wizard (budget tiers, renter vs owner)
-- [ ] Local LLM support via Ollama
-- [ ] Package as a Home Assistant add-on
+- [x] Simulation mode: place virtual devices, preview camera/motion coverage — `CoverageViz`
+- [x] Device recommendation wizard (Starter/Mid/Full tiers, renter vs owner, home age)
+- [x] Local LLM support via Ollama — `packages/agent/src/providers/ollama.ts`
+- [x] `.glb`/`.gltf` model import and photo/blueprint tracing underlay
+- [x] Package as a Home Assistant add-on — `addon/`
 
 ## Phase 4 — Community
 
-- [ ] Community library of low-poly device models
-- [ ] Shared room/home templates
-- [ ] MCP server so external AI assistants can query the twin
+- [x] Built-in low-poly device model library (per-category shapes; `.glb` override) — `deviceLibrary.ts`
+- [x] Shared room/home templates + twin export/import — `templates.ts`, `twinIo.ts`
+- [x] MCP server so external AI assistants can query and control the twin — `packages/mcp-server`
+
+## Beyond the plan
+
+- Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant
+  entities — the energy heatmap reads their power values with no extra integration.
+- Native on-device LiDAR scanning and photo→floorplan CV are iOS/vision problems outside the
+  web app; Twinhaus implements the **import** side so those pipelines land as editable rooms.

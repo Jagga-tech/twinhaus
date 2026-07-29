@@ -1,6 +1,7 @@
 import type { HomeContext } from '@twinhaus/agent';
-import type { HaClient } from '@twinhaus/ha-bridge';
+import { entityDomain, type HaClient } from '@twinhaus/ha-bridge';
 import { entitySummary } from './deviceState.js';
+import { computeRoomEnergy } from './energy.js';
 import { useTwinStore } from '../store/twinStore.js';
 
 /**
@@ -48,6 +49,34 @@ export function createHomeContext(client: HaClient): HomeContext {
           return state ? entitySummary(state) : `${device.entityId} (state unknown)`;
         })
         .join('\n');
+    },
+
+    async listEntities(domain) {
+      const { entityStates } = useTwinStore.getState();
+      const all = Object.values(entityStates)
+        .filter((state) => !domain || entityDomain(state.entity_id) === domain)
+        .sort((a, b) => a.entity_id.localeCompare(b.entity_id));
+      if (all.length === 0) {
+        return domain
+          ? `No entities in domain "${domain}".`
+          : 'No entities — Home Assistant is not connected.';
+      }
+      // Cap the listing so a large home doesn't blow the context window.
+      const shown = all.slice(0, 100);
+      const suffix = all.length > shown.length ? `\n…and ${all.length - shown.length} more.` : '';
+      return shown.map((state) => entitySummary(state)).join('\n') + suffix;
+    },
+
+    async getEnergyByRoom() {
+      const { rooms, devices, entityStates } = useTwinStore.getState();
+      const energy = computeRoomEnergy(rooms, devices, entityStates);
+      if (energy.max === 0)
+        return 'No power readings available. Place a power/energy sensor in a room.';
+      const lines = rooms.map(
+        (room) => `${room.name}: ${Math.round(energy.byRoom[room.id] ?? 0)} W`,
+      );
+      lines.push(`Total: ${Math.round(energy.total)} W`);
+      return lines.join('\n');
     },
 
     async callService({ domain, service, entityId, data }) {

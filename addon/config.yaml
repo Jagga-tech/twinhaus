@@ -1,0 +1,21 @@
+# Home Assistant add-on manifest for Twinhaus.
+# Drop the `addon/` folder into a local add-on repository (or point HA at this repo) and
+# Twinhaus appears in Settings → Add-ons. It serves the built web app; open it, then connect
+# to your Home Assistant instance from the Settings panel.
+name: Twinhaus
+version: '0.1.0'
+slug: twinhaus
+description: A live 3D digital twin of your home with an AI agent, on top of Home Assistant.
+url: https://github.com/Jagga-tech/twinhaus
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:home-assistant
+ports:
+  8099/tcp: 8099
+options: {}
+schema: {}

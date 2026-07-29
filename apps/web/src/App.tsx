@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useTwinStore, type LlmProviderId } from './store/twinStore.js';
 import type { EditorMode } from './store/types.js';
-import { FloorPlanEditor } from './components/editor/FloorPlanEditor.js';
-import { EntityPanel } from './components/editor/EntityPanel.js';
+import { LeftPanel } from './components/LeftPanel.js';
 import { TwinViewer } from './components/viewer/TwinViewer.js';
 import { ChatPanel } from './components/chat/ChatPanel.js';
 import { SettingsPanel } from './components/settings/SettingsPanel.js';
+import { ViewModeSwitch } from './components/panels/ViewModeSwitch.js';
+import { DeviceInspector } from './components/panels/DeviceInspector.js';
+import { RecommendationWizard } from './components/panels/RecommendationWizard.js';
 
 const MODES: EditorMode[] = ['view', 'draw', 'place'];
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const mode = useTwinStore((state) => state.editorMode);
   const setEditorMode = useTwinStore((state) => state.setEditorMode);
   const status = useTwinStore((state) => state.connectionStatus);
@@ -41,15 +44,15 @@ export function App() {
       </header>
 
       <main className="workspace">
-        <section className="pane pane-editor">
-          <h3 className="pane-title">Floor plan</h3>
-          <FloorPlanEditor />
-          <EntityPanel />
-        </section>
+        <LeftPanel onOpenWizard={() => setWizardOpen(true)} />
 
         <section className="pane pane-viewer">
-          <h3 className="pane-title">3D twin</h3>
+          <div className="viewer-header">
+            <h3 className="pane-title">3D twin</h3>
+            <ViewModeSwitch />
+          </div>
           <TwinViewer />
+          <DeviceInspector />
         </section>
 
         <section className="pane pane-chat">
@@ -65,6 +68,8 @@ export function App() {
           </div>
         </div>
       )}
+
+      {wizardOpen && <RecommendationWizard onClose={() => setWizardOpen(false)} />}
     </div>
   );
 }

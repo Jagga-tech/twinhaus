@@ -1,7 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ConnectionStatus, HaConnectionConfig, HaEntityState } from '@twinhaus/ha-bridge';
-import type { DevicePlacement, EditorMode, Point2D, Room } from './types.js';
+import type {
+  DevicePlacement,
+  EditorMode,
+  ImportedModel,
+  Point2D,
+  Room,
+  TwinEvent,
+  TwinModel,
+  ViewMode,
+  VirtualDevice,
+} from './types.js';
 
 export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
 
@@ -13,40 +23,72 @@ export interface LlmConfig {
   baseUrl: string;
 }
 
+const MAX_EVENTS = 200;
+
 interface TwinState {
   // --- Geometry (persisted) ---
   rooms: Room[];
   devices: DevicePlacement[];
+  virtualDevices: VirtualDevice[];
 
   // --- Live mirror of Home Assistant (not persisted) ---
   entityStates: Record<string, HaEntityState>;
   connectionStatus: ConnectionStatus;
+  events: TwinEvent[];
 
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
   llmConfig: LlmConfig;
 
-  // --- Editor UI state (not persisted) ---
+  // --- Editor / view UI state (not persisted) ---
   editorMode: EditorMode;
+  viewMode: ViewMode;
   selectedEntityId: string | null;
+  selectedDeviceId: string | null;
+  highlightedEntityId: string | null;
+  simulationVisible: boolean;
+  importedModels: ImportedModel[];
+  /** Object URL of a photo/blueprint traced over in the 2D editor (session-scoped). */
+  underlayUrl: string | null;
 
-  // --- Actions ---
+  // --- Room actions ---
   addRoom: (name: string, polygon: Point2D[], height?: number) => void;
   removeRoom: (roomId: string) => void;
   renameRoom: (roomId: string, name: string) => void;
 
+  // --- Device actions ---
   placeDevice: (entityId: string, roomId: string, position: Point2D) => void;
   unplaceDevice: (entityId: string) => void;
 
+  // --- Virtual (simulated) device actions ---
+  addVirtualDevice: (device: Omit<VirtualDevice, 'id'>) => string;
+  updateVirtualDevice: (id: string, patch: Partial<Omit<VirtualDevice, 'id'>>) => void;
+  removeVirtualDevice: (id: string) => void;
+  clearVirtualDevices: () => void;
+
+  // --- Home Assistant sync ---
   setEntityStates: (states: HaEntityState[]) => void;
   applyStateChange: (entityId: string, state: HaEntityState | null) => void;
 
+  // --- Config ---
   setConnectionStatus: (status: ConnectionStatus) => void;
   setHaConfig: (config: HaConnectionConfig) => void;
   setLlmConfig: (config: Partial<LlmConfig>) => void;
 
+  // --- UI ---
   setEditorMode: (mode: EditorMode) => void;
+  setViewMode: (mode: ViewMode) => void;
   setSelectedEntityId: (entityId: string | null) => void;
+  setSelectedDeviceId: (deviceId: string | null) => void;
+  setHighlightedEntityId: (entityId: string | null) => void;
+  setSimulationVisible: (visible: boolean) => void;
+  setUnderlayUrl: (url: string | null) => void;
+
+  // --- Models & twin document ---
+  addImportedModel: (model: ImportedModel) => void;
+  removeImportedModel: (id: string) => void;
+  exportTwin: () => TwinModel;
+  importTwin: (model: TwinModel, mode?: 'replace' | 'merge') => void;
 }
 
 const DEFAULT_LLM_CONFIG: LlmConfig = {
@@ -62,17 +104,28 @@ function nextId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${idCounter}`;
 }
 
+/** Domains whose transitions are worth surfacing on the security timeline. */
+const SECURITY_DOMAINS = ['binary_sensor', 'lock', 'cover', 'camera'];
+
 export const useTwinStore = create<TwinState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       rooms: [],
       devices: [],
+      virtualDevices: [],
       entityStates: {},
       connectionStatus: 'disconnected',
+      events: [],
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
       editorMode: 'view',
+      viewMode: 'normal',
       selectedEntityId: null,
+      selectedDeviceId: null,
+      highlightedEntityId: null,
+      simulationVisible: true,
+      importedModels: [],
+      underlayUrl: null,
 
       addRoom: (name, polygon, height = 2.6) =>
         set((state) => ({
@@ -83,6 +136,7 @@ export const useTwinStore = create<TwinState>()(
         set((state) => ({
           rooms: state.rooms.filter((room) => room.id !== roomId),
           devices: state.devices.filter((device) => device.roomId !== roomId),
+          virtualDevices: state.virtualDevices.filter((device) => device.roomId !== roomId),
         })),
 
       renameRoom: (roomId, name) =>
@@ -103,6 +157,26 @@ export const useTwinStore = create<TwinState>()(
           devices: state.devices.filter((device) => device.entityId !== entityId),
         })),
 
+      addVirtualDevice: (device) => {
+        const id = nextId('virt');
+        set((state) => ({ virtualDevices: [...state.virtualDevices, { ...device, id }] }));
+        return id;
+      },
+
+      updateVirtualDevice: (id, patch) =>
+        set((state) => ({
+          virtualDevices: state.virtualDevices.map((device) =>
+            device.id === id ? { ...device, ...patch } : device,
+          ),
+        })),
+
+      removeVirtualDevice: (id) =>
+        set((state) => ({
+          virtualDevices: state.virtualDevices.filter((device) => device.id !== id),
+        })),
+
+      clearVirtualDevices: () => set(() => ({ virtualDevices: [] })),
+
       setEntityStates: (states) =>
         set(() => ({
           entityStates: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -110,10 +184,33 @@ export const useTwinStore = create<TwinState>()(
 
       applyStateChange: (entityId, state) =>
         set((prev) => {
-          const next = { ...prev.entityStates };
-          if (state) next[entityId] = state;
-          else delete next[entityId];
-          return { entityStates: next };
+          const previous = prev.entityStates[entityId];
+          const nextStates = { ...prev.entityStates };
+          if (state) nextStates[entityId] = state;
+          else delete nextStates[entityId];
+
+          // Record meaningful transitions of security-relevant devices for the timeline.
+          let events = prev.events;
+          const domain = entityId.split('.', 1)[0];
+          if (
+            state &&
+            previous &&
+            previous.state !== state.state &&
+            SECURITY_DOMAINS.includes(domain)
+          ) {
+            const placement = prev.devices.find((device) => device.entityId === entityId);
+            const event: TwinEvent = {
+              id: nextId('evt'),
+              entityId,
+              roomId: placement?.roomId ?? null,
+              from: previous.state,
+              to: state.state,
+              at: Date.parse(state.last_changed) || eventClock(),
+            };
+            events = [event, ...prev.events].slice(0, MAX_EVENTS);
+          }
+
+          return { entityStates: nextStates, events };
         }),
 
       setConnectionStatus: (status) => set(() => ({ connectionStatus: status })),
@@ -121,17 +218,55 @@ export const useTwinStore = create<TwinState>()(
       setLlmConfig: (config) => set((state) => ({ llmConfig: { ...state.llmConfig, ...config } })),
 
       setEditorMode: (mode) => set(() => ({ editorMode: mode })),
+      setViewMode: (mode) => set(() => ({ viewMode: mode })),
       setSelectedEntityId: (entityId) => set(() => ({ selectedEntityId: entityId })),
+      setSelectedDeviceId: (deviceId) => set(() => ({ selectedDeviceId: deviceId })),
+      setHighlightedEntityId: (entityId) => set(() => ({ highlightedEntityId: entityId })),
+      setSimulationVisible: (visible) => set(() => ({ simulationVisible: visible })),
+      setUnderlayUrl: (url) => set(() => ({ underlayUrl: url })),
+
+      addImportedModel: (model) =>
+        set((state) => ({ importedModels: [...state.importedModels, model] })),
+
+      removeImportedModel: (id) =>
+        set((state) => ({ importedModels: state.importedModels.filter((m) => m.id !== id) })),
+
+      exportTwin: () => {
+        const { rooms, devices, virtualDevices } = get();
+        return { version: 1, rooms, devices, virtualDevices };
+      },
+
+      importTwin: (model, mode = 'replace') =>
+        set((state) => {
+          if (mode === 'merge') {
+            return {
+              rooms: [...state.rooms, ...model.rooms],
+              devices: [...state.devices, ...model.devices],
+              virtualDevices: [...state.virtualDevices, ...(model.virtualDevices ?? [])],
+            };
+          }
+          return {
+            rooms: model.rooms,
+            devices: model.devices,
+            virtualDevices: model.virtualDevices ?? [],
+          };
+        }),
     }),
     {
       name: 'twinhaus',
-      // Persist geometry and config, but never the live device mirror or transient UI state.
+      // Persist geometry and config, but never the live mirror or transient UI state.
       partialize: (state) => ({
         rooms: state.rooms,
         devices: state.devices,
+        virtualDevices: state.virtualDevices,
         haConfig: state.haConfig,
         llmConfig: state.llmConfig,
       }),
     },
   ),
 );
+
+// Date.now() is avoided elsewhere for reproducibility, but event ordering needs a wall clock.
+function eventClock(): number {
+  return typeof performance !== 'undefined' ? performance.timeOrigin + performance.now() : 0;
+}

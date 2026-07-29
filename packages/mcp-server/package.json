@@ -1,0 +1,23 @@
+{
+  "name": "@twinhaus/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server exposing the Twinhaus twin (rooms, devices, energy) and Home Assistant control to any AI assistant.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "twinhaus-mcp": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@twinhaus/ha-bridge": "*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "tsx": "^4.19.1"
+  }
+}

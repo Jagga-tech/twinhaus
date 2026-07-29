@@ -28,3 +28,64 @@ export interface DevicePlacement {
 }
 
 export type EditorMode = 'draw' | 'place' | 'view';
+
+/** How the 3D twin is shaded: plain, energy heatmap, or the spatial security view. */
+export type ViewMode = 'normal' | 'energy' | 'security';
+
+/** Coarse device categories used for library models, coverage viz, and recommendations. */
+export type DeviceCategory =
+  | 'light'
+  | 'switch'
+  | 'lock'
+  | 'climate'
+  | 'sensor'
+  | 'motion'
+  | 'camera'
+  | 'media'
+  | 'cover'
+  | 'other';
+
+/**
+ * A simulated device that isn't backed by Home Assistant — placed to preview coverage before
+ * buying (the retrofit funnel). Cameras and motion sensors carry range/FOV for coverage viz.
+ */
+export interface VirtualDevice {
+  id: string;
+  category: DeviceCategory;
+  label: string;
+  roomId: string;
+  position: Point2D;
+  /** Facing direction in radians (used by camera FOV cones). */
+  rotationY: number;
+  /** Coverage range in meters (camera reach or motion radius). */
+  rangeM: number;
+  /** Camera horizontal field of view in degrees; ignored for omnidirectional sensors. */
+  fovDeg: number;
+}
+
+/** A recent Home Assistant state change, kept for the spatial security timeline. */
+export interface TwinEvent {
+  id: string;
+  entityId: string;
+  roomId: string | null;
+  from: string;
+  to: string;
+  /** Epoch milliseconds. */
+  at: number;
+}
+
+/** A 3D model (`.glb`/`.gltf`) imported into the scene from Blender/SketchUp. */
+export interface ImportedModel {
+  id: string;
+  name: string;
+  /** Object URL for the uploaded file (session-scoped, not persisted). */
+  url: string;
+}
+
+/** The portable twin document — exported for templates and consumed by the MCP server. */
+export interface TwinModel {
+  version: 1;
+  rooms: Room[];
+  devices: DevicePlacement[];
+  virtualDevices: VirtualDevice[];
+}

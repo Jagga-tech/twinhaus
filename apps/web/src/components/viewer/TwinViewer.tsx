@@ -1,17 +1,33 @@
+import { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Grid, OrbitControls } from '@react-three/drei';
 import { useTwinStore } from '../../store/twinStore.js';
+import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
 import { RoomMesh } from './RoomMesh.js';
 import { DeviceMarker } from './DeviceMarker.js';
+import { VirtualDeviceMarker } from './VirtualDeviceMarker.js';
+import { ImportedModelMesh } from './ImportedModelMesh.js';
 
 /**
- * The 3D twin: rooms extruded from the floor plan, with live device markers on top.
- * Orbit/pan to walk around the home. This is the "3D feedback" half of chat-plus-3D.
+ * The 3D twin: rooms extruded from the floor plan, with live device markers on top. Supports
+ * three shading modes — plain, an energy heatmap (floors colored by consumption), and a
+ * security view (the device that just changed is highlighted).
  */
 export function TwinViewer() {
   const rooms = useTwinStore((state) => state.rooms);
   const devices = useTwinStore((state) => state.devices);
+  const virtualDevices = useTwinStore((state) => state.virtualDevices);
   const entityStates = useTwinStore((state) => state.entityStates);
+  const viewMode = useTwinStore((state) => state.viewMode);
+  const highlightedEntityId = useTwinStore((state) => state.highlightedEntityId);
+  const simulationVisible = useTwinStore((state) => state.simulationVisible);
+  const importedModels = useTwinStore((state) => state.importedModels);
+  const setSelectedDeviceId = useTwinStore((state) => state.setSelectedDeviceId);
+
+  const energy = useMemo(
+    () => computeRoomEnergy(rooms, devices, entityStates),
+    [rooms, devices, entityStates],
+  );
 
   return (
     <Canvas shadows camera={{ position: [8, 9, 12], fov: 50 }} className="twin-canvas">
@@ -30,12 +46,29 @@ export function TwinViewer() {
         position={[0, 0, 0]}
       />
 
-      {rooms.map((room) => (
-        <RoomMesh key={room.id} room={room} />
-      ))}
+      {rooms.map((room) => {
+        const watts = energy.byRoom[room.id] ?? 0;
+        const floorColor =
+          viewMode === 'energy' && energy.max > 0 ? heatColor(watts / energy.max) : undefined;
+        const caption = viewMode === 'energy' ? `${Math.round(watts)} W` : undefined;
+        return <RoomMesh key={room.id} room={room} floorColor={floorColor} caption={caption} />;
+      })}
 
       {devices.map((device) => (
-        <DeviceMarker key={device.entityId} device={device} state={entityStates[device.entityId]} />
+        <DeviceMarker
+          key={device.entityId}
+          device={device}
+          state={entityStates[device.entityId]}
+          highlighted={viewMode === 'security' && highlightedEntityId === device.entityId}
+          onSelect={setSelectedDeviceId}
+        />
+      ))}
+
+      {simulationVisible &&
+        virtualDevices.map((device) => <VirtualDeviceMarker key={device.id} device={device} />)}
+
+      {importedModels.map((model) => (
+        <ImportedModelMesh key={model.id} model={model} />
       ))}
 
       <OrbitControls makeDefault target={[0, 0, 0]} maxPolarAngle={Math.PI / 2.05} />

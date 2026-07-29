@@ -10,6 +10,14 @@ export interface HomeContext {
   describeHome(): Promise<string>;
   /** Devices assigned to a named room, with their live state. */
   getRoomDevices(roomName: string): Promise<string>;
+  /**
+   * List Home Assistant entities, optionally filtered to a domain. Lets the agent discover
+   * entity ids beyond what's placed in the twin — needed for routines like turning off every
+   * light, activating a scene, or triggering an automation.
+   */
+  listEntities(domain?: string): Promise<string>;
+  /** Per-room power draw in watts, for questions like "which room uses the most energy?". */
+  getEnergyByRoom(): Promise<string>;
   /** Call a Home Assistant service against one entity, e.g. `light` / `turn_on`. */
   callService(args: {
     domain: string;
@@ -38,9 +46,28 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
+    name: 'list_entities',
+    description:
+      'List Home Assistant entities and their state, optionally filtered to a domain (e.g. "light", "scene", "automation"). Use this to find entity ids for routines — turning off all lights, activating a scene, triggering an automation.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        domain: {
+          type: 'string',
+          description: 'Optional domain filter, e.g. "light", "switch", "scene", "automation".',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_energy_by_room',
+    description: 'Report current power draw per room in watts, for energy questions.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
     name: 'call_service',
     description:
-      'Control a device by calling a Home Assistant service on one entity. Examples: domain "light" service "turn_on"; domain "lock" service "lock"; domain "climate" service "set_temperature".',
+      'Control a device by calling a Home Assistant service on one entity. Examples: domain "light" service "turn_on"; domain "lock" service "lock"; domain "climate" service "set_temperature"; domain "scene" service "turn_on"; domain "automation" service "trigger". To run a routine like "turn off everything", list the relevant entities first, then call this once per entity.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -71,6 +98,10 @@ export async function executeTool(
       return context.describeHome();
     case 'get_room_devices':
       return context.getRoomDevices(String(input.room_name ?? ''));
+    case 'list_entities':
+      return context.listEntities(input.domain ? String(input.domain) : undefined);
+    case 'get_energy_by_room':
+      return context.getEnergyByRoom();
     case 'call_service':
       return context.callService({
         domain: String(input.domain),
