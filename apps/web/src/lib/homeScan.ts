@@ -1,0 +1,142 @@
+import type { RawArea, RawDeviceRegistryEntry, RawEntityRegistryEntry } from '@twinhaus/ha-bridge';
+import { entityDomain } from '@twinhaus/ha-bridge';
+import type { DevicePlacement, Point2D, Room, TwinModel } from '../store/types.js';
+import { polygonCentroid } from './geometry.js';
+
+/**
+ * Domains worth placing in the twin. Home Assistant surfaces hundreds of diagnostic entities per
+ * device; we only drop the ones a person thinks of as "a device in a room" so the scan reads clean.
+ */
+const PLACEABLE_DOMAINS = new Set([
+  'light',
+  'switch',
+  'lock',
+  'climate',
+  'cover',
+  'camera',
+  'media_player',
+  'fan',
+  'binary_sensor',
+  'sensor',
+  'vacuum',
+]);
+
+const ROOM_W = 4;
+const ROOM_D = 4;
+const GAP = 0.6;
+const WALL_HEIGHT = 2.6;
+
+export interface HomeScanResult {
+  model: TwinModel;
+  roomCount: number;
+  placedCount: number;
+  /** Placeable entities that had no resolvable area, so they couldn't be auto-placed. */
+  skippedCount: number;
+}
+
+/** Axis-aligned rectangle polygon, clockwise from the top-left corner. */
+function rect(x: number, z: number, w: number, d: number): Point2D[] {
+  return [
+    { x, z },
+    { x: x + w, z },
+    { x: x + w, z: z + d },
+    { x, z: z + d },
+  ];
+}
+
+/**
+ * Pack one labeled rectangle per area into a centered grid. Deterministic — no randomness or
+ * clock — so the same home always scans to the same layout, and it's a starting point the user
+ * nudges in the editor, not a claim of real geometry.
+ */
+export function packAreasIntoRooms(areas: Array<{ area_id: string; name: string }>): Room[] {
+  const columns = Math.max(1, Math.ceil(Math.sqrt(areas.length)));
+  const rows = Math.ceil(areas.length / columns);
+  const totalWidth = columns * ROOM_W + (columns - 1) * GAP;
+  const totalDepth = rows * ROOM_D + (rows - 1) * GAP;
+  const offsetX = -totalWidth / 2;
+  const offsetZ = -totalDepth / 2;
+
+  return areas.map((area, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const x = offsetX + column * (ROOM_W + GAP);
+    const z = offsetZ + row * (ROOM_D + GAP);
+    return {
+      id: `scan_${area.area_id}`,
+      name: area.name,
+      height: WALL_HEIGHT,
+      polygon: rect(x, z, ROOM_W, ROOM_D),
+    };
+  });
+}
+
+/** Resolve an entity's area: its own assignment wins, else it inherits its device's area. */
+export function resolveEntityArea(
+  entity: RawEntityRegistryEntry,
+  deviceAreaById: Map<string, string>,
+): string | null {
+  if (entity.area_id) return entity.area_id;
+  if (entity.device_id) return deviceAreaById.get(entity.device_id) ?? null;
+  return null;
+}
+
+/** Spread devices in a room around its center so several in one room don't stack on one point. */
+function spreadInRoom(center: Point2D, indexInRoom: number): Point2D {
+  const perRow = 3;
+  const spacing = 0.7;
+  const column = indexInRoom % perRow;
+  const row = Math.floor(indexInRoom / perRow);
+  return {
+    x: center.x + (column - (perRow - 1) / 2) * spacing,
+    z: center.z + (row - 1) * spacing,
+  };
+}
+
+/**
+ * Turn Home Assistant's area, device, and entity registries into a ready-to-import {@link TwinModel}:
+ * a room per area and every placeable entity dropped into the room its device belongs to. This is
+ * the "I don't want to draw" path — HA already knows the rooms and where each device lives.
+ */
+export function buildHomeScan(
+  areas: RawArea[],
+  devices: RawDeviceRegistryEntry[],
+  entities: RawEntityRegistryEntry[],
+): HomeScanResult {
+  const rooms = packAreasIntoRooms(areas);
+  const roomByAreaId = new Map(rooms.map((room, index) => [areas[index].area_id, room]));
+  const centroidByRoomId = new Map(rooms.map((room) => [room.id, polygonCentroid(room.polygon)]));
+
+  const deviceAreaById = new Map<string, string>();
+  for (const device of devices) {
+    if (device.area_id) deviceAreaById.set(device.id, device.area_id);
+  }
+
+  const placements: DevicePlacement[] = [];
+  const countInRoom = new Map<string, number>();
+  let skippedCount = 0;
+
+  for (const entity of entities) {
+    if (!PLACEABLE_DOMAINS.has(entityDomain(entity.entity_id))) continue;
+    const areaId = resolveEntityArea(entity, deviceAreaById);
+    const room = areaId ? roomByAreaId.get(areaId) : undefined;
+    if (!room) {
+      skippedCount += 1;
+      continue;
+    }
+    const indexInRoom = countInRoom.get(room.id) ?? 0;
+    countInRoom.set(room.id, indexInRoom + 1);
+    placements.push({
+      entityId: entity.entity_id,
+      roomId: room.id,
+      position: spreadInRoom(centroidByRoomId.get(room.id)!, indexInRoom),
+    });
+  }
+
+  return {
+    model: { version: 1, rooms, devices: placements, virtualDevices: [] },
+    roomCount: rooms.length,
+    placedCount: placements.length,
+    skippedCount,
+  };
+}
