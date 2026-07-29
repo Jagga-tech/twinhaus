@@ -4,12 +4,15 @@ import type { HaEntityState } from '@twinhaus/ha-bridge';
 import { entityLabel, isEntityActive } from '../../lib/deviceState.js';
 import { CATEGORY_GLYPH, categorize } from '../../lib/deviceCategory.js';
 import { DEVICE_MODELS } from '../../lib/deviceLibrary.js';
+import type { PositionEstimate } from '../../lib/positioning.js';
 import type { DevicePlacement } from '../../store/types.js';
 
 interface DeviceMarkerProps {
   device: DevicePlacement;
   state: HaEntityState | undefined;
   highlighted?: boolean;
+  /** Live position from distance ranging; overrides the static placement when present. */
+  livePosition?: PositionEstimate;
   onSelect?: (entityId: string) => void;
 }
 
@@ -18,11 +21,18 @@ interface DeviceMarkerProps {
  * `on`, a lock that is `unlocked`) glows. Clicking selects it for the inspector; the security
  * view highlights the device that just changed.
  */
-export function DeviceMarker({ device, state, highlighted, onSelect }: DeviceMarkerProps) {
+export function DeviceMarker({
+  device,
+  state,
+  highlighted,
+  livePosition,
+  onSelect,
+}: DeviceMarkerProps) {
   const active = isEntityActive(state);
   const category = categorize(device.entityId, state);
   const model = DEVICE_MODELS[category];
   const color = highlighted ? '#ef5350' : active ? '#ffca28' : '#607d8b';
+  const position = livePosition ? livePosition.position : device.position;
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
@@ -30,7 +40,17 @@ export function DeviceMarker({ device, state, highlighted, onSelect }: DeviceMar
   }
 
   return (
-    <group position={[device.position.x, 1.1, device.position.z]} onClick={handleClick}>
+    <group position={[position.x, 1.1, position.z]} onClick={handleClick}>
+      {livePosition && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+          <ringGeometry args={[0.3, 0.38, 24]} />
+          <meshBasicMaterial
+            color="#29b6f6"
+            transparent
+            opacity={0.4 + 0.4 * livePosition.confidence}
+          />
+        </mesh>
+      )}
       <mesh castShadow scale={highlighted ? 1.4 : 1}>
         {model.shape === 'sphere' && (
           <sphereGeometry args={model.args as [number, number, number]} />

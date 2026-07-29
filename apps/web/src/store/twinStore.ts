@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ConnectionStatus, HaConnectionConfig, HaEntityState } from '@twinhaus/ha-bridge';
 import type { DiscoveredDevice } from '@twinhaus/discovery';
+import type { PositionEstimate } from '../lib/positioning.js';
 import type {
   DevicePlacement,
   EditorMode,
@@ -40,6 +41,8 @@ interface TwinState {
   discovered: DiscoveredDevice[];
   /** A just-added device awaiting a room click in the 3D viewer. */
   pendingPlacement: { entityId: string; label: string } | null;
+  /** Live position estimates (from distance ranging) keyed by entity id; overrides static placement. */
+  livePositions: Record<string, PositionEstimate>;
 
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
@@ -83,6 +86,7 @@ interface TwinState {
   // --- UI ---
   setDiscovered: (devices: DiscoveredDevice[]) => void;
   setPendingPlacement: (placement: { entityId: string; label: string } | null) => void;
+  setLivePositions: (positions: Record<string, PositionEstimate>) => void;
 
   setEditorMode: (mode: EditorMode) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -126,6 +130,7 @@ export const useTwinStore = create<TwinState>()(
       events: [],
       discovered: [],
       pendingPlacement: null,
+      livePositions: {},
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
       editorMode: 'view',
@@ -229,6 +234,7 @@ export const useTwinStore = create<TwinState>()(
 
       setDiscovered: (devices) => set(() => ({ discovered: devices })),
       setPendingPlacement: (placement) => set(() => ({ pendingPlacement: placement })),
+      setLivePositions: (positions) => set(() => ({ livePositions: positions })),
 
       setEditorMode: (mode) => set(() => ({ editorMode: mode })),
       setViewMode: (mode) => set(() => ({ viewMode: mode })),

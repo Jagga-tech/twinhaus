@@ -21,6 +21,7 @@ export function TwinViewer() {
   const entityStates = useTwinStore((state) => state.entityStates);
   const viewMode = useTwinStore((state) => state.viewMode);
   const highlightedEntityId = useTwinStore((state) => state.highlightedEntityId);
+  const livePositions = useTwinStore((state) => state.livePositions);
   const simulationVisible = useTwinStore((state) => state.simulationVisible);
   const importedModels = useTwinStore((state) => state.importedModels);
   const setSelectedDeviceId = useTwinStore((state) => state.setSelectedDeviceId);
@@ -80,6 +81,7 @@ export function TwinViewer() {
           device={device}
           state={entityStates[device.entityId]}
           highlighted={viewMode === 'security' && highlightedEntityId === device.entityId}
+          livePosition={livePositions[device.entityId]}
           onSelect={setSelectedDeviceId}
         />
       ))}

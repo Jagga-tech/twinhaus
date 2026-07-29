@@ -81,7 +81,16 @@ The smallest thing that's demo-able and useful.
 - [x] Entity→device→area resolution (entity area overrides device area); non-placeable/no-area entities skipped and reported
 - [x] "Scan from Home Assistant" in the Import tab: one click, preview counts, apply
 - [x] `docs/HOME-SCAN.md` — how it works and the Slice 2 (review) / Slice 3 (position-from-distance) roadmap
-- [ ] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense)
+- [x] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense) — `apps/web/src/lib/positioning.ts`
+
+## Position from distance
+
+- [x] Log-distance RSSI→meters + least-squares trilateration (≥3 anchors) with proximity fallback — `positioning.ts`
+- [x] Confidence per estimate from the fit residual; honest "roughly here" halo in the twin
+- [x] Documented HA distance-sensor ingestion (`device_class: distance` + `anchor`/`target`), inert without ranging — `positioningSources.ts`
+- [x] Live `livePositions` store slice + `useLivePositioning` so device dots follow movement; `DeviceMarker` overrides static placement
+- [x] `docs/POSITIONING.md` — the math, the HA contract, and accuracy expectations
+- [ ] Turnkey ESPHome proxy config + in-app anchor calibration flow
 
 ## Beyond the plan
 
