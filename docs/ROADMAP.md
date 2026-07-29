@@ -63,7 +63,8 @@ The smallest thing that's demo-able and useful.
 - [x] Confirmation gate: guarded actions (unlock, disarm, open, heating off, whole-home) need Approve/Deny; declined by default when unattended
 - [x] Circuit breaker on consecutive tool errors + hard per-request action budget
 - [x] Inline Approve/Deny in the chat, with `confirmation_required` / `action_blocked` / `loop_halted` events
-- [x] `docs/SAFETY.md` — the four guards and how to tune them
+- [x] Verify-after-act: retry transient failures, confirm the device reached the intended state, report "couldn't confirm" instead of a false success — `apps/web/src/lib/verifyAction.ts`
+- [x] `docs/SAFETY.md` — the five guards and how to tune them
 
 ## Failure recovery — self-healing connection
 

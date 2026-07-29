@@ -1,6 +1,7 @@
 import type { HomeContext } from '@twinhaus/agent';
 import { entityDomain, type HaClient } from '@twinhaus/ha-bridge';
 import { searchCatalog } from '@twinhaus/discovery';
+import { confirmState, expectedStateFor, withRetry } from './verifyAction.js';
 import { entitySummary } from './deviceState.js';
 import { computeRoomEnergy } from './energy.js';
 import { useTwinStore } from '../store/twinStore.js';
@@ -109,13 +110,25 @@ export function createHomeContext(client: HaClient): HomeContext {
     },
 
     async callService({ domain, service, entityId, data }) {
-      await client.callService({
-        domain,
-        service,
-        target: { entity_id: entityId },
-        serviceData: data,
-      });
-      return `Called ${domain}.${service} on ${entityId}.`;
+      await withRetry(() =>
+        client.callService({
+          domain,
+          service,
+          target: { entity_id: entityId },
+          serviceData: data,
+        }),
+      );
+
+      const expected = expectedStateFor(domain, service);
+      if (!expected || !entityId) return `Called ${domain}.${service} on ${entityId}.`;
+
+      const read = () => useTwinStore.getState().entityStates[entityId]?.state;
+      const confirmed = await confirmState(read, expected);
+      if (confirmed) {
+        return `Called ${domain}.${service} on ${entityId} — confirmed it is now "${expected}".`;
+      }
+      const current = read() ?? 'unknown';
+      return `Called ${domain}.${service} on ${entityId}, but couldn't confirm it took effect (still "${current}"). The device may be offline or slow — tell the user rather than assuming it worked.`;
     },
   };
 }
