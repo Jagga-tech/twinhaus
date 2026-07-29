@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTwinStore } from '../store/twinStore.js';
 import { FloorPlanEditor } from './editor/FloorPlanEditor.js';
 import { EntityPanel } from './editor/EntityPanel.js';
@@ -23,7 +22,8 @@ const TABS: Array<{ id: Tab; label: string }> = [
 
 /** The left workspace column: tabbed access to the editor and every Phase 2–4 tool. */
 export function LeftPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
-  const [tab, setTab] = useState<Tab>('plan');
+  const tab = useTwinStore((state) => state.activeLeftTab) as Tab;
+  const setTab = useTwinStore((state) => state.setActiveLeftTab);
   const discoveredCount = useTwinStore((state) => state.discovered.length);
 
   return (

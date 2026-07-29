@@ -9,6 +9,7 @@ import { ViewModeSwitch } from './components/panels/ViewModeSwitch.js';
 import { DeviceInspector } from './components/panels/DeviceInspector.js';
 import { RecommendationWizard } from './components/panels/RecommendationWizard.js';
 import { PlacementPrompt } from './components/discovery/PlacementPrompt.js';
+import { WelcomeFlow } from './components/WelcomeFlow.js';
 import { useDiscovery } from './hooks/useDiscovery.js';
 import { useLivePositioning } from './hooks/useLivePositioning.js';
 
@@ -76,6 +77,8 @@ export function App() {
       )}
 
       {wizardOpen && <RecommendationWizard onClose={() => setWizardOpen(false)} />}
+
+      <WelcomeFlow onOpenSettings={() => setSettingsOpen(true)} />
     </div>
   );
 }
