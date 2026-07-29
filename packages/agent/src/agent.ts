@@ -1,4 +1,11 @@
 import { executeTool, TOOL_DEFINITIONS, type HomeContext } from './tools.js';
+import {
+  assessAction,
+  toControlAction,
+  CONTROL_TOOLS,
+  type ControlAction,
+  type SafetyVerdict,
+} from './safety.js';
 import type {
   AssistantTurn,
   ChatMessage,
@@ -15,6 +22,8 @@ For routines and automations ("turn off everything when I leave", "movie mode", 
 
 If the user asks what's new on their network, use list_discovered_devices. You may summarize what was found and offer to add something, but you cannot add or configure devices yourself — adding runs a Home Assistant setup flow the user completes in the "Found near you" panel. Point them there.
 
+Some actions are guarded: unlocking a lock, disarming the alarm, opening a garage or gate, turning off heating, or anything affecting the whole home needs the user to confirm before it runs. Go ahead and request these when asked — the app will ask the user to approve. If an action is declined or blocked, do not retry it or try to work around the guard; explain what needs confirming and stop.
+
 Be concise and confirm what you did in plain language ("Dimmed the living room to 40% and locked the back door."). If you can't find a matching device, say so rather than guessing an entity id.`;
 
 export interface AgentOptions {
@@ -22,13 +31,33 @@ export interface AgentOptions {
   context: HomeContext;
   /** Safety cap on tool-call rounds per user message. */
   maxSteps?: number;
+  /** Hard cap on control actions (state-changing tool calls) per user message. */
+  maxActions?: number;
+  /** Abort the loop after this many consecutive tool errors, to stop runaway retries. */
+  maxConsecutiveErrors?: number;
+  /**
+   * Ask the user to approve a guarded action. Resolves true to run it, false to decline. When
+   * omitted, guarded actions are declined by default — the loop never runs a sensitive or critical
+   * action unattended.
+   */
+  confirmAction?: (action: ControlAction, verdict: SafetyVerdict) => Promise<boolean>;
 }
 
 /** Emitted as the agent works, so the UI can show tool activity as it happens. */
 export type AgentEvent =
   | { type: 'text'; text: string }
   | { type: 'tool_call'; name: string; input: Record<string, unknown> }
-  | { type: 'tool_result'; name: string; content: string; isError: boolean };
+  | { type: 'tool_result'; name: string; content: string; isError: boolean }
+  | { type: 'confirmation_required'; action: ControlAction; verdict: SafetyVerdict }
+  | { type: 'action_blocked'; action: ControlAction; reason: string }
+  | { type: 'loop_halted'; reason: string };
+
+/** Per-message safety counters, so caps and the circuit breaker span the whole tool loop. */
+interface LoopGuard {
+  actions: number;
+  consecutiveErrors: number;
+  halted: string | null;
+}
 
 /**
  * The chat-control agent. Runs a tool-calling loop against a pluggable {@link LlmProvider},
@@ -39,12 +68,21 @@ export class Agent {
   private readonly provider: LlmProvider;
   private readonly context: HomeContext;
   private readonly maxSteps: number;
+  private readonly maxActions: number;
+  private readonly maxConsecutiveErrors: number;
+  private readonly confirmAction?: (
+    action: ControlAction,
+    verdict: SafetyVerdict,
+  ) => Promise<boolean>;
   private readonly history: ProviderMessage[] = [];
 
   constructor(options: AgentOptions) {
     this.provider = options.provider;
     this.context = options.context;
     this.maxSteps = options.maxSteps ?? 6;
+    this.maxActions = options.maxActions ?? 12;
+    this.maxConsecutiveErrors = options.maxConsecutiveErrors ?? 3;
+    this.confirmAction = options.confirmAction;
   }
 
   /** The user-facing conversation so far, tool traffic stripped out. */
@@ -67,6 +105,7 @@ export class Agent {
   async send(userMessage: string, onEvent?: (event: AgentEvent) => void): Promise<string> {
     this.history.push({ role: 'user', content: userMessage });
 
+    const guard: LoopGuard = { actions: 0, consecutiveErrors: 0, halted: null };
     let finalText = '';
     for (let step = 0; step < this.maxSteps; step++) {
       const turn = await this.provider.complete({
@@ -80,8 +119,14 @@ export class Agent {
 
       if (turn.toolCalls.length === 0) break;
 
-      const results = await this.runToolCalls(turn, onEvent);
+      const results = await this.runToolCalls(turn, guard, onEvent);
       this.history.push({ role: 'tool', results });
+
+      if (guard.halted) {
+        onEvent?.({ type: 'loop_halted', reason: guard.halted });
+        finalText = finalText || `Stopped for safety: ${guard.halted}`;
+        break;
+      }
     }
 
     return finalText;
@@ -94,21 +139,72 @@ export class Agent {
 
   private async runToolCalls(
     turn: AssistantTurn,
+    guard: LoopGuard,
     onEvent?: (event: AgentEvent) => void,
   ): Promise<ToolResult[]> {
     const results: ToolResult[] = [];
     for (const call of turn.toolCalls) {
+      if (guard.halted) {
+        results.push({ toolCallId: call.id, content: `Skipped: ${guard.halted}`, isError: true });
+        continue;
+      }
+
+      const gateReason = await this.gateControlAction(call.name, call.input, guard, onEvent);
+      if (gateReason) {
+        results.push({ toolCallId: call.id, content: gateReason, isError: true });
+        continue;
+      }
+
       onEvent?.({ type: 'tool_call', name: call.name, input: call.input });
       try {
         const content = await executeTool(this.context, call.name, call.input);
         results.push({ toolCallId: call.id, content });
         onEvent?.({ type: 'tool_result', name: call.name, content, isError: false });
+        guard.consecutiveErrors = 0;
       } catch (err) {
         const content = err instanceof Error ? err.message : String(err);
         results.push({ toolCallId: call.id, content, isError: true });
         onEvent?.({ type: 'tool_result', name: call.name, content, isError: true });
+        guard.consecutiveErrors += 1;
+        if (guard.consecutiveErrors >= this.maxConsecutiveErrors) {
+          guard.halted = `${guard.consecutiveErrors} tool errors in a row`;
+        }
       }
     }
     return results;
+  }
+
+  /**
+   * Run a control action through the safety layer before it executes. Returns a reason string when
+   * the action must NOT run (over budget, declined, malformed) — that reason is fed back to the
+   * model as an error result so it explains rather than retries. Returns null to let it proceed.
+   * Read-only tools bypass this entirely.
+   */
+  private async gateControlAction(
+    name: string,
+    input: Record<string, unknown>,
+    guard: LoopGuard,
+    onEvent?: (event: AgentEvent) => void,
+  ): Promise<string | null> {
+    if (!CONTROL_TOOLS.has(name)) return null;
+
+    const action = toControlAction(input);
+    if (!action) return null;
+
+    guard.actions += 1;
+    if (guard.actions > this.maxActions) {
+      guard.halted = `action budget reached (${this.maxActions} per request)`;
+      return `Blocked for safety: ${guard.halted}. Not executed.`;
+    }
+
+    const verdict = assessAction(action);
+    if (!verdict.requiresConfirmation) return null;
+
+    onEvent?.({ type: 'confirmation_required', action, verdict });
+    const approved = this.confirmAction ? await this.confirmAction(action, verdict) : false;
+    if (approved) return null;
+
+    onEvent?.({ type: 'action_blocked', action, reason: verdict.reason });
+    return `Declined by the user for safety (${verdict.reason}). Not executed — do not retry.`;
   }
 }
