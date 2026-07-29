@@ -58,3 +58,50 @@ export function deriveLivePositions(
   }
   return positions;
 }
+
+export interface PositioningStatus {
+  /** Whether there's enough to trilaterate: ≥3 placed anchors and at least one tracked device. */
+  ready: boolean;
+  /** Anchor entity ids referenced by distance sensors. */
+  anchorsReferenced: string[];
+  /** Referenced anchors that are placed in the twin (so they have coordinates). */
+  anchorsPlaced: string[];
+  /** Referenced anchors not yet placed — the user needs to drop these in the twin. */
+  anchorsMissing: string[];
+  /** Devices being located by the distance sensors. */
+  targets: string[];
+}
+
+/**
+ * Report how ready distance-positioning is, to drive a setup helper: which anchors the distance
+ * sensors reference, which are placed (and so usable) versus missing, and whether there's enough to
+ * trilaterate. Everything is empty when no ranging integration is present.
+ */
+export function positioningStatus(
+  devices: DevicePlacement[],
+  entityStates: Record<string, HaEntityState>,
+): PositioningStatus {
+  const placed = new Set(devices.map((device) => device.entityId));
+  const anchorsReferenced = new Set<string>();
+  const targets = new Set<string>();
+
+  for (const state of Object.values(entityStates)) {
+    const attributes = state.attributes;
+    if (attributes.device_class !== 'distance') continue;
+    const anchor = typeof attributes.anchor === 'string' ? attributes.anchor : '';
+    const target = typeof attributes.target === 'string' ? attributes.target : '';
+    if (!anchor || !target) continue;
+    anchorsReferenced.add(anchor);
+    targets.add(target);
+  }
+
+  const anchorsPlaced = [...anchorsReferenced].filter((id) => placed.has(id));
+  const anchorsMissing = [...anchorsReferenced].filter((id) => !placed.has(id));
+  return {
+    ready: anchorsPlaced.length >= 3 && targets.size > 0,
+    anchorsReferenced: [...anchorsReferenced],
+    anchorsPlaced,
+    anchorsMissing,
+    targets: [...targets],
+  };
+}

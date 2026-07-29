@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { HaEntityState } from '@twinhaus/ha-bridge';
 import type { DevicePlacement } from '../store/types.js';
-import { deriveLivePositions } from './positioningSources.js';
+import { deriveLivePositions, positioningStatus } from './positioningSources.js';
 
 const devices: DevicePlacement[] = [
   { entityId: 'sensor.proxy_a', roomId: 'r', position: { x: 0, z: 0 } },
@@ -67,5 +67,41 @@ describe('deriveLivePositions', () => {
 
   it('is inert with no distance sensors at all', () => {
     expect(deriveLivePositions(devices, {})).toEqual({});
+  });
+});
+
+describe('positioningStatus', () => {
+  it('is not ready with no distance sensors', () => {
+    const status = positioningStatus(devices, {});
+    expect(status.ready).toBe(false);
+    expect(status.anchorsReferenced).toEqual([]);
+  });
+
+  it('is ready with three placed anchors and a tracked target', () => {
+    const states = statesFrom([
+      distanceSensor('sensor.d_a', 'sensor.proxy_a', 'device_tracker.phone', 1),
+      distanceSensor('sensor.d_b', 'sensor.proxy_b', 'device_tracker.phone', 2),
+      distanceSensor('sensor.d_c', 'sensor.proxy_c', 'device_tracker.phone', 3),
+    ]);
+    const status = positioningStatus(devices, states);
+    expect(status.ready).toBe(true);
+    expect(status.anchorsPlaced.sort()).toEqual([
+      'sensor.proxy_a',
+      'sensor.proxy_b',
+      'sensor.proxy_c',
+    ]);
+    expect(status.anchorsMissing).toEqual([]);
+    expect(status.targets).toEqual(['device_tracker.phone']);
+  });
+
+  it('flags anchors referenced but not yet placed', () => {
+    const states = statesFrom([
+      distanceSensor('sensor.d_a', 'sensor.proxy_a', 'device_tracker.phone', 1),
+      distanceSensor('sensor.d_x', 'sensor.not_placed', 'device_tracker.phone', 2),
+    ]);
+    const status = positioningStatus(devices, states);
+    expect(status.ready).toBe(false);
+    expect(status.anchorsPlaced).toEqual(['sensor.proxy_a']);
+    expect(status.anchorsMissing).toEqual(['sensor.not_placed']);
   });
 });

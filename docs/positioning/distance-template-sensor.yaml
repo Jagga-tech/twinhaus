@@ -1,0 +1,24 @@
+# Twinhaus positioning — shape a distance reading for the twin
+#
+# Twinhaus reads distance from any `sensor.*` whose attributes carry `device_class: distance`, an
+# `anchor` (the entity_id of a proxy you've placed in the twin), and a `target` (the device being
+# located). Ranging integrations (ESPresense, Bermuda) expose per-proxy distances under their own
+# names; this template sensor re-publishes one of them in the shape Twinhaus expects.
+#
+# Add to configuration.yaml (one template sensor per anchor × target pair), adjust the source
+# entity, and reload template entities.
+
+template:
+  - sensor:
+      - name: 'Phone distance from Living Room proxy'
+        unique_id: twinhaus_dist_phone_living
+        unit_of_measurement: m
+        state_class: measurement
+        # Point this at your ranging integration's distance entity for this proxy + device.
+        state: "{{ states('sensor.espresense_living_room_phone') | float(0) }}"
+        attributes:
+          device_class: distance
+          # The proxy entity you placed in the twin (its coordinates become the anchor).
+          anchor: sensor.twinhaus_proxy_living
+          # The device being located; its dot moves to the estimated position.
+          target: device_tracker.phone

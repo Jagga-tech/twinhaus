@@ -3,6 +3,7 @@ import { useTwinStore } from '../../store/twinStore.js';
 import { HOME_TEMPLATES, templateToTwin } from '../../lib/templates.js';
 import { captureToTwin, downloadTwin, parseTwin, type RoomCapture } from '../../lib/twinIo.js';
 import { HomeScanPanel } from './HomeScanPanel.js';
+import { PositioningPanel } from './PositioningPanel.js';
 
 /**
  * Every way to get geometry into the twin: built-in templates, an iPhone LiDAR / RoomPlan
@@ -52,6 +53,7 @@ export function ImportPanel() {
   return (
     <div className="panel-block">
       <HomeScanPanel />
+      <PositioningPanel />
 
       <h4>Start from a template</h4>
       <div className="template-grid">
