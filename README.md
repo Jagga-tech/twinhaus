@@ -68,29 +68,13 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 > ⚠️ Twinhaus is in early development. The MVP targets: floor plan editor → 3D extrusion → live Home Assistant device states → chat control of lights.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/twinhaus.git
+git clone https://github.com/Jagga-tech/twinhaus.git
 cd twinhaus
 npm install
 npm run dev
 ```
 
 Then open `http://localhost:5173`, draw your floor plan, and connect your Home Assistant instance (Settings → paste your HA URL + long-lived access token).
-
-## Project structure
-
-```
-twinhaus/
-├── apps/
-│   └── web/            # React + React Three Fiber frontend + twin state engine
-├── packages/
-│   ├── agent/          # AI agent — provider-agnostic LLM tool-calling against HA services
-│   ├── discovery/      # consume HA config flows + device catalog we can recommend
-│   ├── ha-bridge/      # Home Assistant WebSocket client + state sync
-│   └── mcp-server/     # MCP server — query & control your home from any AI assistant
-├── addon/              # Home Assistant add-on packaging (Ingress)
-├── assets/             # Logo, brand assets
-└── docs/               # Architecture, roadmap
-```
 
 ## Roadmap
 
