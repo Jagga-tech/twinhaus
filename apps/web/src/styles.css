@@ -326,9 +326,18 @@ select {
   color: #2e7d32;
 }
 .status-connecting,
-.status-authenticating {
+.status-authenticating,
+.status-reconnecting {
   background: #fff3cd;
   color: #8a6d3b;
+}
+.status-reconnecting {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Settings overlay */

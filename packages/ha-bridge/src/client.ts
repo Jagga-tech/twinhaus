@@ -1,3 +1,4 @@
+import { backoffDelay, type BackoffOptions } from './backoff.js';
 import type {
   CallServiceOptions,
   ConnectionStatus,
@@ -11,31 +12,101 @@ import type {
 type StateListener = (event: StateChangedEvent) => void;
 type StatusListener = (status: ConnectionStatus) => void;
 type EventListener = (event: unknown) => void;
+type ReconnectListener = () => void;
 
 interface PendingCommand {
   resolve: (value: unknown) => void;
   reject: (reason: Error) => void;
 }
 
+/** A live WebSocket subscription, kept so it can be re-established after a reconnect. */
+interface Subscription {
+  id: number;
+  payload: Record<string, unknown>;
+  onEvent: EventListener;
+}
+
+/** The subset of the WebSocket API the client needs; injectable so reconnection is testable. */
+export interface HaSocket {
+  send(data: string): void;
+  close(): void;
+  addEventListener(type: 'message', handler: (event: { data: string }) => void): void;
+  addEventListener(type: 'open' | 'close' | 'error', handler: () => void): void;
+}
+
+export interface ReconnectOptions extends BackoffOptions {
+  /** Auto-reconnect after an unexpected drop. Default true. */
+  enabled?: boolean;
+  /** Give up after this many attempts. Default Infinity — keep trying until told to stop. */
+  maxAttempts?: number;
+  /** Injectable randomness for deterministic backoff in tests. */
+  random?: () => number;
+}
+
+export interface HaClientOptions {
+  /** Override socket creation (tests inject a fake; the browser uses `WebSocket`). */
+  socketFactory?: (url: string) => HaSocket;
+  reconnect?: ReconnectOptions;
+  setTimeoutFn?: (callback: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  clearTimeoutFn?: (handle: ReturnType<typeof setTimeout>) => void;
+}
+
 /**
  * Minimal Home Assistant WebSocket client.
  *
- * Implements the auth handshake, `get_states`, `subscribe_events` (state_changed),
- * and `call_service`. Twinhaus never talks to hardware directly — this bridge is the
- * only path to devices, and Home Assistant owns every integration behind it.
+ * Implements the auth handshake, `get_states`, `subscribe_events` (state_changed), and
+ * `call_service`. When a live connection drops unexpectedly it auto-reconnects with exponential
+ * backoff, re-authenticates, re-subscribes to state_changed and any active subscriptions, and
+ * fires `onReconnected` so the app can reload a fresh snapshot — the twin heals itself instead of
+ * going stale. Twinhaus never talks to hardware directly; this bridge is the only path to devices.
  *
  * @see https://developers.home-assistant.io/docs/api/websocket
  */
 export class HaClient {
-  private socket: WebSocket | null = null;
+  private socket: HaSocket | null = null;
   private config: HaConnectionConfig | null = null;
   private messageId = 1;
   private status: ConnectionStatus = 'disconnected';
   private readonly pending = new Map<number, PendingCommand>();
   private readonly subscriptions = new Map<number, EventListener>();
+  private readonly activeSubscriptions = new Set<Subscription>();
   private readonly stateListeners = new Set<StateListener>();
   private readonly statusListeners = new Set<StatusListener>();
+  private readonly reconnectListeners = new Set<ReconnectListener>();
+
   private closedByUser = false;
+  private everConnected = false;
+  private reconnectAttempts = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private connectResolve: (() => void) | null = null;
+  private connectReject: ((reason: Error) => void) | null = null;
+
+  private readonly socketFactory: (url: string) => HaSocket;
+  private readonly reconnectOptions: {
+    enabled: boolean;
+    maxAttempts: number;
+    random: () => number;
+  } & BackoffOptions;
+  private readonly setTimeoutFn: (
+    callback: () => void,
+    ms: number,
+  ) => ReturnType<typeof setTimeout>;
+  private readonly clearTimeoutFn: (handle: ReturnType<typeof setTimeout>) => void;
+
+  constructor(options: HaClientOptions = {}) {
+    this.socketFactory =
+      options.socketFactory ?? ((url) => new WebSocket(url) as unknown as HaSocket);
+    this.reconnectOptions = {
+      enabled: options.reconnect?.enabled ?? true,
+      maxAttempts: options.reconnect?.maxAttempts ?? Number.POSITIVE_INFINITY,
+      random: options.reconnect?.random ?? Math.random,
+      baseMs: options.reconnect?.baseMs,
+      maxMs: options.reconnect?.maxMs,
+      jitter: options.reconnect?.jitter,
+    };
+    this.setTimeoutFn = options.setTimeoutFn ?? ((cb, ms) => setTimeout(cb, ms));
+    this.clearTimeoutFn = options.clearTimeoutFn ?? ((handle) => clearTimeout(handle));
+  }
 
   getStatus(): ConnectionStatus {
     return this.status;
@@ -51,52 +122,38 @@ export class HaClient {
     return () => this.statusListeners.delete(listener);
   }
 
+  /**
+   * Fires after the connection is re-established following an unexpected drop. The app reloads a
+   * full state snapshot here, since events missed while offline left the live mirror stale.
+   */
+  onReconnected(listener: ReconnectListener): () => void {
+    this.reconnectListeners.add(listener);
+    return () => this.reconnectListeners.delete(listener);
+  }
+
   /** Connect, authenticate, and subscribe to `state_changed`. Resolves once authenticated. */
   connect(config: HaConnectionConfig): Promise<void> {
     this.disconnect();
     this.config = config;
     this.closedByUser = false;
+    this.everConnected = false;
+    this.reconnectAttempts = 0;
 
     return new Promise((resolve, reject) => {
-      const wsUrl = toWebSocketUrl(config.url);
-      this.setStatus('connecting');
-
-      let socket: WebSocket;
-      try {
-        socket = new WebSocket(wsUrl);
-      } catch (err) {
-        this.setStatus('disconnected');
-        reject(err instanceof Error ? err : new Error(String(err)));
-        return;
-      }
-      this.socket = socket;
-
-      socket.addEventListener('message', (event) => {
-        this.handleMessage(JSON.parse(event.data as string), resolve, reject);
-      });
-
-      socket.addEventListener('error', () => {
-        if (this.status !== 'connected') {
-          reject(new Error(`Unable to reach Home Assistant at ${config.url}`));
-        }
-      });
-
-      socket.addEventListener('close', () => {
-        this.setStatus('disconnected');
-        this.failPending(new Error('Connection to Home Assistant closed'));
-        if (!this.closedByUser) {
-          reject(new Error('Connection to Home Assistant closed before authentication'));
-        }
-      });
+      this.connectResolve = resolve;
+      this.connectReject = reject;
+      this.openSocket();
     });
   }
 
   disconnect(): void {
     this.closedByUser = true;
+    this.clearReconnectTimer();
     if (this.socket) {
       this.socket.close();
       this.socket = null;
     }
+    this.activeSubscriptions.clear();
     this.failPending(new Error('Client disconnected'));
     this.setStatus('disconnected');
   }
@@ -118,11 +175,37 @@ export class HaClient {
     });
   }
 
-  private handleMessage(
-    message: Record<string, unknown>,
-    resolveConnect: () => void,
-    rejectConnect: (reason: Error) => void,
-  ): void {
+  private openSocket(): void {
+    if (!this.config) return;
+    const wsUrl = toWebSocketUrl(this.config.url);
+    this.setStatus(this.everConnected ? 'reconnecting' : 'connecting');
+
+    let socket: HaSocket;
+    try {
+      socket = this.socketFactory(wsUrl);
+    } catch (err) {
+      if (this.everConnected) {
+        this.scheduleReconnect();
+      } else {
+        this.setStatus('disconnected');
+        this.rejectConnect(err instanceof Error ? err : new Error(String(err)));
+      }
+      return;
+    }
+    this.socket = socket;
+
+    socket.addEventListener('message', (event) => {
+      this.handleMessage(JSON.parse(event.data) as Record<string, unknown>);
+    });
+    socket.addEventListener('error', () => {
+      if (this.status !== 'connected' && !this.everConnected) {
+        this.rejectConnect(new Error(`Unable to reach Home Assistant at ${this.config?.url}`));
+      }
+    });
+    socket.addEventListener('close', () => this.handleClose());
+  }
+
+  private handleMessage(message: Record<string, unknown>): void {
     switch (message.type) {
       case 'auth_required':
         this.setStatus('authenticating');
@@ -130,19 +213,14 @@ export class HaClient {
         break;
 
       case 'auth_ok':
-        this.setStatus('connected');
-        this.rawSend({
-          id: this.messageId++,
-          type: 'subscribe_events',
-          event_type: 'state_changed',
-        });
-        resolveConnect();
+        this.onAuthenticated();
         break;
 
       case 'auth_invalid':
         this.closedByUser = true;
+        this.clearReconnectTimer();
         this.socket?.close();
-        rejectConnect(new Error('Home Assistant rejected the access token'));
+        this.rejectConnect(new Error('Home Assistant rejected the access token'));
         break;
 
       case 'result': {
@@ -174,25 +252,116 @@ export class HaClient {
     }
   }
 
+  private onAuthenticated(): void {
+    const wasReconnect = this.everConnected;
+    this.everConnected = true;
+    this.reconnectAttempts = 0;
+    this.setStatus('connected');
+
+    this.rawSend({
+      id: this.messageId++,
+      type: 'subscribe_events',
+      event_type: 'state_changed',
+    });
+
+    if (wasReconnect) {
+      this.reestablishSubscriptions();
+      for (const listener of this.reconnectListeners) listener();
+    }
+
+    this.connectResolve?.();
+    this.connectResolve = null;
+    this.connectReject = null;
+  }
+
+  private handleClose(): void {
+    this.failPending(new Error('Connection to Home Assistant closed'));
+    this.subscriptions.clear();
+    this.socket = null;
+
+    if (this.closedByUser) {
+      this.setStatus('disconnected');
+      return;
+    }
+    if (!this.everConnected) {
+      this.setStatus('disconnected');
+      this.rejectConnect(new Error('Connection to Home Assistant closed before authentication'));
+      return;
+    }
+    this.scheduleReconnect();
+  }
+
+  private scheduleReconnect(): void {
+    if (
+      !this.reconnectOptions.enabled ||
+      this.reconnectAttempts >= this.reconnectOptions.maxAttempts
+    ) {
+      this.setStatus('disconnected');
+      return;
+    }
+    this.setStatus('reconnecting');
+    const delay = backoffDelay(
+      this.reconnectAttempts,
+      this.reconnectOptions,
+      this.reconnectOptions.random,
+    );
+    this.reconnectAttempts += 1;
+    this.clearReconnectTimer();
+    this.reconnectTimer = this.setTimeoutFn(() => {
+      this.reconnectTimer = null;
+      this.openSocket();
+    }, delay);
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer !== null) {
+      this.clearTimeoutFn(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
+  private rejectConnect(error: Error): void {
+    this.connectReject?.(error);
+    this.connectResolve = null;
+    this.connectReject = null;
+  }
+
   /**
    * Subscribe to a Home Assistant WebSocket subscription command. `onEvent` fires for each
-   * streamed event; the returned function cancels the subscription. Used for live config-flow
-   * discovery so the tray updates the moment HA finds a new device.
+   * streamed event; the returned function cancels the subscription. Subscriptions are tracked so
+   * they survive a reconnect — a dropped connection re-establishes them automatically.
    */
   async subscribe(payload: Record<string, unknown>, onEvent: EventListener): Promise<() => void> {
     if (!this.socket || this.status !== 'connected') {
       throw new Error('Not connected to Home Assistant');
     }
     const id = this.messageId++;
+    const subscription: Subscription = { id, payload, onEvent };
+    this.activeSubscriptions.add(subscription);
     this.subscriptions.set(id, onEvent);
     await new Promise<void>((resolve, reject) => {
       this.pending.set(id, { resolve: () => resolve(), reject });
       this.rawSend({ id, ...payload });
     });
     return () => {
-      this.subscriptions.delete(id);
-      this.rawSend({ id: this.messageId++, type: 'unsubscribe_events', subscription: id });
+      this.activeSubscriptions.delete(subscription);
+      this.subscriptions.delete(subscription.id);
+      this.rawSend({
+        id: this.messageId++,
+        type: 'unsubscribe_events',
+        subscription: subscription.id,
+      });
     };
+  }
+
+  /** Re-send every active subscription after a reconnect; the server assigns fresh ids. */
+  private reestablishSubscriptions(): void {
+    for (const subscription of this.activeSubscriptions) {
+      const id = this.messageId++;
+      subscription.id = id;
+      this.subscriptions.set(id, subscription.onEvent);
+      this.rawSend({ id, ...subscription.payload });
+    }
   }
 
   // --- Config flows (discovered-but-unconfigured devices) ---
@@ -260,7 +429,6 @@ export class HaClient {
   private failPending(error: Error): void {
     for (const pending of this.pending.values()) pending.reject(error);
     this.pending.clear();
-    this.subscriptions.clear();
   }
 
   private setStatus(status: ConnectionStatus): void {
