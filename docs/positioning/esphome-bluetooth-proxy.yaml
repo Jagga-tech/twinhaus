@@ -1,0 +1,42 @@
+# Twinhaus positioning — ESPHome Bluetooth proxy
+#
+# Flash this to a cheap ESP32 to turn it into a fixed anchor: it scans for Bluetooth devices and
+# reports their signal strength to Home Assistant, which turns that into distance. Place three or
+# more around the home (one per corner of the area you want to cover), then drop each one into the
+# twin so it has coordinates. See docs/POSITIONING.md.
+#
+# Replace the substitutions and secrets, then: esphome run esphome-bluetooth-proxy.yaml
+
+substitutions:
+  name: twinhaus-proxy-living
+  friendly_name: Twinhaus Proxy (Living Room)
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+api:
+  encryption:
+    key: !secret api_encryption_key
+ota:
+  platform: esphome
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Scan the airwaves and forward every BLE advertisement to Home Assistant.
+esp32_ble_tracker:
+  scan_parameters:
+    active: false
+    interval: 320ms
+    window: 30ms
+
+# Act as a Bluetooth proxy so HA (and ESPresense/Bermuda) can range devices through this node.
+bluetooth_proxy:
+  active: false

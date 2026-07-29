@@ -51,8 +51,17 @@ integration once its output is shaped to match — rather than guessing one vend
 
 with the numeric state (or `attributes.distance`) giving meters. Anything else is ignored, so the
 feature is simply **inert until a ranging integration is present** — it never interferes with a
-plain setup. An ESPHome template or a small HA template sensor can map ESPresense/Bermuda output
-into this shape.
+plain setup.
+
+Turnkey setup files live in [`docs/positioning/`](positioning/):
+
+- [`esphome-bluetooth-proxy.yaml`](positioning/esphome-bluetooth-proxy.yaml) — flash to a cheap
+  ESP32 to make it a fixed anchor.
+- [`distance-template-sensor.yaml`](positioning/distance-template-sensor.yaml) — a HA template
+  sensor that re-publishes an ESPresense/Bermuda distance in the shape above.
+
+In the app, the **Import → Live positioning** panel reports readiness: how many referenced anchors
+are placed, which are still missing, and whether there's enough to trilaterate (`positioningStatus`).
 
 ## Where it lives
 
@@ -66,6 +75,6 @@ into this shape.
 
 ## Status
 
-This is Slice 3 of the home-scan plan (Slice 1 = layout + room placement, shipped). The math and the
-live rendering are done; the remaining work is packaging a turnkey ESPHome proxy config and an
-in-app anchor-calibration helper so setup is one guided flow.
+Slice 3 of the home-scan plan (Slice 1 = layout + room placement; Slice 2 = review-before-apply).
+The math, the live rendering, the turnkey ESPHome/template configs, and the in-app readiness helper
+are all shipped. Remaining polish: a drag-to-calibrate flow for nudging anchor coordinates visually.
