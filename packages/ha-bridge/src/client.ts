@@ -4,8 +4,11 @@ import type {
   ConnectionStatus,
   HaConnectionConfig,
   HaEntityState,
+  RawArea,
   RawConfigFlow,
   RawConfigFlowStep,
+  RawDeviceRegistryEntry,
+  RawEntityRegistryEntry,
   StateChangedEvent,
 } from './types.js';
 
@@ -362,6 +365,29 @@ export class HaClient {
       this.subscriptions.set(id, subscription.onEvent);
       this.rawSend({ id, ...subscription.payload });
     }
+  }
+
+  // --- Registries (auto-scan the home: areas + device/entity assignments) ---
+  // Home Assistant already knows the user's rooms and which device lives in which — Twinhaus reads
+  // these to generate a floor plan and place devices without the user drawing anything.
+
+  /** List the areas (rooms) the user has defined in Home Assistant. */
+  async listAreas(): Promise<RawArea[]> {
+    return (await this.sendCommand({ type: 'config/area_registry/list' })) as RawArea[];
+  }
+
+  /** List device-registry entries, each with the area it's assigned to. */
+  async listDeviceRegistry(): Promise<RawDeviceRegistryEntry[]> {
+    return (await this.sendCommand({
+      type: 'config/device_registry/list',
+    })) as RawDeviceRegistryEntry[];
+  }
+
+  /** List entity-registry entries, mapping each entity to its device and/or area. */
+  async listEntityRegistry(): Promise<RawEntityRegistryEntry[]> {
+    return (await this.sendCommand({
+      type: 'config/entity_registry/list',
+    })) as RawEntityRegistryEntry[];
   }
 
   // --- Config flows (discovered-but-unconfigured devices) ---

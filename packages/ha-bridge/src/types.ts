@@ -63,6 +63,30 @@ export interface RawConfigFlow {
   };
 }
 
+/** A room/area in Home Assistant, from `config/area_registry/list`. Twinhaus reads these to
+ * auto-generate a floor plan so the user never has to draw one. */
+export interface RawArea {
+  area_id: string;
+  name: string;
+  floor_id?: string | null;
+}
+
+/** A device in Home Assistant's device registry, carrying the area it's assigned to. */
+export interface RawDeviceRegistryEntry {
+  id: string;
+  area_id?: string | null;
+  name?: string | null;
+  name_by_user?: string | null;
+}
+
+/** An entity in Home Assistant's entity registry; `area_id` (if set) overrides its device's area. */
+export interface RawEntityRegistryEntry {
+  entity_id: string;
+  device_id?: string | null;
+  area_id?: string | null;
+  name?: string | null;
+}
+
 /** One serialized field of a config-flow form's `data_schema`. */
 export interface RawFlowSchemaField {
   name: string;

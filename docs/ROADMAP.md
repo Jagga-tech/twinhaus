@@ -74,6 +74,15 @@ The smallest thing that's demo-able and useful.
 - [x] `reconnecting` status surfaced in the UI; injectable socket/timer make it fully unit-tested
 - [x] `docs/RESILIENCE.md` — the recovery flow and how to tune it
 
+## Scan your home — no drawing
+
+- [x] Read HA's area/device/entity registries — `listAreas`/`listDeviceRegistry`/`listEntityRegistry` in `packages/ha-bridge`
+- [x] Auto-generate a room per area and place every placeable device in its room — `apps/web/src/lib/homeScan.ts`
+- [x] Entity→device→area resolution (entity area overrides device area); non-placeable/no-area entities skipped and reported
+- [x] "Scan from Home Assistant" in the Import tab: one click, preview counts, apply
+- [x] `docs/HOME-SCAN.md` — how it works and the Slice 2 (review) / Slice 3 (position-from-distance) roadmap
+- [ ] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense)
+
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant

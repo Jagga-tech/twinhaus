@@ -250,6 +250,21 @@ body {
   flex: 1;
 }
 
+/* Home scan preview */
+.scan-preview {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.scan-preview p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
 /* Agent safety — inline confirmation for guarded actions */
 .confirm-card {
   align-self: stretch;
