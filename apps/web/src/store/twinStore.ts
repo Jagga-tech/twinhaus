@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ConnectionStatus, HaConnectionConfig, HaEntityState } from '@twinhaus/ha-bridge';
+import type { DiscoveredDevice } from '@twinhaus/discovery';
 import type {
   DevicePlacement,
   EditorMode,
@@ -35,6 +36,10 @@ interface TwinState {
   entityStates: Record<string, HaEntityState>;
   connectionStatus: ConnectionStatus;
   events: TwinEvent[];
+  /** Devices Home Assistant has discovered but not yet configured. */
+  discovered: DiscoveredDevice[];
+  /** A just-added device awaiting a room click in the 3D viewer. */
+  pendingPlacement: { entityId: string; label: string } | null;
 
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
@@ -76,6 +81,9 @@ interface TwinState {
   setLlmConfig: (config: Partial<LlmConfig>) => void;
 
   // --- UI ---
+  setDiscovered: (devices: DiscoveredDevice[]) => void;
+  setPendingPlacement: (placement: { entityId: string; label: string } | null) => void;
+
   setEditorMode: (mode: EditorMode) => void;
   setViewMode: (mode: ViewMode) => void;
   setSelectedEntityId: (entityId: string | null) => void;
@@ -116,6 +124,8 @@ export const useTwinStore = create<TwinState>()(
       entityStates: {},
       connectionStatus: 'disconnected',
       events: [],
+      discovered: [],
+      pendingPlacement: null,
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
       editorMode: 'view',
@@ -216,6 +226,9 @@ export const useTwinStore = create<TwinState>()(
       setConnectionStatus: (status) => set(() => ({ connectionStatus: status })),
       setHaConfig: (config) => set(() => ({ haConfig: config })),
       setLlmConfig: (config) => set((state) => ({ llmConfig: { ...state.llmConfig, ...config } })),
+
+      setDiscovered: (devices) => set(() => ({ discovered: devices })),
+      setPendingPlacement: (placement) => set(() => ({ pendingPlacement: placement })),
 
       setEditorMode: (mode) => set(() => ({ editorMode: mode })),
       setViewMode: (mode) => set(() => ({ viewMode: mode })),

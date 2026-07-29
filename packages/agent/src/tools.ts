@@ -18,6 +18,12 @@ export interface HomeContext {
   listEntities(domain?: string): Promise<string>;
   /** Per-room power draw in watts, for questions like "which room uses the most energy?". */
   getEnergyByRoom(): Promise<string>;
+  /**
+   * List devices Home Assistant has discovered but not yet configured. Read-only: the agent can
+   * tell the user what's new and offer to add it, but adding always requires the user to confirm
+   * the config flow in the UI — the agent must never complete a config flow itself.
+   */
+  listDiscoveredDevices(): Promise<string>;
   /** Call a Home Assistant service against one entity, e.g. `light` / `turn_on`. */
   callService(args: {
     domain: string;
@@ -65,6 +71,12 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     inputSchema: { type: 'object', properties: {} },
   },
   {
+    name: 'list_discovered_devices',
+    description:
+      'List devices Home Assistant has found on the network but not yet configured ("anything new on my network?"). Read-only — you can offer to add them, but the user must confirm setup in the UI. You cannot add or configure devices yourself.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
     name: 'call_service',
     description:
       'Control a device by calling a Home Assistant service on one entity. Examples: domain "light" service "turn_on"; domain "lock" service "lock"; domain "climate" service "set_temperature"; domain "scene" service "turn_on"; domain "automation" service "trigger". To run a routine like "turn off everything", list the relevant entities first, then call this once per entity.',
@@ -102,6 +114,8 @@ export async function executeTool(
       return context.listEntities(input.domain ? String(input.domain) : undefined);
     case 'get_energy_by_room':
       return context.getEnergyByRoom();
+    case 'list_discovered_devices':
+      return context.listDiscoveredDevices();
     case 'call_service':
       return context.callService({
         domain: String(input.domain),

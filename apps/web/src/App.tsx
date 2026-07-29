@@ -8,12 +8,15 @@ import { SettingsPanel } from './components/settings/SettingsPanel.js';
 import { ViewModeSwitch } from './components/panels/ViewModeSwitch.js';
 import { DeviceInspector } from './components/panels/DeviceInspector.js';
 import { RecommendationWizard } from './components/panels/RecommendationWizard.js';
+import { PlacementPrompt } from './components/discovery/PlacementPrompt.js';
+import { useDiscovery } from './hooks/useDiscovery.js';
 
 const MODES: EditorMode[] = ['view', 'draw', 'place'];
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  useDiscovery();
   const mode = useTwinStore((state) => state.editorMode);
   const setEditorMode = useTwinStore((state) => state.setEditorMode);
   const status = useTwinStore((state) => state.connectionStatus);
@@ -52,6 +55,7 @@ export function App() {
             <ViewModeSwitch />
           </div>
           <TwinViewer />
+          <PlacementPrompt />
           <DeviceInspector />
         </section>
 

@@ -602,3 +602,100 @@ select {
   color: var(--muted);
   margin: 0.25rem 0;
 }
+
+/* Discovery — Found near you */
+.tab-badge {
+  margin-left: 0.35rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  padding: 0 0.35rem;
+  min-width: 1.1rem;
+  display: inline-block;
+  text-align: center;
+}
+.found-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.found-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+.found-glyph {
+  font-size: 1.15rem;
+}
+.found-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.found-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.found-brand {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.source-chip {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--muted);
+}
+.source-bluetooth {
+  background: #d7e3fc;
+  color: #1a4bb5;
+}
+.source-zeroconf,
+.source-ssdp,
+.source-dhcp {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+.add-modal {
+  width: min(440px, 92vw);
+}
+
+/* Placement prompt over the viewer */
+.placement-prompt {
+  position: absolute;
+  top: 3.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  z-index: 6;
+}
+.placement-prompt .link {
+  color: var(--accent-ink);
+  text-decoration: underline;
+}
+
+/* Bluetooth quick scan (beta) */
+.bt-scan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}

@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Grid, OrbitControls } from '@react-three/drei';
 import { useTwinStore } from '../../store/twinStore.js';
 import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
+import { polygonCentroid } from '../../lib/geometry.js';
 import { RoomMesh } from './RoomMesh.js';
 import { DeviceMarker } from './DeviceMarker.js';
 import { VirtualDeviceMarker } from './VirtualDeviceMarker.js';
@@ -23,11 +24,22 @@ export function TwinViewer() {
   const simulationVisible = useTwinStore((state) => state.simulationVisible);
   const importedModels = useTwinStore((state) => state.importedModels);
   const setSelectedDeviceId = useTwinStore((state) => state.setSelectedDeviceId);
+  const pendingPlacement = useTwinStore((state) => state.pendingPlacement);
+  const placeDevice = useTwinStore((state) => state.placeDevice);
+  const setPendingPlacement = useTwinStore((state) => state.setPendingPlacement);
 
   const energy = useMemo(
     () => computeRoomEnergy(rooms, devices, entityStates),
     [rooms, devices, entityStates],
   );
+
+  function placeIntoRoom(roomId: string) {
+    if (!pendingPlacement) return;
+    const room = rooms.find((r) => r.id === roomId);
+    if (!room) return;
+    placeDevice(pendingPlacement.entityId, roomId, polygonCentroid(room.polygon));
+    setPendingPlacement(null);
+  }
 
   return (
     <Canvas shadows camera={{ position: [8, 9, 12], fov: 50 }} className="twin-canvas">
@@ -51,7 +63,15 @@ export function TwinViewer() {
         const floorColor =
           viewMode === 'energy' && energy.max > 0 ? heatColor(watts / energy.max) : undefined;
         const caption = viewMode === 'energy' ? `${Math.round(watts)} W` : undefined;
-        return <RoomMesh key={room.id} room={room} floorColor={floorColor} caption={caption} />;
+        return (
+          <RoomMesh
+            key={room.id}
+            room={room}
+            floorColor={floorColor}
+            caption={caption}
+            onPick={pendingPlacement ? placeIntoRoom : undefined}
+          />
+        );
       })}
 
       {devices.map((device) => (

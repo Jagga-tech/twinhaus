@@ -37,6 +37,17 @@ The smallest thing that's demo-able and useful.
 - [x] Shared room/home templates + twin export/import — `templates.ts`, `twinIo.ts`
 - [x] MCP server so external AI assistants can query and control the twin — `packages/mcp-server`
 
+## Discovery — "Found near you"
+
+- [x] Consume HA's pending config flows (discovered-but-unconfigured devices) — `packages/discovery`
+- [x] Normalize into `DiscoveredDevice` (name, brand, source, best-guess category)
+- [x] Drive a config flow to completion, rendering PIN/credential forms from the flow schema
+- [x] "Found near you" tray with a live count badge and one-click **Add**
+- [x] Instant room placement in the 3D twin after adding
+- [x] Read-only agent tool `list_discovered_devices` (the agent never completes a flow)
+- [x] Optional, clearly-separated Web Bluetooth "Quick scan (beta)", informational only
+- [x] `docs/DISCOVERY.md` — how it works, `cors_allowed_origins`, ESPHome BT proxies
+
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant

@@ -32,6 +32,10 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
       calls.push('get_energy_by_room');
       return '0 W';
     },
+    async listDiscoveredDevices() {
+      calls.push('list_discovered_devices');
+      return 'Hue Bridge';
+    },
     async callService({ domain, service, entityId }) {
       calls.push(`call_service:${domain}.${service}:${entityId}`);
       return 'done';
@@ -84,6 +88,7 @@ describe('Agent', () => {
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
+      listDiscoveredDevices: async () => 'ok',
       callService: async () => {
         throw new Error('HA offline');
       },

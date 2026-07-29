@@ -79,6 +79,15 @@ export function createHomeContext(client: HaClient): HomeContext {
       return lines.join('\n');
     },
 
+    async listDiscoveredDevices() {
+      const { discovered, connectionStatus } = useTwinStore.getState();
+      if (connectionStatus !== 'connected') return 'Home Assistant is not connected.';
+      if (discovered.length === 0) return 'Nothing new — no unconfigured devices discovered.';
+      return discovered
+        .map((device) => `${device.name} — ${device.brand} (via ${device.source})`)
+        .join('\n');
+    },
+
     async callService({ domain, service, entityId, data }) {
       await client.callService({
         domain,

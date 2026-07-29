@@ -46,3 +46,42 @@ export interface HaConnectionConfig {
 export function entityDomain(entityId: string): string {
   return entityId.split('.', 1)[0];
 }
+
+/**
+ * A config flow Home Assistant has started but not finished — the raw shape of a
+ * discovered-but-unconfigured device, from `GET /api/config/config_entries/flow`.
+ */
+export interface RawConfigFlow {
+  flow_id: string;
+  handler: string;
+  step_id?: string;
+  context?: {
+    source?: string;
+    title_placeholders?: Record<string, string>;
+    unique_id?: string | null;
+  };
+}
+
+/** One serialized field of a config-flow form's `data_schema`. */
+export interface RawFlowSchemaField {
+  name: string;
+  type?: string;
+  required?: boolean;
+  optional?: boolean;
+  default?: unknown;
+  options?: Array<[string, string]>;
+  selector?: Record<string, unknown>;
+}
+
+/** A single step returned when getting or advancing a config flow. */
+export interface RawConfigFlowStep {
+  type: 'form' | 'create_entry' | 'abort' | 'progress' | 'menu' | 'external_step';
+  flow_id: string;
+  handler: string;
+  step_id?: string;
+  data_schema?: RawFlowSchemaField[];
+  errors?: Record<string, string>;
+  description_placeholders?: Record<string, string> | null;
+  reason?: string;
+  title?: string;
+}

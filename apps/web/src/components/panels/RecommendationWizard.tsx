@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
 import { recommend, type Ownership, type Tier } from '../../lib/recommendations.js';
+import { BluetoothQuickScan } from '../discovery/BluetoothQuickScan.js';
 
 /**
  * The retrofit funnel. Asks a few questions about the home, recommends a device tier, and drops
@@ -110,6 +111,11 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
             Place kit in twin
           </button>
           {placed && <span className="hint">Placed — check coverage in the 3D view.</span>}
+        </div>
+
+        <div className="wizard-result">
+          <h3>What's already nearby?</h3>
+          <BluetoothQuickScan />
         </div>
       </div>
     </div>

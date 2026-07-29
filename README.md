@@ -29,6 +29,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 
 - **Dashboards are lists. Homes are spaces.** A motion alert means more when you see _which door_ it came from, in 3D.
 - **Works with the home you already have.** Old house, rented apartment, zero smart devices — start with a floor plan and grow from there.
+- **Add devices as they appear.** A "Found near you" tray surfaces devices Home Assistant has discovered but not yet configured — one click adds them and drops them straight into the twin. See [docs/DISCOVERY.md](docs/DISCOVERY.md).
 - **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, _then_ spend money.
 - **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM — cloud APIs or fully local via Ollama.
 
@@ -83,6 +84,7 @@ twinhaus/
 │   └── web/            # React + React Three Fiber frontend + twin state engine
 ├── packages/
 │   ├── agent/          # AI agent — provider-agnostic LLM tool-calling against HA services
+│   ├── discovery/      # consume HA config flows — discovered-but-unconfigured devices
 │   ├── ha-bridge/      # Home Assistant WebSocket client + state sync
 │   └── mcp-server/     # MCP server — query & control your home from any AI assistant
 ├── addon/              # Home Assistant add-on packaging (Ingress)
@@ -96,6 +98,7 @@ twinhaus/
 - [x] **Phase 2**: RoomPlan/capture import, more device types + click-to-control, per-room energy heatmap, spatial security timeline, agent automations
 - [x] **Phase 3**: Simulation mode with coverage viz, device recommendation wizard, local LLM support (Ollama), `.glb`/`.gltf` + photo import, HA add-on packaging
 - [x] **Phase 4**: Built-in device model library, home templates, MCP server
+- [x] **Discovery**: "Found near you" tray — one-click add of HA-discovered devices with instant 3D placement ([docs](docs/DISCOVERY.md))
 
 Full details in [docs/ROADMAP.md](docs/ROADMAP.md).
 

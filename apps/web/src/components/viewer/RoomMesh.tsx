@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
+import type { ThreeEvent } from '@react-three/fiber';
 import { polygonCentroid, wallSegments } from '../../lib/geometry.js';
 import type { Room } from '../../store/types.js';
 
@@ -12,10 +13,12 @@ interface RoomMeshProps {
   floorColor?: string;
   /** Optional caption under the room name (e.g. "120 W" in energy mode). */
   caption?: string;
+  /** When set, clicking the floor picks this room (used for device placement). */
+  onPick?: (roomId: string) => void;
 }
 
 /** Renders one room: an extruded floor slab, thin walls per edge, and a floating name label. */
-export function RoomMesh({ room, floorColor, caption }: RoomMeshProps) {
+export function RoomMesh({ room, floorColor, caption, onPick }: RoomMeshProps) {
   const floorGeometry = useMemo(() => {
     const shape = new THREE.Shape();
     room.polygon.forEach((point, index) => {
@@ -32,10 +35,19 @@ export function RoomMesh({ room, floorColor, caption }: RoomMeshProps) {
   const walls = useMemo(() => wallSegments(room), [room]);
   const centroid = useMemo(() => polygonCentroid(room.polygon), [room.polygon]);
 
+  function handlePick(event: ThreeEvent<MouseEvent>) {
+    if (!onPick) return;
+    event.stopPropagation();
+    onPick(room.id);
+  }
+
   return (
     <group>
-      <mesh geometry={floorGeometry} receiveShadow position={[0, 0.01, 0]}>
-        <meshStandardMaterial color={floorColor ?? '#cfd8dc'} side={THREE.DoubleSide} />
+      <mesh geometry={floorGeometry} receiveShadow position={[0, 0.01, 0]} onClick={handlePick}>
+        <meshStandardMaterial
+          color={onPick ? '#a5d6a7' : (floorColor ?? '#cfd8dc')}
+          side={THREE.DoubleSide}
+        />
       </mesh>
 
       {walls.map((wall, index) => (
