@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { HaEntityState } from '@twinhaus/ha-bridge';
-import { deviceGlow, isEntityActive, isSupportedDomain } from './deviceState.js';
+import { compactState, deviceGlow, isEntityActive, isSupportedDomain } from './deviceState.js';
 
 function state(
   entity_id: string,
@@ -41,6 +41,26 @@ describe('deviceGlow', () => {
 
   it('falls back to a warm default when active without a colour', () => {
     expect(deviceGlow(state('switch.x', 'on')).color).toBe('#ffca28');
+  });
+});
+
+describe('compactState', () => {
+  it('shows a light brightness as a percentage', () => {
+    expect(compactState(state('light.x', 'on', { brightness: 128 }))).toBe('50%');
+    expect(compactState(state('light.x', 'off'))).toBe('off');
+  });
+
+  it('shows the current temperature for a thermostat', () => {
+    expect(compactState(state('climate.x', 'heat', { current_temperature: 21 }))).toBe('21°');
+  });
+
+  it('appends the unit for a sensor', () => {
+    expect(compactState(state('sensor.x', '42', { unit_of_measurement: 'W' }))).toBe('42W');
+  });
+
+  it('falls back to the raw state and is empty when unknown', () => {
+    expect(compactState(state('media_player.x', 'playing'))).toBe('playing');
+    expect(compactState(undefined)).toBe('');
   });
 });
 

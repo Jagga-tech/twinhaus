@@ -196,6 +196,9 @@ body {
   min-height: 400px;
 }
 .device-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: rgba(31, 42, 51, 0.9);
   color: #fff;
   padding: 2px 7px;
@@ -205,6 +208,20 @@ body {
   white-space: nowrap;
   transform: translateY(-4px);
   box-shadow: var(--shadow-sm);
+  transition:
+    background 0.15s var(--ease),
+    transform 0.15s var(--ease);
+}
+.device-label.hovered {
+  background: var(--ink);
+  transform: translateY(-6px) scale(1.05);
+}
+.device-label-state {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #7fe0d2;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  padding-left: 6px;
 }
 
 /* Entity panel */

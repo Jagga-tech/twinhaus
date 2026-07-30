@@ -68,6 +68,40 @@ export function entitySummary(state: HaEntityState): string {
   return `${entityLabel(state.entity_id, state)} (${state.entity_id}): ${value}`;
 }
 
+/**
+ * A tiny live-state badge for the device's label in the twin, "60%", "21°C", "playing",
+ * "unlocked", so the 3D view reads at a glance without opening the inspector. Returns an empty
+ * string when there's nothing worth showing.
+ */
+export function compactState(state: HaEntityState | undefined): string {
+  if (!state) return '';
+  const domain = entityDomain(state.entity_id);
+  const attrs = state.attributes;
+
+  switch (domain) {
+    case 'light': {
+      if (state.state !== 'on') return 'off';
+      const brightness = Number(attrs.brightness);
+      return Number.isFinite(brightness) ? `${Math.round((brightness / 255) * 100)}%` : 'on';
+    }
+    case 'fan': {
+      if (state.state !== 'on') return 'off';
+      const pct = Number(attrs.percentage);
+      return Number.isFinite(pct) ? `${Math.round(pct)}%` : 'on';
+    }
+    case 'climate': {
+      const temp = attrs.current_temperature ?? attrs.temperature;
+      return temp != null ? `${temp}°` : state.state;
+    }
+    case 'sensor': {
+      const unit = attrs.unit_of_measurement;
+      return unit ? `${state.state}${unit}` : state.state;
+    }
+    default:
+      return state.state;
+  }
+}
+
 /** Domains the twin renders and lets you control from the inspector or the agent. */
 export function isSupportedDomain(entityId: string): boolean {
   return [
