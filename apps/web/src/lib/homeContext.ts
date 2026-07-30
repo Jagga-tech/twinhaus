@@ -4,6 +4,8 @@ import { searchCatalog } from '@twinhaus/discovery';
 import { confirmState, expectedStateFor, withRetry } from './verifyAction.js';
 import { entitySummary } from './deviceState.js';
 import { computeRoomEnergy } from './energy.js';
+import { homeInsights } from './homeInsights.js';
+import { matchRoom } from './roomMatch.js';
 import { useTwinStore } from '../store/twinStore.js';
 
 /**
@@ -37,7 +39,7 @@ export function createHomeContext(client: HaClient): HomeContext {
 
     async getRoomDevices(roomName) {
       const { rooms, devices, entityStates } = useTwinStore.getState();
-      const room = rooms.find((r) => r.name.toLowerCase() === roomName.trim().toLowerCase());
+      const room = matchRoom(rooms, roomName);
       if (!room) {
         const names = rooms.map((r) => `"${r.name}"`).join(', ') || '(none)';
         return `No room named "${roomName}". Known rooms: ${names}.`;
@@ -78,6 +80,16 @@ export function createHomeContext(client: HaClient): HomeContext {
       );
       lines.push(`Total: ${Math.round(energy.total)} W`);
       return lines.join('\n');
+    },
+
+    async checkHome() {
+      const { rooms, devices, entityStates, connectionStatus } = useTwinStore.getState();
+      if (connectionStatus !== 'connected') return 'Home Assistant is not connected.';
+      const insights = homeInsights(rooms, devices, entityStates);
+      if (insights.length === 0) {
+        return 'No live state to check yet, connect Home Assistant and place some devices.';
+      }
+      return insights.map((insight) => `[${insight.severity}] ${insight.message}`).join('\n');
     },
 
     async listDiscoveredDevices() {

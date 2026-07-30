@@ -15,6 +15,8 @@ export type DeviceCategory =
   | 'camera'
   | 'media'
   | 'cover'
+  | 'fan'
+  | 'vacuum'
   | 'other';
 
 /** How Home Assistant found the device, the discovery transport that surfaced it. */

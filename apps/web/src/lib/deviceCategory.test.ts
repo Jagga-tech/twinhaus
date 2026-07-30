@@ -14,6 +14,8 @@ describe('categorize', () => {
     expect(categorize('media_player.x')).toBe('media');
     expect(categorize('cover.x')).toBe('cover');
     expect(categorize('climate.x')).toBe('climate');
+    expect(categorize('fan.x')).toBe('fan');
+    expect(categorize('vacuum.x')).toBe('vacuum');
   });
 
   it('splits binary sensors into motion vs generic sensor by device_class', () => {
@@ -26,6 +28,7 @@ describe('categorize', () => {
   });
 
   it('falls back to "other" for unknown domains', () => {
-    expect(categorize('vacuum.roomba')).toBe('other');
+    expect(categorize('weather.home')).toBe('other');
+    expect(categorize('automation.night')).toBe('other');
   });
 });

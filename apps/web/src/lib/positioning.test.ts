@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { estimatePosition, rssiToDistanceM, trilaterate, type Anchor } from './positioning.js';
+import {
+  estimatePosition,
+  rssiToDistanceM,
+  smoothPositions,
+  trilaterate,
+  type Anchor,
+  type PositionEstimate,
+} from './positioning.js';
 
 const anchors: Anchor[] = [
   { id: 'a', position: { x: 0, z: 0 } },
@@ -76,5 +83,29 @@ describe('estimatePosition', () => {
   it('returns null when no readings match a known anchor', () => {
     expect(estimatePosition(anchors, [{ anchorId: 'unknown', distanceM: 3 }])).toBeNull();
     expect(estimatePosition(anchors, [])).toBeNull();
+  });
+});
+
+describe('smoothPositions', () => {
+  const est = (x: number, z: number, confidence = 1): PositionEstimate => ({
+    position: { x, z },
+    confidence,
+    method: 'trilateration',
+  });
+
+  it('eases a moved dot part-way toward the new reading', () => {
+    const out = smoothPositions({ phone: est(0, 0) }, { phone: est(10, 0) }, 0.4);
+    expect(out.phone.position.x).toBeCloseTo(4, 5);
+  });
+
+  it('adopts a newly-tracked device immediately', () => {
+    const out = smoothPositions({}, { phone: est(3, 4) }, 0.4);
+    expect(out.phone.position).toEqual({ x: 3, z: 4 });
+  });
+
+  it('drops devices that stopped reporting', () => {
+    const out = smoothPositions({ phone: est(0, 0), watch: est(1, 1) }, { phone: est(0, 0) });
+    expect(out.watch).toBeUndefined();
+    expect(out.phone).toBeDefined();
   });
 });

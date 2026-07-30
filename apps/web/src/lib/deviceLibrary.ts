@@ -23,5 +23,7 @@ export const DEVICE_MODELS: Record<DeviceCategory, DeviceModel> = {
   camera: { shape: 'cone', args: [0.13, 0.26, 4] },
   media: { shape: 'box', args: [0.26, 0.16, 0.08] },
   cover: { shape: 'box', args: [0.28, 0.2, 0.04] },
+  fan: { shape: 'cylinder', args: [0.18, 0.18, 0.05, 5] },
+  vacuum: { shape: 'cylinder', args: [0.2, 0.2, 0.08, 24] },
   other: { shape: 'sphere', args: [0.13, 16, 16] },
 };

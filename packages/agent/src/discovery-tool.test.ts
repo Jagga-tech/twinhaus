@@ -22,6 +22,7 @@ function context(): HomeContext {
     getRoomDevices: async () => 'ok',
     listEntities: async () => 'ok',
     getEnergyByRoom: async () => 'ok',
+    checkHome: async () => 'ok',
     listDiscoveredDevices: async () => NORMALIZED,
     searchDeviceCatalog: async () => CATALOG_RESULT,
     callService: async () => 'done',

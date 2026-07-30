@@ -53,6 +53,34 @@ describe('deriveLivePositions', () => {
     expect(positions['device_tracker.phone'].position.z).toBeCloseTo(truth.z, 3);
   });
 
+  it('applies the environment calibration scale to raw distances', () => {
+    // Inflate every reading 25%, then calibrate it back with a 0.8 scale, the fix should return.
+    const truth = { x: 2, z: 3 };
+    const states = statesFrom([
+      distanceSensor(
+        'sensor.d_a',
+        'sensor.proxy_a',
+        'device_tracker.phone',
+        Math.hypot(2, 3) * 1.25,
+      ),
+      distanceSensor(
+        'sensor.d_b',
+        'sensor.proxy_b',
+        'device_tracker.phone',
+        Math.hypot(4, 3) * 1.25,
+      ),
+      distanceSensor(
+        'sensor.d_c',
+        'sensor.proxy_c',
+        'device_tracker.phone',
+        Math.hypot(2, 3) * 1.25,
+      ),
+    ]);
+    const positions = deriveLivePositions(devices, states, 0.8);
+    expect(positions['device_tracker.phone'].position.x).toBeCloseTo(truth.x, 3);
+    expect(positions['device_tracker.phone'].position.z).toBeCloseTo(truth.z, 3);
+  });
+
   it('ignores non-distance sensors and unplaced anchors', () => {
     const states = statesFrom([
       {

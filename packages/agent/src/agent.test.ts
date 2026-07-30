@@ -32,6 +32,10 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
       calls.push('get_energy_by_room');
       return '0 W';
     },
+    async checkHome() {
+      calls.push('check_home');
+      return '[info] Nothing needs attention.';
+    },
     async listDiscoveredDevices() {
       calls.push('list_discovered_devices');
       return 'Hue Bridge';
@@ -92,6 +96,7 @@ describe('Agent', () => {
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
+      checkHome: async () => 'ok',
       listDiscoveredDevices: async () => 'ok',
       searchDeviceCatalog: async () => 'ok',
       callService: async () => {
@@ -191,6 +196,7 @@ describe('Agent safety loop', () => {
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
+      checkHome: async () => 'ok',
       listDiscoveredDevices: async () => 'ok',
       searchDeviceCatalog: async () => 'ok',
       callService: async () => {
