@@ -56,6 +56,8 @@ export type DeviceCategory =
   | 'camera'
   | 'media'
   | 'cover'
+  | 'fan'
+  | 'vacuum'
   | 'other';
 
 /**

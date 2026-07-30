@@ -1,7 +1,7 @@
 import { Html } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { HaEntityState } from '@twinhaus/ha-bridge';
-import { entityLabel, isEntityActive } from '../../lib/deviceState.js';
+import { entityLabel, isEntityActive, deviceGlow } from '../../lib/deviceState.js';
 import { CATEGORY_GLYPH, categorize } from '../../lib/deviceCategory.js';
 import { DEVICE_MODELS } from '../../lib/deviceLibrary.js';
 import type { PositionEstimate } from '../../lib/positioning.js';
@@ -31,7 +31,10 @@ export function DeviceMarker({
   const active = isEntityActive(state);
   const category = categorize(device.entityId, state);
   const model = DEVICE_MODELS[category];
-  const color = highlighted ? '#ef5350' : active ? '#ffca28' : '#607d8b';
+  const glow = deviceGlow(state);
+  // Live state colours the device: red when it just changed (security view), otherwise its real
+  // glow colour when active (a bulb's actual RGB), or a neutral slate when idle.
+  const color = highlighted ? '#ef5350' : active ? glow.color : '#607d8b';
   const position = livePosition ? livePosition.position : device.position;
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
@@ -63,10 +66,12 @@ export function DeviceMarker({
         <meshStandardMaterial
           color={color}
           emissive={active || highlighted ? color : '#000000'}
-          emissiveIntensity={active || highlighted ? 0.9 : 0}
+          emissiveIntensity={highlighted ? 0.9 : active ? 0.9 * glow.intensity : 0}
         />
       </mesh>
-      {(active || highlighted) && <pointLight color={color} intensity={6} distance={3} />}
+      {(active || highlighted) && (
+        <pointLight color={color} intensity={6 * (highlighted ? 1 : glow.intensity)} distance={3} />
+      )}
       <Html distanceFactor={8} position={[0, 0.28, 0]} center>
         <div className="device-label">
           {CATEGORY_GLYPH[category]} {entityLabel(device.entityId, state)}

@@ -10,6 +10,8 @@ const CATEGORY_DOMAIN: Record<DeviceCategory, string> = {
   camera: 'camera',
   media: 'media_player',
   cover: 'cover',
+  fan: 'fan',
+  vacuum: 'vacuum',
   other: 'sensor',
 };
 

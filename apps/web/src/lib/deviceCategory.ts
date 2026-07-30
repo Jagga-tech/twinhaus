@@ -25,6 +25,10 @@ export function categorize(entityId: string, state?: HaEntityState): DeviceCateg
       return 'media';
     case 'cover':
       return 'cover';
+    case 'fan':
+      return 'fan';
+    case 'vacuum':
+      return 'vacuum';
     case 'binary_sensor':
       return deviceClass === 'motion' || deviceClass === 'occupancy' ? 'motion' : 'sensor';
     case 'sensor':
@@ -45,5 +49,7 @@ export const CATEGORY_GLYPH: Record<DeviceCategory, string> = {
   camera: '📷',
   media: '🔊',
   cover: '🪟',
+  fan: '🌀',
+  vacuum: '🤖',
   other: '⚙️',
 };
