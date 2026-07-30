@@ -4,6 +4,7 @@ import { Grid, OrbitControls } from '@react-three/drei';
 import { useTwinStore } from '../../store/twinStore.js';
 import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
 import { polygonCentroid } from '../../lib/geometry.js';
+import { roomsOnLevel, devicesOnLevel } from '../../lib/levels.js';
 import { RoomMesh } from './RoomMesh.js';
 import { DeviceMarker } from './DeviceMarker.js';
 import { VirtualDeviceMarker } from './VirtualDeviceMarker.js';
@@ -15,9 +16,10 @@ import { ImportedModelMesh } from './ImportedModelMesh.js';
  * security view (the device that just changed is highlighted).
  */
 export function TwinViewer() {
-  const rooms = useTwinStore((state) => state.rooms);
-  const devices = useTwinStore((state) => state.devices);
-  const virtualDevices = useTwinStore((state) => state.virtualDevices);
+  const allRooms = useTwinStore((state) => state.rooms);
+  const allDevices = useTwinStore((state) => state.devices);
+  const allVirtualDevices = useTwinStore((state) => state.virtualDevices);
+  const activeLevelId = useTwinStore((state) => state.activeLevelId);
   const entityStates = useTwinStore((state) => state.entityStates);
   const viewMode = useTwinStore((state) => state.viewMode);
   const highlightedEntityId = useTwinStore((state) => state.highlightedEntityId);
@@ -28,6 +30,17 @@ export function TwinViewer() {
   const pendingPlacement = useTwinStore((state) => state.pendingPlacement);
   const placeDevice = useTwinStore((state) => state.placeDevice);
   const setPendingPlacement = useTwinStore((state) => state.setPendingPlacement);
+
+  // Show only the active floor — the rest of the building is hidden until you switch to it.
+  const rooms = useMemo(() => roomsOnLevel(allRooms, activeLevelId), [allRooms, activeLevelId]);
+  const devices = useMemo(
+    () => devicesOnLevel(allDevices, allRooms, activeLevelId),
+    [allDevices, allRooms, activeLevelId],
+  );
+  const virtualDevices = useMemo(
+    () => devicesOnLevel(allVirtualDevices, allRooms, activeLevelId),
+    [allVirtualDevices, allRooms, activeLevelId],
+  );
 
   const energy = useMemo(
     () => computeRoomEnergy(rooms, devices, entityStates),

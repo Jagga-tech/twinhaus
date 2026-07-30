@@ -1,6 +1,11 @@
-import type { RawArea, RawDeviceRegistryEntry, RawEntityRegistryEntry } from '@twinhaus/ha-bridge';
+import type {
+  RawArea,
+  RawDeviceRegistryEntry,
+  RawEntityRegistryEntry,
+  RawFloor,
+} from '@twinhaus/ha-bridge';
 import { entityDomain } from '@twinhaus/ha-bridge';
-import type { DevicePlacement, Point2D, Room, TwinModel } from '../store/types.js';
+import type { DevicePlacement, Level, Point2D, Room, TwinModel } from '../store/types.js';
 import { polygonCentroid } from './geometry.js';
 
 /**
@@ -49,7 +54,10 @@ function rect(x: number, z: number, w: number, d: number): Point2D[] {
  * clock — so the same home always scans to the same layout, and it's a starting point the user
  * nudges in the editor, not a claim of real geometry.
  */
-export function packAreasIntoRooms(areas: Array<{ area_id: string; name: string }>): Room[] {
+export function packAreasIntoRooms(
+  areas: Array<{ area_id: string; name: string }>,
+  levelId?: string,
+): Room[] {
   const columns = Math.max(1, Math.ceil(Math.sqrt(areas.length)));
   const rows = Math.ceil(areas.length / columns);
   const totalWidth = columns * ROOM_W + (columns - 1) * GAP;
@@ -66,6 +74,7 @@ export function packAreasIntoRooms(areas: Array<{ area_id: string; name: string 
       id: `scan_${area.area_id}`,
       name: area.name,
       height: WALL_HEIGHT,
+      levelId,
       polygon: rect(x, z, ROOM_W, ROOM_D),
     };
   });
@@ -102,9 +111,35 @@ export function buildHomeScan(
   areas: RawArea[],
   devices: RawDeviceRegistryEntry[],
   entities: RawEntityRegistryEntry[],
+  floors: RawFloor[] = [],
 ): HomeScanResult {
-  const rooms = packAreasIntoRooms(areas);
-  const roomByAreaId = new Map(rooms.map((room, index) => [areas[index].area_id, room]));
+  const floorById = new Map(floors.map((floor) => [floor.floor_id, floor]));
+  const HOME = '__home';
+  const levelKey = (area: RawArea) =>
+    area.floor_id && floorById.has(area.floor_id) ? area.floor_id : HOME;
+
+  // One level per floor actually used by an area, ordered by the floor's storey number.
+  const usedKeys = [...new Set(areas.map(levelKey))];
+  const levels: Level[] = usedKeys.map((key, index) => {
+    if (key === HOME) {
+      return { id: 'scan_home', name: floors.length > 0 ? 'Unassigned' : 'Home', order: 1000 };
+    }
+    const floor = floorById.get(key)!;
+    return { id: `scan_${key}`, name: floor.name, order: floor.level ?? index };
+  });
+  const levelIdForKey = new Map(usedKeys.map((key, i) => [key, levels[i].id]));
+
+  // Pack each floor's areas into its own grid (floors overlap in space — only one shows at a time).
+  const rooms: Room[] = [];
+  const roomByAreaId = new Map<string, Room>();
+  for (const key of usedKeys) {
+    const floorAreas = areas.filter((area) => levelKey(area) === key);
+    const packed = packAreasIntoRooms(floorAreas, levelIdForKey.get(key));
+    packed.forEach((room, index) => {
+      rooms.push(room);
+      roomByAreaId.set(floorAreas[index].area_id, room);
+    });
+  }
   const centroidByRoomId = new Map(rooms.map((room) => [room.id, polygonCentroid(room.polygon)]));
 
   const deviceAreaById = new Map<string, string>();
@@ -134,7 +169,7 @@ export function buildHomeScan(
   }
 
   return {
-    model: { version: 1, rooms, devices: placements, virtualDevices: [] },
+    model: { version: 1, rooms, devices: placements, virtualDevices: [], levels },
     roomCount: rooms.length,
     placedCount: placements.length,
     skippedCount,
@@ -182,5 +217,11 @@ export function applyReview(result: HomeScanResult, review: ScanReview = EMPTY_R
     });
   }
 
-  return { version: 1, rooms, devices: placements, virtualDevices: [] };
+  return {
+    version: 1,
+    rooms,
+    devices: placements,
+    virtualDevices: [],
+    levels: result.model.levels,
+  };
 }

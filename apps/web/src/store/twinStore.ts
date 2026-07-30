@@ -7,6 +7,7 @@ import type {
   DevicePlacement,
   EditorMode,
   ImportedModel,
+  Level,
   Point2D,
   Room,
   TwinEvent,
@@ -14,6 +15,7 @@ import type {
   ViewMode,
   VirtualDevice,
 } from './types.js';
+import { DEFAULT_LEVEL, normalizeLevels, sortedLevels } from '../lib/levels.js';
 
 export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
 
@@ -32,6 +34,10 @@ interface TwinState {
   rooms: Room[];
   devices: DevicePlacement[];
   virtualDevices: VirtualDevice[];
+  /** The building's floors; a whole house is a stack of these. */
+  levels: Level[];
+  /** The floor currently shown in the 2D editor and 3D twin (the active "page"). */
+  activeLevelId: string;
 
   // --- Live mirror of Home Assistant (not persisted) ---
   entityStates: Record<string, HaEntityState>;
@@ -71,6 +77,12 @@ interface TwinState {
   addRoom: (name: string, polygon: Point2D[], height?: number) => void;
   removeRoom: (roomId: string) => void;
   renameRoom: (roomId: string, name: string) => void;
+
+  // --- Level (floor) actions ---
+  addLevel: (name: string) => string;
+  renameLevel: (levelId: string, name: string) => void;
+  removeLevel: (levelId: string) => void;
+  setActiveLevel: (levelId: string) => void;
 
   // --- Device actions ---
   placeDevice: (entityId: string, roomId: string, position: Point2D) => void;
@@ -136,6 +148,8 @@ export const useTwinStore = create<TwinState>()(
       rooms: [],
       devices: [],
       virtualDevices: [],
+      levels: [DEFAULT_LEVEL],
+      activeLevelId: DEFAULT_LEVEL.id,
       entityStates: {},
       connectionStatus: 'disconnected',
       events: [],
@@ -158,8 +172,47 @@ export const useTwinStore = create<TwinState>()(
 
       addRoom: (name, polygon, height = 2.6) =>
         set((state) => ({
-          rooms: [...state.rooms, { id: nextId('room'), name, polygon, height }],
+          rooms: [
+            ...state.rooms,
+            { id: nextId('room'), name, polygon, height, levelId: state.activeLevelId },
+          ],
         })),
+
+      addLevel: (name) => {
+        const id = nextId('level');
+        set((state) => ({
+          levels: [...state.levels, { id, name, order: state.levels.length }],
+          activeLevelId: id,
+        }));
+        return id;
+      },
+
+      renameLevel: (levelId, name) =>
+        set((state) => ({
+          levels: state.levels.map((level) => (level.id === levelId ? { ...level, name } : level)),
+        })),
+
+      removeLevel: (levelId) =>
+        set((state) => {
+          if (state.levels.length <= 1) return state;
+          const remaining = state.levels.filter((level) => level.id !== levelId);
+          const removedRoomIds = new Set(
+            state.rooms.filter((room) => room.levelId === levelId).map((room) => room.id),
+          );
+          const nextActive =
+            state.activeLevelId === levelId ? sortedLevels(remaining)[0].id : state.activeLevelId;
+          return {
+            levels: remaining,
+            activeLevelId: nextActive,
+            rooms: state.rooms.filter((room) => room.levelId !== levelId),
+            devices: state.devices.filter((device) => !removedRoomIds.has(device.roomId)),
+            virtualDevices: state.virtualDevices.filter(
+              (device) => !removedRoomIds.has(device.roomId),
+            ),
+          };
+        }),
+
+      setActiveLevel: (levelId) => set(() => ({ activeLevelId: levelId })),
 
       removeRoom: (roomId) =>
         set((state) => ({
@@ -268,21 +321,27 @@ export const useTwinStore = create<TwinState>()(
         set((state) => ({ importedModels: state.importedModels.filter((m) => m.id !== id) })),
 
       exportTwin: () => {
-        const { rooms, devices, virtualDevices } = get();
-        return { version: 1, rooms, devices, virtualDevices };
+        const { rooms, devices, virtualDevices, levels } = get();
+        return { version: 1, rooms, devices, virtualDevices, levels };
       },
 
       importTwin: (model, mode = 'replace') =>
         set((state) => {
+          const { levels, rooms } = normalizeLevels(model);
           if (mode === 'merge') {
+            const merged = new Map(state.levels.map((level) => [level.id, level]));
+            for (const level of levels) if (!merged.has(level.id)) merged.set(level.id, level);
             return {
-              rooms: [...state.rooms, ...model.rooms],
+              levels: [...merged.values()],
+              rooms: [...state.rooms, ...rooms],
               devices: [...state.devices, ...model.devices],
               virtualDevices: [...state.virtualDevices, ...(model.virtualDevices ?? [])],
             };
           }
           return {
-            rooms: model.rooms,
+            levels,
+            activeLevelId: sortedLevels(levels)[0].id,
+            rooms,
             devices: model.devices,
             virtualDevices: model.virtualDevices ?? [],
           };
@@ -295,6 +354,8 @@ export const useTwinStore = create<TwinState>()(
         rooms: state.rooms,
         devices: state.devices,
         virtualDevices: state.virtualDevices,
+        levels: state.levels,
+        activeLevelId: state.activeLevelId,
         haConfig: state.haConfig,
         llmConfig: state.llmConfig,
         welcomeDismissed: state.welcomeDismissed,

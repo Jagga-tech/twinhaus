@@ -6,6 +6,7 @@ import { TwinViewer } from './components/viewer/TwinViewer.js';
 import { ChatPanel } from './components/chat/ChatPanel.js';
 import { SettingsPanel } from './components/settings/SettingsPanel.js';
 import { ViewModeSwitch } from './components/panels/ViewModeSwitch.js';
+import { LevelSwitcher } from './components/LevelSwitcher.js';
 import { DeviceInspector } from './components/panels/DeviceInspector.js';
 import { RecommendationWizard } from './components/panels/RecommendationWizard.js';
 import { PlacementPrompt } from './components/discovery/PlacementPrompt.js';
@@ -57,6 +58,7 @@ export function App() {
             <h3 className="pane-title">3D twin</h3>
             <ViewModeSwitch />
           </div>
+          <LevelSwitcher />
           <TwinViewer />
           <PlacementPrompt />
           <DeviceInspector />

@@ -5,6 +5,17 @@ export interface Point2D {
 }
 
 /**
+ * A floor/storey of the building. A whole house is a stack of levels; the app shows one at a
+ * time (the "pages" of the structure), and each {@link Room} belongs to exactly one.
+ */
+export interface Level {
+  id: string;
+  name: string;
+  /** Vertical order, lowest first (e.g. basement -1, ground 0, first 1). */
+  order: number;
+}
+
+/**
  * A room in the twin. Geometry is stored as a 2D polygon plus a wall height, and is
  * extruded to 3D at render time — the source of truth stays lightweight and editable.
  */
@@ -15,6 +26,8 @@ export interface Room {
   polygon: Point2D[];
   /** Wall height in meters. */
   height: number;
+  /** The level (floor) this room sits on; absent means the default ground level. */
+  levelId?: string;
 }
 
 /**
@@ -88,4 +101,6 @@ export interface TwinModel {
   rooms: Room[];
   devices: DevicePlacement[];
   virtualDevices: VirtualDevice[];
+  /** The building's floors; absent means a single default ground level. */
+  levels?: Level[];
 }

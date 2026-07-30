@@ -9,6 +9,7 @@ import type {
   RawConfigFlowStep,
   RawDeviceRegistryEntry,
   RawEntityRegistryEntry,
+  RawFloor,
   StateChangedEvent,
 } from './types.js';
 
@@ -390,6 +391,11 @@ export class HaClient {
   // --- Registries (auto-scan the home: areas + device/entity assignments) ---
   // Home Assistant already knows the user's rooms and which device lives in which — Twinhaus reads
   // these to generate a floor plan and place devices without the user drawing anything.
+
+  /** List the floors (storeys) the user has defined in Home Assistant. */
+  async listFloors(): Promise<RawFloor[]> {
+    return (await this.sendCommand({ type: 'config/floor_registry/list' })) as RawFloor[];
+  }
 
   /** List the areas (rooms) the user has defined in Home Assistant. */
   async listAreas(): Promise<RawArea[]> {
