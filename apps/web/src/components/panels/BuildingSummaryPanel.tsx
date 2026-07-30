@@ -43,7 +43,7 @@ export function BuildingSummaryPanel() {
               <td>{row.level.name}</td>
               <td>{row.roomCount}</td>
               <td>{row.deviceCount}</td>
-              <td>{row.watts > 0 ? `${row.watts} W` : ', '}</td>
+              <td>{row.watts > 0 ? `${row.watts} W` : '0 W'}</td>
             </tr>
           ))}
         </tbody>
@@ -52,7 +52,7 @@ export function BuildingSummaryPanel() {
             <td>{summary.floorCount} floors</td>
             <td>{summary.totalRooms}</td>
             <td>{summary.totalDevices}</td>
-            <td>{summary.totalWatts > 0 ? `${summary.totalWatts} W` : ', '}</td>
+            <td>{summary.totalWatts > 0 ? `${summary.totalWatts} W` : '0 W'}</td>
           </tr>
         </tfoot>
       </table>
