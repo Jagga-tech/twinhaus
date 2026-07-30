@@ -149,3 +149,34 @@ export function estimatePosition(
     method: 'proximity',
   };
 }
+
+/**
+ * Exponentially smooth this frame's estimates against the previous ones so a device's dot glides
+ * rather than jumps as noisy readings arrive. `alpha` is the responsiveness (0 to 1): higher tracks
+ * new readings faster, lower is steadier. A newly-tracked device adopts its estimate immediately;
+ * a device that stops reporting is dropped (only targets in `next` survive).
+ */
+export function smoothPositions(
+  previous: Record<string, PositionEstimate>,
+  next: Record<string, PositionEstimate>,
+  alpha = 0.4,
+): Record<string, PositionEstimate> {
+  const a = Math.max(0, Math.min(1, alpha));
+  const out: Record<string, PositionEstimate> = {};
+  for (const [target, estimate] of Object.entries(next)) {
+    const prior = previous[target];
+    if (!prior) {
+      out[target] = estimate;
+      continue;
+    }
+    out[target] = {
+      position: {
+        x: prior.position.x + a * (estimate.position.x - prior.position.x),
+        z: prior.position.z + a * (estimate.position.z - prior.position.z),
+      },
+      confidence: prior.confidence + a * (estimate.confidence - prior.confidence),
+      method: estimate.method,
+    };
+  }
+  return out;
+}

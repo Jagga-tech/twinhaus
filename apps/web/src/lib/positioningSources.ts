@@ -25,8 +25,15 @@ import {
 export function deriveLivePositions(
   devices: DevicePlacement[],
   entityStates: Record<string, HaEntityState>,
+  /**
+   * Environment calibration: raw BLE distances read long through walls and furniture, so this
+   * scales every reading before the geometry (0.6 to 1.4, default 1). Tune it until a stationary
+   * device's dot lands where the device actually is.
+   */
+  distanceScale = 1,
 ): Record<string, PositionEstimate> {
   const placementByEntity = new Map(devices.map((device) => [device.entityId, device.position]));
+  const scale = Number.isFinite(distanceScale) && distanceScale > 0 ? distanceScale : 1;
 
   const anchorsById = new Map<string, Anchor>();
   const readingsByTarget = new Map<string, DistanceReading[]>();
@@ -46,7 +53,7 @@ export function deriveLivePositions(
 
     anchorsById.set(anchorId, { id: anchorId, position: anchorPosition });
     const readings = readingsByTarget.get(target) ?? [];
-    readings.push({ anchorId, distanceM: raw });
+    readings.push({ anchorId, distanceM: raw * scale });
     readingsByTarget.set(target, readings);
   }
 

@@ -49,6 +49,8 @@ interface TwinState {
   pendingPlacement: { entityId: string; label: string } | null;
   /** Live position estimates (from distance ranging) keyed by entity id; overrides static placement. */
   livePositions: Record<string, PositionEstimate>;
+  /** Environment calibration for distance positioning: scales raw BLE distances (default 1). */
+  positioningScale: number;
 
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
@@ -110,6 +112,7 @@ interface TwinState {
   setDiscovered: (devices: DiscoveredDevice[]) => void;
   setPendingPlacement: (placement: { entityId: string; label: string } | null) => void;
   setLivePositions: (positions: Record<string, PositionEstimate>) => void;
+  setPositioningScale: (scale: number) => void;
   setWelcomeDismissed: (dismissed: boolean) => void;
   markAgentUsed: () => void;
 
@@ -159,6 +162,7 @@ export const useTwinStore = create<TwinState>()(
       discovered: [],
       pendingPlacement: null,
       livePositions: {},
+      positioningScale: 1,
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
       welcomeDismissed: false,
@@ -307,6 +311,8 @@ export const useTwinStore = create<TwinState>()(
       setDiscovered: (devices) => set(() => ({ discovered: devices })),
       setPendingPlacement: (placement) => set(() => ({ pendingPlacement: placement })),
       setLivePositions: (positions) => set(() => ({ livePositions: positions })),
+      setPositioningScale: (scale) =>
+        set(() => ({ positioningScale: Math.max(0.6, Math.min(1.4, scale)) })),
       setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
       markAgentUsed: () => set(() => ({ agentUsed: true })),
 
@@ -365,6 +371,7 @@ export const useTwinStore = create<TwinState>()(
         llmConfig: state.llmConfig,
         welcomeDismissed: state.welcomeDismissed,
         agentUsed: state.agentUsed,
+        positioningScale: state.positioningScale,
       }),
     },
   ),
