@@ -23,7 +23,7 @@ function slug(value: string): string {
 /**
  * A synthetic entity id for a just-added device, in the Home Assistant domain matching its
  * category. Until HA finishes setting up the entry and its real entities sync, this placeholder
- * lets the device render in the twin with the correct icon — placed the same way as any device.
+ * lets the device render in the twin with the correct icon, placed the same way as any device.
  */
 export function syntheticEntityId(device: DiscoveredDevice): string {
   const domain = CATEGORY_DOMAIN[device.category];

@@ -8,7 +8,7 @@ import type { Point2D } from '../../store/types.js';
 const PIXELS_PER_METER = 42;
 
 /**
- * The 2D floor plan editor — the entry point for everyone, including homes with zero smart
+ * The 2D floor plan editor, the entry point for everyone, including homes with zero smart
  * devices. Draw rooms as polygons, then drop Home Assistant entities into them. The 3D twin
  * is extruded from exactly this geometry.
  */

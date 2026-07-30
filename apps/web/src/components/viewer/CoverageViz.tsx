@@ -5,7 +5,7 @@ import type { VirtualDevice } from '../../store/types.js';
 /**
  * Draws a device's coverage footprint flat on the floor: a directional sector for cameras,
  * a full circle for motion/omnidirectional sensors. This is what makes "simulate before you
- * buy" tangible — you see exactly what a placement would and wouldn't cover.
+ * buy" tangible, you see exactly what a placement would and wouldn't cover.
  */
 export function CoverageViz({ device }: { device: VirtualDevice }) {
   const geometry = useMemo(() => {

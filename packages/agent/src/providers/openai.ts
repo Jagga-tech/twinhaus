@@ -66,7 +66,7 @@ interface OpenAiAssistantMessage {
   }>;
 }
 
-/** Shared translation to OpenAI wire format — reused by the Ollama provider. */
+/** Shared translation to OpenAI wire format, reused by the Ollama provider. */
 export function toOpenAiMessages(system: string, messages: ProviderMessage[]): unknown[] {
   const result: unknown[] = [{ role: 'system', content: system }];
   for (const message of messages) {
@@ -97,7 +97,7 @@ export function toOpenAiMessages(system: string, messages: ProviderMessage[]): u
   return result;
 }
 
-/** Shared translation from an OpenAI-format assistant message — reused by the Ollama provider. */
+/** Shared translation from an OpenAI-format assistant message, reused by the Ollama provider. */
 export function fromOpenAiMessage(message: OpenAiAssistantMessage | undefined): AssistantTurn {
   const toolCalls: ToolCall[] = (message?.tool_calls ?? []).map((call, index) => ({
     id: call.id || `call_${index}`,

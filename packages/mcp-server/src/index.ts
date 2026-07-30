@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { HaClient, entityDomain, type HaEntityState } from '@twinhaus/ha-bridge';
 
 /**
- * Twinhaus MCP server — lets any MCP-capable AI assistant query your home and control it.
+ * Twinhaus MCP server, lets any MCP-capable AI assistant query your home and control it.
  *
  * It reads the twin document (rooms + device placements) exported from the web app, and
  * optionally connects to Home Assistant for live state and service calls. This is the Phase 4
@@ -14,7 +14,7 @@ import { HaClient, entityDomain, type HaEntityState } from '@twinhaus/ha-bridge'
  *
  * Config (environment variables):
  *   TWINHAUS_TWIN  path to a twin.json exported from the Twinhaus web app (required)
- *   HA_URL         Home Assistant base URL (optional — enables live state + control)
+ *   HA_URL         Home Assistant base URL (optional, enables live state + control)
  *   HA_TOKEN       Home Assistant long-lived access token (optional)
  */
 

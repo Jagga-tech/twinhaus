@@ -3,7 +3,7 @@ import type { DevicePlacement, Room } from '../store/types.js';
 
 /**
  * Best-effort instantaneous power draw for an entity, in watts. Reads a `power` sensor's value
- * or a switch/plug's `current_power_w` attribute — the shapes Emporia, Shelly, and most HA
+ * or a switch/plug's `current_power_w` attribute, the shapes Emporia, Shelly, and most HA
  * energy integrations expose.
  */
 export function entityPowerWatts(state: HaEntityState | undefined): number | null {

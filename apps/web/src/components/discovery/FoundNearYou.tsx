@@ -32,7 +32,7 @@ export function FoundNearYou() {
   if (connectionStatus !== 'connected') {
     return (
       <p className="hint">
-        Connect Home Assistant to see devices discovered on your network. Discovery runs in HA —
+        Connect Home Assistant to see devices discovered on your network. Discovery runs in HA,
         Twinhaus never scans hardware directly.
       </p>
     );
@@ -43,10 +43,10 @@ export function FoundNearYou() {
       <div className="panel-block">
         <p className="hint">
           Nothing new right now. Home Assistant automatically finds devices over WiFi (mDNS/SSDP/
-          DHCP) and Bluetooth — new gear usually appears here within seconds of powering on.
+          DHCP) and Bluetooth, new gear usually appears here within seconds of powering on.
         </p>
         <p className="hint">
-          Bluetooth range is limited. To cover a whole house, add ESPHome Bluetooth proxies — see{' '}
+          Bluetooth range is limited. To cover a whole house, add ESPHome Bluetooth proxies, see{' '}
           <a
             href="https://github.com/Jagga-tech/twinhaus/blob/main/docs/DISCOVERY.md"
             target="_blank"

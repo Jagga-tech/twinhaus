@@ -17,7 +17,7 @@ interface DeviceMarkerProps {
 }
 
 /**
- * A device in the twin. Its visual mirrors real state — an active entity (a light that is
+ * A device in the twin. Its visual mirrors real state, an active entity (a light that is
  * `on`, a lock that is `unlocked`) glows. Clicking selects it for the inspector; the security
  * view highlights the device that just changed.
  */

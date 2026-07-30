@@ -85,7 +85,7 @@ export function ChatPanel() {
       const prefix = event.isError ? '✗' : '✓';
       appendItem({ role: 'tool', text: `${prefix} ${truncate(event.content)}` });
     } else if (event.type === 'action_blocked') {
-      appendItem({ role: 'tool', text: `🛡️ Declined (${event.reason}) — not executed.` });
+      appendItem({ role: 'tool', text: `🛡️ Declined (${event.reason}), not executed.` });
     } else if (event.type === 'loop_halted') {
       appendItem({ role: 'tool', text: `🛑 Stopped for safety: ${event.reason}.` });
     }
@@ -123,7 +123,7 @@ export function ChatPanel() {
                   on <code>{pending.action.entityId}</code>
                 </>
               ) : null}{' '}
-              — this {pending.verdict.reason}.
+              , this {pending.verdict.reason}.
             </p>
             <div className="confirm-actions">
               <button className="primary" onClick={() => pending.resolve(true)}>

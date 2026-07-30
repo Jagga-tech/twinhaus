@@ -17,12 +17,12 @@ export type DeviceCategory =
   | 'cover'
   | 'other';
 
-/** How Home Assistant found the device — the discovery transport that surfaced it. */
+/** How Home Assistant found the device, the discovery transport that surfaced it. */
 export type DiscoverySource = 'zeroconf' | 'ssdp' | 'dhcp' | 'bluetooth' | 'usb' | 'other';
 
 /** A device Home Assistant has discovered but not yet configured. */
 export interface DiscoveredDevice {
-  /** The config flow id — stable while the flow is in progress. */
+  /** The config flow id, stable while the flow is in progress. */
   id: string;
   name: string;
   integration: string;
@@ -61,7 +61,7 @@ export type FlowState =
 /**
  * The seam between discovery logic and Home Assistant. The web app implements this by wiring
  * the shared `ha-bridge` client; tests implement it with a fake socket. Discovery logic never
- * touches hardware — HA is the discovery layer, we only consume its config flows.
+ * touches hardware, HA is the discovery layer, we only consume its config flows.
  */
 export interface DiscoveryTransport {
   subscribeFlows(onFlows: (flows: RawConfigFlow[]) => void): Promise<() => void>;

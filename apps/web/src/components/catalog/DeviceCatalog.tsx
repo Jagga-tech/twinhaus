@@ -19,7 +19,7 @@ const SETUPS: Setup[] = ['local', 'cloud'];
 
 /**
  * Browse the catalog of devices you can add. This is the "search everything we can recommend" layer
- * — Twinhaus never sells or provisions hardware, so each result links to Home Assistant's add flow
+ *, Twinhaus never sells or provisions hardware, so each result links to Home Assistant's add flow
  * and can be dropped into the twin as a simulated placement to preview coverage before buying.
  */
 export function DeviceCatalog() {
@@ -66,7 +66,7 @@ export function DeviceCatalog() {
   return (
     <div className="panel-block">
       <p className="hint">
-        Search every device we can recommend. Twinhaus doesn&apos;t sell hardware — adding always
+        Search every device we can recommend. Twinhaus doesn&apos;t sell hardware, adding always
         happens in Home Assistant. Simulate one to preview it in your twin before you buy.
       </p>
 
@@ -150,7 +150,7 @@ export function DeviceCatalog() {
 
       {results.length === 0 && (
         <p className="hint">
-          No matches. Try a broader term, or clear the filters — the catalog spans lighting,
+          No matches. Try a broader term, or clear the filters, the catalog spans lighting,
           switches, locks, climate, sensors, cameras, media, and shades.
         </p>
       )}

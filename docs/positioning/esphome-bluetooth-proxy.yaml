@@ -1,4 +1,4 @@
-# Twinhaus positioning — ESPHome Bluetooth proxy
+# Twinhaus positioning, ESPHome Bluetooth proxy
 #
 # Flash this to a cheap ESP32 to turn it into a fixed anchor: it scans for Bluetooth devices and
 # reports their signal strength to Home Assistant, which turns that into distance. Place three or

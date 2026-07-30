@@ -12,7 +12,7 @@ import { ImportedModelMesh } from './ImportedModelMesh.js';
 
 /**
  * The 3D twin: rooms extruded from the floor plan, with live device markers on top. Supports
- * three shading modes — plain, an energy heatmap (floors colored by consumption), and a
+ * three shading modes, plain, an energy heatmap (floors colored by consumption), and a
  * security view (the device that just changed is highlighted).
  */
 export function TwinViewer() {

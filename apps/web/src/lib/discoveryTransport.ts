@@ -4,7 +4,7 @@ import { haClient } from '../hooks/useHaConnection.js';
 const POLL_INTERVAL_MS = 15000;
 
 /**
- * Implements the discovery seam against the shared Home Assistant connection — the web analog
+ * Implements the discovery seam against the shared Home Assistant connection, the web analog
  * of how `homeContext` wires the agent. Discovery logic stays in `@twinhaus/discovery`; this is
  * the only place it touches `ha-bridge`. HA remains the discovery layer; we just consume flows.
  *

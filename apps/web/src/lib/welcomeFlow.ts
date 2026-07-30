@@ -1,13 +1,13 @@
 /**
  * The first-run spine. Twinhaus has many features living in separate tabs; this resolves them into
- * one ordered journey — connect → scan → control → locate → talk — and tracks progress from live
+ * one ordered journey, connect → scan → control → locate → talk, and tracks progress from live
  * app state rather than a stored cursor, so a step ticks off the moment the user actually does it
  * (and un-ticks if they undo it). Pure and state-driven, so the whole flow is unit-tested.
  */
 
 export type WelcomeStepId = 'connect' | 'scan' | 'control' | 'locate' | 'talk' | 'floors';
 
-/** The signals a step's completion is derived from — a snapshot of what the user has done so far. */
+/** The signals a step's completion is derived from, a snapshot of what the user has done so far. */
 export interface WelcomeInput {
   connected: boolean;
   hasLayout: boolean;
@@ -24,7 +24,7 @@ export interface WelcomeStep {
   body: string;
   /** Where the user goes to act on it (a left-panel tab id, or 'settings' / 'chat'). */
   target: string;
-  /** Optional steps don't block "you're all set" — they're nudges, not gates. */
+  /** Optional steps don't block "you're all set", they're nudges, not gates. */
   optional: boolean;
   done: boolean;
   current: boolean;
@@ -51,7 +51,7 @@ const SPECS: StepSpec[] = [
   {
     id: 'scan',
     title: 'Build your home',
-    body: 'Scan from Home Assistant to generate rooms and place devices automatically — no drawing. Or start from a template.',
+    body: 'Scan from Home Assistant to generate rooms and place devices automatically, no drawing. Or start from a template.',
     target: 'import',
     optional: false,
     isDone: (input) => input.hasLayout,
@@ -83,7 +83,7 @@ const SPECS: StepSpec[] = [
   {
     id: 'floors',
     title: 'Add your floors (optional)',
-    body: 'Multi-storey home? Add each floor and switch between them — or scan, and HA floors become levels automatically.',
+    body: 'Multi-storey home? Add each floor and switch between them, or scan, and HA floors become levels automatically.',
     target: 'import',
     optional: true,
     isDone: (input) => input.levelCount > 1,
@@ -96,7 +96,7 @@ export interface WelcomeState {
   currentId: WelcomeStepId | null;
   doneCount: number;
   total: number;
-  /** True once every required step is done — the flow can be finished even if optional ones remain. */
+  /** True once every required step is done, the flow can be finished even if optional ones remain. */
   allRequiredDone: boolean;
 }
 

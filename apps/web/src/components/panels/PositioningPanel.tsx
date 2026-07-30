@@ -35,7 +35,7 @@ export function PositioningPanel() {
       ) : (
         <>
           <p className={status.ready ? 'positioning-ready' : 'hint'}>
-            {status.ready ? '✓ Ready — ' : ''}
+            {status.ready ? '✓ Ready, ' : ''}
             {status.anchorsPlaced.length} of {status.anchorsReferenced.length} anchor
             {status.anchorsReferenced.length === 1 ? '' : 's'} placed, tracking{' '}
             {status.targets.length} device{status.targets.length === 1 ? '' : 's'}.

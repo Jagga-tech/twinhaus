@@ -10,7 +10,7 @@ import { createDiscoveryTransport } from '../../lib/discoveryTransport.js';
 /**
  * Runs a discovered device's Home Assistant config flow to completion. Renders any required form
  * (PIN, credentials, options) from the flow's own schema. On success, hands the device back so
- * the caller can start room placement. The user drives every step — nothing completes on its own.
+ * the caller can start room placement. The user drives every step, nothing completes on its own.
  */
 export function AddDeviceModal({
   device,

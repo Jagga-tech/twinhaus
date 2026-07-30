@@ -1,8 +1,8 @@
 import type { DeviceCategory } from './types.js';
 
 /**
- * How a device talks to Home Assistant. A device can speak more than one — a Matter bulb also
- * rides Thread, a Shelly can be Wi-Fi today and add Zigbee tomorrow — so protocols is a set.
+ * How a device talks to Home Assistant. A device can speak more than one, a Matter bulb also
+ * rides Thread, a Shelly can be Wi-Fi today and add Zigbee tomorrow, so protocols is a set.
  */
 export type Protocol =
   'wifi' | 'ethernet' | 'zigbee' | 'zwave' | 'thread' | 'matter' | 'bluetooth' | 'cloud';
@@ -11,8 +11,7 @@ export type Protocol =
 export type Setup = 'local' | 'cloud';
 
 /**
- * One buyable smart-home product Twinhaus can recommend. Twinhaus never sells or provisions these —
- * the `integration` handler is the Home Assistant integration that actually adds the device, so
+ * One buyable smart-home product Twinhaus can recommend. Twinhaus never sells or provisions these, * the `integration` handler is the Home Assistant integration that actually adds the device, so
  * every catalog entry links straight to HA's add flow rather than a store. This is the searchable
  * "what can I add?" layer that feeds the recommendation wizard and the agent.
  */
@@ -42,7 +41,7 @@ export interface CatalogFilter {
 /**
  * A curated cross-brand catalog of devices Home Assistant can add, spanning every
  * {@link DeviceCategory}, both local and cloud setups, and the common radios. It is intentionally
- * broad rather than exhaustive — enough to recommend a real product for any category and to let a
+ * broad rather than exhaustive, enough to recommend a real product for any category and to let a
  * user search by brand, protocol, or budget. Handlers match `normalize.ts` so a device discovered
  * on the network can be cross-referenced back to its catalog entry.
  */
@@ -80,7 +79,7 @@ export const DEVICE_CATALOG: CatalogDevice[] = [
     setup: 'local',
     approxPriceUsd: 45,
     rangeM: 0,
-    note: 'No hub — bright, but a Wi-Fi client per bulb.',
+    note: 'No hub, bright, but a Wi-Fi client per bulb.',
   },
   {
     id: 'wled-strip',

@@ -7,7 +7,7 @@ import { BluetoothQuickScan } from '../discovery/BluetoothQuickScan.js';
 
 /**
  * The retrofit funnel. Asks a few questions about the home, recommends a device tier, and drops
- * the kit into the twin as simulated placements — turning "I have no smart devices" into a
+ * the kit into the twin as simulated placements, turning "I have no smart devices" into a
  * concrete, coverage-checked shopping list. Nobody else does this.
  */
 export function RecommendationWizard({ onClose }: { onClose: () => void }) {
@@ -97,7 +97,7 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
               const pick = suggestForCategory(device.category);
               return (
                 <li key={index}>
-                  {device.label} — ~${device.approxPriceUsd}
+                  {device.label}, ~${device.approxPriceUsd}
                   {device.note ? ` · ${device.note}` : ''}
                   {pick && (
                     <span className="recommend-pick">
@@ -120,7 +120,7 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
           <button className="primary" onClick={placeKit}>
             Place kit in twin
           </button>
-          {placed && <span className="hint">Placed — check coverage in the 3D view.</span>}
+          {placed && <span className="hint">Placed, check coverage in the 3D view.</span>}
         </div>
 
         <div className="wizard-result">

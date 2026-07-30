@@ -1,8 +1,8 @@
-# Twinhaus — the blended workflow
+# Twinhaus, the blended workflow
 
 One journey that stitches every shipped feature into a single product story:
 **connect → scan → live twin → recommend → locate → talk**, with safety and resilience running
-underneath the whole time. Each node maps to code that already exists — this is a build spec for
+underneath the whole time. Each node maps to code that already exists, this is a build spec for
 the connective tissue (a guided first-run flow), not new subsystems.
 
 ## The end-to-end flow
@@ -14,8 +14,8 @@ flowchart TD
     Connect -->|fails| Retry["Show real error<br/>fail fast, no silent loop"]
     Retry --> Connect
 
-    Layout -->|"no — scan it"| Scan["Scan my home<br/>read HA areas + registries"]
-    Layout -->|"no — start blank"| Alt["Template · LiDAR · .glb · photo trace"]
+    Layout -->|"no, scan it"| Scan["Scan my home<br/>read HA areas + registries"]
+    Layout -->|"no, start blank"| Alt["Template · LiDAR · .glb · photo trace"]
     Layout -->|already built| Twin
 
     Scan --> Review["Review: rename rooms,<br/>reassign or drop devices"]
@@ -40,12 +40,12 @@ flowchart TD
     Twin --> Talk["Talk to your home<br/>natural-language agent"]
     Talk --> Loop
 
-    subgraph Loop["Agent safety loop — every control action"]
+    subgraph Loop["Agent safety loop, every control action"]
         direction TB
         Classify["1 Classify risk<br/>safe / sensitive / critical"] --> Gate{"Guarded?"}
         Gate -->|no| Exec["Execute service call"]
         Gate -->|yes| Confirm{"User approves?"}
-        Confirm -->|no| Blocked["Declined — not executed"]
+        Confirm -->|no| Blocked["Declined, not executed"]
         Confirm -->|yes| Exec
         Exec --> Verify["Verify it took effect<br/>+ retry transient failures"]
         Verify --> Report["Report honestly<br/>confirmed / couldn't confirm"]
@@ -54,7 +54,7 @@ flowchart TD
 
     Report --> Twin
 
-    subgraph Resilience["Connection resilience — always on"]
+    subgraph Resilience["Connection resilience, always on"]
         direction TB
         Drop["Socket drops"] --> Reconnect["Auto-reconnect<br/>backoff + jitter"]
         Reconnect --> Resub["Re-subscribe +<br/>reload snapshot"]
@@ -84,21 +84,20 @@ flowchart TD
 | Safety loop                     | `packages/agent` `safety.ts` + `agent.ts` · `verifyAction.ts`                                |
 | Connection resilience           | `packages/ha-bridge` `backoff.ts` + `client.ts`                                              |
 
-## The spine — WelcomeFlow (built)
+## The spine, WelcomeFlow (built)
 
 The features used to live in separate tabs the user had to discover. The **`WelcomeFlow`** now
-threads them into one first-run journey — connect → build → control → locate (optional) → talk —
-steering the user to the right tab for each step and ticking steps off **live** as they're done
+threads them into one first-run journey, connect → build → control → locate (optional) → talk, steering the user to the right tab for each step and ticking steps off **live** as they're done
 (and re-opening one if a prerequisite regresses, e.g. Home Assistant disconnects).
 
-- **`apps/web/src/lib/welcomeFlow.ts`** — `resolveWelcome(input)`, a pure state-driven resolver
+- **`apps/web/src/lib/welcomeFlow.ts`**, `resolveWelcome(input)`, a pure state-driven resolver
   (no stored cursor), fully unit-tested.
-- **`apps/web/src/components/WelcomeFlow.tsx`** — a dismissible checklist overlay; the app stays
+- **`apps/web/src/components/WelcomeFlow.tsx`**, a dismissible checklist overlay; the app stays
   fully usable underneath, and finishing/skipping hides it for good (persisted).
 - Progress derives from real signals: `connected`, `hasLayout`, `hasDevices`,
-  `positioningStatus().ready`, and `agentUsed` — so it can't lie about where you are.
+  `positioningStatus().ready`, and `agentUsed`, so it can't lie about where you are.
 
-## Monetization edges (free core, paid rim — the Nabu Casa model)
+## Monetization edges (free core, paid rim, the Nabu Casa model)
 
 ```mermaid
 flowchart LR

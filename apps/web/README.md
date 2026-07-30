@@ -13,9 +13,9 @@ Then: draw a floor plan (Draw mode), open **Settings** to connect your Home Assi
 
 ## Structure
 
-- `store/` — the twin state engine (rooms, device placements, live entity mirror, config).
-- `lib/` — geometry helpers, device-state helpers, and the `HomeContext` adapter that wires the agent to the twin + bridge.
-- `components/editor/` — 2D floor plan editor and the entity panel.
-- `components/viewer/` — the React Three Fiber 3D twin (rooms extruded from the plan, live device markers).
-- `components/chat/` — natural-language control panel.
-- `components/settings/` — Home Assistant + LLM provider configuration.
+- `store/`, the twin state engine (rooms, device placements, live entity mirror, config).
+- `lib/`, geometry helpers, device-state helpers, and the `HomeContext` adapter that wires the agent to the twin + bridge.
+- `components/editor/`, 2D floor plan editor and the entity panel.
+- `components/viewer/`, the React Three Fiber 3D twin (rooms extruded from the plan, live device markers).
+- `components/chat/`, natural-language control panel.
+- `components/settings/`, Home Assistant + LLM provider configuration.

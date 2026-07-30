@@ -2,7 +2,7 @@ import type { ToolDefinition } from './types.js';
 
 /**
  * Runtime the agent's tools act on. The web app implements this by wiring the twin state
- * engine to the Home Assistant bridge — the agent package itself never imports either,
+ * engine to the Home Assistant bridge, the agent package itself never imports either,
  * which keeps the LLM logic decoupled from the device and geometry layers.
  */
 export interface HomeContext {
@@ -12,7 +12,7 @@ export interface HomeContext {
   getRoomDevices(roomName: string): Promise<string>;
   /**
    * List Home Assistant entities, optionally filtered to a domain. Lets the agent discover
-   * entity ids beyond what's placed in the twin — needed for routines like turning off every
+   * entity ids beyond what's placed in the twin, needed for routines like turning off every
    * light, activating a scene, or triggering an automation.
    */
   listEntities(domain?: string): Promise<string>;
@@ -21,13 +21,13 @@ export interface HomeContext {
   /**
    * List devices Home Assistant has discovered but not yet configured. Read-only: the agent can
    * tell the user what's new and offer to add it, but adding always requires the user to confirm
-   * the config flow in the UI — the agent must never complete a config flow itself.
+   * the config flow in the UI, the agent must never complete a config flow itself.
    */
   listDiscoveredDevices(): Promise<string>;
   /**
    * Search the catalog of smart-home devices Home Assistant can add, so the agent can recommend a
    * real product for a category, protocol, or budget ("suggest a cheap local smart lock"). Read-only
-   * and advisory: it never buys or configures anything — the user adds the device through HA.
+   * and advisory: it never buys or configures anything, the user adds the device through HA.
    */
   searchDeviceCatalog(query?: string): Promise<string>;
   /** Call a Home Assistant service against one entity, e.g. `light` / `turn_on`. */
@@ -60,7 +60,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: 'list_entities',
     description:
-      'List Home Assistant entities and their state, optionally filtered to a domain (e.g. "light", "scene", "automation"). Use this to find entity ids for routines — turning off all lights, activating a scene, triggering an automation.',
+      'List Home Assistant entities and their state, optionally filtered to a domain (e.g. "light", "scene", "automation"). Use this to find entity ids for routines, turning off all lights, activating a scene, triggering an automation.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -79,13 +79,13 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: 'list_discovered_devices',
     description:
-      'List devices Home Assistant has found on the network but not yet configured ("anything new on my network?"). Read-only — you can offer to add them, but the user must confirm setup in the UI. You cannot add or configure devices yourself.',
+      'List devices Home Assistant has found on the network but not yet configured ("anything new on my network?"). Read-only, you can offer to add them, but the user must confirm setup in the UI. You cannot add or configure devices yourself.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'search_device_catalog',
     description:
-      'Search the catalog of smart-home devices Home Assistant can add, to recommend products ("what smart lock should I buy?", "cheap local Zigbee sensor"). Optional query matches brand, category, protocol, or setup. Read-only and advisory — you recommend, the user adds the device through Home Assistant. Never claim to have purchased or configured anything.',
+      'Search the catalog of smart-home devices Home Assistant can add, to recommend products ("what smart lock should I buy?", "cheap local Zigbee sensor"). Optional query matches brand, category, protocol, or setup. Read-only and advisory, you recommend, the user adds the device through Home Assistant. Never claim to have purchased or configured anything.',
     inputSchema: {
       type: 'object',
       properties: {

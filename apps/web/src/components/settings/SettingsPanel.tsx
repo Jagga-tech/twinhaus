@@ -7,7 +7,7 @@ const MODEL_PLACEHOLDER: Record<LlmProviderId, string> = {
   ollama: 'llama3.1',
 };
 
-/** Connect Home Assistant and pick an LLM provider — cloud APIs or fully local via Ollama. */
+/** Connect Home Assistant and pick an LLM provider, cloud APIs or fully local via Ollama. */
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const haConfig = useTwinStore((state) => state.haConfig);
   const setHaConfig = useTwinStore((state) => state.setHaConfig);
@@ -61,8 +61,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
       <section>
         <h3>AI provider</h3>
         <p className="hint">
-          Bring your own LLM. Anthropic or OpenAI for cloud, or Ollama for fully local inference —
-          no data leaves your machine.
+          Bring your own LLM. Anthropic or OpenAI for cloud, or Ollama for fully local inference, no
+          data leaves your machine.
         </p>
         <label>
           Provider

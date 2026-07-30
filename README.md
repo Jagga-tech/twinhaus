@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Twinhaus — turn any home into an AI home" width="100%"/>
+  <img src="assets/banner.svg" alt="Twinhaus, turn any home into an AI home" width="100%"/>
 </p>
 
 <p align="center">
@@ -16,14 +16,14 @@
 </p>
 
 <p align="center">
-  <img src="assets/twinhaus-demo.gif" alt="Twinhaus — scan your home from Home Assistant, control it in 3D, and talk to it safely" width="100%"/>
+  <img src="assets/twinhaus-demo.gif" alt="Twinhaus, scan your home from Home Assistant, control it in 3D, and talk to it safely" width="100%"/>
 </p>
 
 ---
 
 ## What is Twinhaus?
 
-Twinhaus is a live, walkable 3D replica of your real home that runs in the browser. Every smart device in your house appears in the model exactly where it is in real life — and an AI agent controls all of it through natural language.
+Twinhaus is a live, walkable 3D replica of your real home that runs in the browser. Every smart device in your house appears in the model exactly where it is in real life, and an AI agent controls all of it through natural language.
 
 Say _"dim the living room and lock the back door"_ and watch it happen in the twin as it happens in your house.
 
@@ -32,10 +32,10 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 ## Why?
 
 - **Dashboards are lists. Homes are spaces.** A motion alert means more when you see _which door_ it came from, in 3D.
-- **Works with the home you already have.** Old house, rented apartment, zero smart devices — start with a floor plan and grow from there.
-- **Add devices as they appear.** A "Found near you" tray surfaces devices Home Assistant has discovered but not yet configured — one click adds them and drops them straight into the twin. See [docs/DISCOVERY.md](docs/DISCOVERY.md).
+- **Works with the home you already have.** Old house, rented apartment, zero smart devices, start with a floor plan and grow from there.
+- **Add devices as they appear.** A "Found near you" tray surfaces devices Home Assistant has discovered but not yet configured, one click adds them and drops them straight into the twin. See [docs/DISCOVERY.md](docs/DISCOVERY.md).
 - **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, _then_ spend money.
-- **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM — cloud APIs or fully local via Ollama.
+- **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM, cloud APIs or fully local via Ollama.
 
 ## How it works
 
@@ -63,7 +63,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
         Zigbee · Matter · WiFi devices
 ```
 
-Twinhaus never talks to hardware directly — Home Assistant is the device layer. We are the 3D + AI layer on top.
+Twinhaus never talks to hardware directly, Home Assistant is the device layer. We are the 3D + AI layer on top.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
@@ -82,28 +82,28 @@ Then open `http://localhost:5173`, draw your floor plan, and connect your Home A
 
 ## Roadmap
 
-- [x] **Phase 1 — MVP**: 2D floor plan editor, 3D extrusion, HA connection, live light/sensor states, chat control
+- [x] **Phase 1, MVP**: 2D floor plan editor, 3D extrusion, HA connection, live light/sensor states, chat control
 - [x] **Phase 2**: RoomPlan/capture import, more device types + click-to-control, per-room energy heatmap, spatial security timeline, agent automations
 - [x] **Phase 3**: Simulation mode with coverage viz, device recommendation wizard, local LLM support (Ollama), `.glb`/`.gltf` + photo import, HA add-on packaging
 - [x] **Phase 4**: Built-in device model library, home templates, MCP server
-- [x] **Discovery**: "Found near you" tray — one-click add of HA-discovered devices with instant 3D placement ([docs](docs/DISCOVERY.md))
+- [x] **Discovery**: "Found near you" tray, one-click add of HA-discovered devices with instant 3D placement ([docs](docs/DISCOVERY.md))
 - [x] **Catalog**: searchable cross-brand catalog of devices you can add, feeding the recommendation wizard and the agent ([docs](docs/CATALOG.md))
 - [x] **Agent safety loop**: risk classification, confirmation gate, circuit breaker, action budget, and verify-after-act so the agent can never cause a serious issue while operating ([docs](docs/SAFETY.md))
 - [x] **Self-healing connection**: auto-reconnect with exponential backoff, subscription re-establishment, and snapshot resync so a Home Assistant restart or network blip never leaves the twin stale ([docs](docs/RESILIENCE.md))
 - [x] **Whole-house structure**: multi-floor levels with a floor switcher, stacked 3D view, per-floor + whole-home summaries, building-type starts, and scan-by-HA-floor ([docs](docs/STRUCTURE.md))
 - [x] **Guided onboarding**: a first-run WelcomeFlow that threads connect → build → control → locate → talk into one journey ([workflow](docs/WORKFLOW.md))
-- [x] **Scan your home**: no drawing — generate a room per Home Assistant area and auto-place every device where it already lives ([docs](docs/HOME-SCAN.md))
+- [x] **Scan your home**: no drawing, generate a room per Home Assistant area and auto-place every device where it already lives ([docs](docs/HOME-SCAN.md))
 - [x] **Position from distance**: trilaterate a device's live spot within a room from Bluetooth ranging (ESPHome proxies / ESPresense / Bermuda), with an honest confidence halo ([docs](docs/POSITIONING.md))
 
 Full details in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-Contributions are very welcome — this project is being built in the open from day one. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started, or grab an issue labeled `good first issue`.
+Contributions are very welcome, this project is being built in the open from day one. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started, or grab an issue labeled `good first issue`.
 
 ## License
 
-[MIT](LICENSE) — free to use, fork, and build on.
+[MIT](LICENSE), free to use, fork, and build on.
 
 ---
 

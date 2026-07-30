@@ -4,22 +4,22 @@ Thanks for your interest! Twinhaus is early-stage, which means your contribution
 
 ## Ways to contribute
 
-- **Code** — grab an issue labeled `good first issue` or `help wanted`
-- **3D device models** — low-poly `.glb` models of common smart devices (bulbs, sensors, locks)
-- **Testing** — run it against your Home Assistant setup and report what breaks
-- **Docs** — setup guides, especially for unusual HA configurations
+- **Code**, grab an issue labeled `good first issue` or `help wanted`
+- **3D device models**, low-poly `.glb` models of common smart devices (bulbs, sensors, locks)
+- **Testing**, run it against your Home Assistant setup and report what breaks
+- **Docs**, setup guides, especially for unusual HA configurations
 
 ## Development setup
 
 1. Fork and clone the repo
 2. `npm install`
 3. `npm run dev`
-4. You'll need a Home Assistant instance to test against — a [demo container](https://www.home-assistant.io/installation/) works fine
+4. You'll need a Home Assistant instance to test against, a [demo container](https://www.home-assistant.io/installation/) works fine
 
 ## Pull requests
 
 - Branch from `main`, one feature per PR
-- Keep PRs small and focused — easier to review, faster to merge
+- Keep PRs small and focused, easier to review, faster to merge
 - Describe _what_ and _why_ in the PR body; screenshots/recordings for anything visual
 
 ## Checks
@@ -42,4 +42,4 @@ CI (`.github/workflows/ci.yml`) runs these on every pull request.
 
 ## Questions?
 
-Open a GitHub Discussion — no question is too basic.
+Open a GitHub Discussion, no question is too basic.

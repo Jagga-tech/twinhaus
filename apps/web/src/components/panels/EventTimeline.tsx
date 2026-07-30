@@ -3,7 +3,7 @@ import { entityLabel } from '../../lib/deviceState.js';
 
 /**
  * The spatial security view: a timeline of device transitions (motion, doors, locks). Clicking
- * an event flips the twin into security mode and highlights where it happened — events on a map
+ * an event flips the twin into security mode and highlights where it happened, events on a map
  * beat events in a list.
  */
 export function EventTimeline() {

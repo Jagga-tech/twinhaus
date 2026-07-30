@@ -69,7 +69,7 @@ function toState(step: RawConfigFlowStep): FlowState {
 /**
  * Drives a single Home Assistant config flow to completion from the UI: fetch the current step,
  * surface any required form, submit user input, and report done/aborted. It only ever advances a
- * flow the user explicitly chose to add — nothing here runs automatically.
+ * flow the user explicitly chose to add, nothing here runs automatically.
  */
 export class ConfigFlowController {
   private flowId: string | null = null;

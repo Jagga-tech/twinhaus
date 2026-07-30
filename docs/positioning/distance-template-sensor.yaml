@@ -1,4 +1,4 @@
-# Twinhaus positioning — shape a distance reading for the twin
+# Twinhaus positioning, shape a distance reading for the twin
 #
 # Twinhaus reads distance from any `sensor.*` whose attributes carry `device_class: distance`, an
 # `anchor` (the entity_id of a proxy you've placed in the twin), and a `target` (the device being

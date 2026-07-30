@@ -2,100 +2,100 @@
 
 All four phases are implemented. Items below are checked with a short note on where each lives.
 
-## Phase 1 — MVP
+## Phase 1, MVP
 
 The smallest thing that's demo-able and useful.
 
-- [x] 2D floor plan editor (draw rooms as polygons, set heights) — `apps/web/src/components/editor`
-- [x] 3D extrusion + orbit/walkthrough camera — `apps/web/src/components/viewer`
-- [x] Home Assistant connection (URL + long-lived token) — `packages/ha-bridge`
+- [x] 2D floor plan editor (draw rooms as polygons, set heights), `apps/web/src/components/editor`
+- [x] 3D extrusion + orbit/walkthrough camera, `apps/web/src/components/viewer`
+- [x] Home Assistant connection (URL + long-lived token), `packages/ha-bridge`
 - [x] Live entity states rendered in 3D (lights, binary sensors, and more)
 - [x] Entity-to-room assignment (select + place)
-- [x] Chat control via agent tool-calling — `packages/agent`
+- [x] Chat control via agent tool-calling, `packages/agent`
 
 **Ship criteria:** a stranger can clone the repo, draw their apartment, connect HA, and turn a real light on from the 3D twin.
 
-## Phase 2 — Depth
+## Phase 2, Depth
 
-- [x] Capture import (RoomPlan-style JSON → rooms) — `apps/web/src/lib/twinIo.ts`
+- [x] Capture import (RoomPlan-style JSON → rooms), `apps/web/src/lib/twinIo.ts`
 - [x] More device types (locks, climate, cameras, media, covers) + click-to-control inspector
-- [x] Per-room energy heatmap (from power/energy entities) — `apps/web/src/lib/energy.ts`
+- [x] Per-room energy heatmap (from power/energy entities), `apps/web/src/lib/energy.ts`
 - [x] Agent automations ("turn everything off when I leave") via `list_entities` + `call_service`
-- [x] Event timeline plotted spatially (security view) — highlights the room/device that changed
+- [x] Event timeline plotted spatially (security view), highlights the room/device that changed
 
-## Phase 3 — Retrofit story
+## Phase 3, Retrofit story
 
-- [x] Simulation mode: place virtual devices, preview camera/motion coverage — `CoverageViz`
+- [x] Simulation mode: place virtual devices, preview camera/motion coverage, `CoverageViz`
 - [x] Device recommendation wizard (Starter/Mid/Full tiers, renter vs owner, home age)
-- [x] Local LLM support via Ollama — `packages/agent/src/providers/ollama.ts`
+- [x] Local LLM support via Ollama, `packages/agent/src/providers/ollama.ts`
 - [x] `.glb`/`.gltf` model import and photo/blueprint tracing underlay
-- [x] Package as a Home Assistant add-on — `addon/`
+- [x] Package as a Home Assistant add-on, `addon/`
 
-## Phase 4 — Community
+## Phase 4, Community
 
-- [x] Built-in low-poly device model library (per-category shapes; `.glb` override) — `deviceLibrary.ts`
-- [x] Shared room/home templates + twin export/import — `templates.ts`, `twinIo.ts`
-- [x] MCP server so external AI assistants can query and control the twin — `packages/mcp-server`
+- [x] Built-in low-poly device model library (per-category shapes; `.glb` override), `deviceLibrary.ts`
+- [x] Shared room/home templates + twin export/import, `templates.ts`, `twinIo.ts`
+- [x] MCP server so external AI assistants can query and control the twin, `packages/mcp-server`
 
-## Discovery — "Found near you"
+## Discovery, "Found near you"
 
-- [x] Consume HA's pending config flows (discovered-but-unconfigured devices) — `packages/discovery`
+- [x] Consume HA's pending config flows (discovered-but-unconfigured devices), `packages/discovery`
 - [x] Normalize into `DiscoveredDevice` (name, brand, source, best-guess category)
 - [x] Drive a config flow to completion, rendering PIN/credential forms from the flow schema
 - [x] "Found near you" tray with a live count badge and one-click **Add**
 - [x] Instant room placement in the 3D twin after adding
 - [x] Read-only agent tool `list_discovered_devices` (the agent never completes a flow)
 - [x] Optional, clearly-separated Web Bluetooth "Quick scan (beta)", informational only
-- [x] `docs/DISCOVERY.md` — how it works, `cors_allowed_origins`, ESPHome BT proxies
+- [x] `docs/DISCOVERY.md`, how it works, `cors_allowed_origins`, ESPHome BT proxies
 
-## Catalog — search everything you can add
+## Catalog, search everything you can add
 
-- [x] Cross-brand `DEVICE_CATALOG` spanning every category, local & cloud setups, all radios — `packages/discovery/src/catalog.ts`
+- [x] Cross-brand `DEVICE_CATALOG` spanning every category, local & cloud setups, all radios, `packages/discovery/src/catalog.ts`
 - [x] `searchCatalog` free-text + category/protocol/setup/price filters, cheapest-first
 - [x] Catalog browse tab: search, filter, simulate-in-twin, and "How to add →" HA docs link
 - [x] Recommendation wizard names a real catalog pick per device (`suggestForCategory`)
 - [x] Read-only agent tool `search_device_catalog` (recommends only; HA still does the adding)
-- [x] `docs/CATALOG.md` — data model, search semantics, why it's curated
+- [x] `docs/CATALOG.md`, data model, search semantics, why it's curated
 
 ## Agent safety loop
 
-- [x] Risk classification for every control action (safe / sensitive / critical) — `packages/agent/src/safety.ts`
+- [x] Risk classification for every control action (safe / sensitive / critical), `packages/agent/src/safety.ts`
 - [x] Confirmation gate: guarded actions (unlock, disarm, open, heating off, whole-home) need Approve/Deny; declined by default when unattended
 - [x] Circuit breaker on consecutive tool errors + hard per-request action budget
 - [x] Inline Approve/Deny in the chat, with `confirmation_required` / `action_blocked` / `loop_halted` events
-- [x] Verify-after-act: retry transient failures, confirm the device reached the intended state, report "couldn't confirm" instead of a false success — `apps/web/src/lib/verifyAction.ts`
-- [x] `docs/SAFETY.md` — the five guards and how to tune them
+- [x] Verify-after-act: retry transient failures, confirm the device reached the intended state, report "couldn't confirm" instead of a false success, `apps/web/src/lib/verifyAction.ts`
+- [x] `docs/SAFETY.md`, the five guards and how to tune them
 
-## Failure recovery — self-healing connection
+## Failure recovery, self-healing connection
 
-- [x] Auto-reconnect on unexpected WebSocket drop, with exponential backoff + jitter — `packages/ha-bridge/src/backoff.ts`
+- [x] Auto-reconnect on unexpected WebSocket drop, with exponential backoff + jitter, `packages/ha-bridge/src/backoff.ts`
 - [x] Re-authenticate, re-subscribe to state_changed, and re-establish active subscriptions on reconnect
 - [x] `onReconnected` snapshot resync so missed-while-offline events don't leave the mirror stale
 - [x] Bounded by an optional `maxAttempts`; initial connect still fails fast on a bad URL/token
 - [x] `reconnecting` status surfaced in the UI; injectable socket/timer make it fully unit-tested
-- [x] `docs/RESILIENCE.md` — the recovery flow and how to tune it
+- [x] `docs/RESILIENCE.md`, the recovery flow and how to tune it
 
-## Scan your home — no drawing
+## Scan your home, no drawing
 
-- [x] Read HA's area/device/entity registries — `listAreas`/`listDeviceRegistry`/`listEntityRegistry` in `packages/ha-bridge`
-- [x] Auto-generate a room per area and place every placeable device in its room — `apps/web/src/lib/homeScan.ts`
+- [x] Read HA's area/device/entity registries, `listAreas`/`listDeviceRegistry`/`listEntityRegistry` in `packages/ha-bridge`
+- [x] Auto-generate a room per area and place every placeable device in its room, `apps/web/src/lib/homeScan.ts`
 - [x] Entity→device→area resolution (entity area overrides device area); non-placeable/no-area entities skipped and reported
 - [x] "Scan from Home Assistant" in the Import tab: one click, then a review step to rename rooms, reassign, or drop devices before applying (`applyReview`)
-- [x] `docs/HOME-SCAN.md` — how it works and the Slice 2 (review) / Slice 3 (position-from-distance) roadmap
-- [x] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense) — `apps/web/src/lib/positioning.ts`
+- [x] `docs/HOME-SCAN.md`, how it works and the Slice 2 (review) / Slice 3 (position-from-distance) roadmap
+- [x] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense), `apps/web/src/lib/positioning.ts`
 
 ## Position from distance
 
-- [x] Log-distance RSSI→meters + least-squares trilateration (≥3 anchors) with proximity fallback — `positioning.ts`
+- [x] Log-distance RSSI→meters + least-squares trilateration (≥3 anchors) with proximity fallback, `positioning.ts`
 - [x] Confidence per estimate from the fit residual; honest "roughly here" halo in the twin
-- [x] Documented HA distance-sensor ingestion (`device_class: distance` + `anchor`/`target`), inert without ranging — `positioningSources.ts`
+- [x] Documented HA distance-sensor ingestion (`device_class: distance` + `anchor`/`target`), inert without ranging, `positioningSources.ts`
 - [x] Live `livePositions` store slice + `useLivePositioning` so device dots follow movement; `DeviceMarker` overrides static placement
-- [x] `docs/POSITIONING.md` — the math, the HA contract, and accuracy expectations
+- [x] `docs/POSITIONING.md`, the math, the HA contract, and accuracy expectations
 - [x] Turnkey setup: ESPHome BT-proxy config + distance template-sensor examples (`docs/positioning/`) and an in-app readiness helper (`positioningStatus` + Positioning panel)
 
 ## Beyond the plan
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant
-  entities — the energy heatmap reads their power values with no extra integration.
+  entities, the energy heatmap reads their power values with no extra integration.
 - Native on-device LiDAR scanning and photo→floorplan CV are iOS/vision problems outside the
   web app; Twinhaus implements the **import** side so those pipelines land as editable rooms.

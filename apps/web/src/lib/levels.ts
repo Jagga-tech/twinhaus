@@ -31,7 +31,7 @@ export function sortedLevels(levels: Level[]): Level[] {
 /** Vertical gap between stacked storeys, in meters (wall height + a little slab). */
 export const LEVEL_GAP = 3.4;
 
-/** Height a level sits at in the stacked 3D view — its index in storey order × the gap. */
+/** Height a level sits at in the stacked 3D view, its index in storey order × the gap. */
 export function levelElevation(levels: Level[], levelId: string): number {
   const index = sortedLevels(levels).findIndex((level) => level.id === levelId);
   return Math.max(0, index) * LEVEL_GAP;
@@ -80,14 +80,14 @@ export interface BuildingType {
 
 /**
  * Starter structures for a whole house, spanning one to three storeys. Materialized with
- * {@link buildingToTwin} into a {@link TwinModel} the store can import — the multi-floor answer to
+ * {@link buildingToTwin} into a {@link TwinModel} the store can import, the multi-floor answer to
  * the single-floor templates.
  */
 export const BUILDING_TYPES: BuildingType[] = [
   {
     id: 'bungalow',
     name: 'Bungalow',
-    description: 'Single storey — living, kitchen, two beds, bath.',
+    description: 'Single storey, living, kitchen, two beds, bath.',
     floors: [
       {
         name: 'Ground floor',

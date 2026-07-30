@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { HaClient } from '@twinhaus/ha-bridge';
 import { useTwinStore } from '../store/twinStore.js';
 
-/** Shared client instance — the chat agent and the viewer both act on the same connection. */
+/** Shared client instance, the chat agent and the viewer both act on the same connection. */
 export const haClient = new HaClient();
 
 // Keep the store's live mirror in sync with Home Assistant for the app's lifetime.
@@ -12,7 +12,7 @@ haClient.onStateChanged((event) => {
 });
 
 // After an auto-reconnect the live mirror is stale (events were missed while offline), so reload a
-// full snapshot to heal it. Failures are swallowed — the next reconnect attempt will try again.
+// full snapshot to heal it. Failures are swallowed, the next reconnect attempt will try again.
 haClient.onReconnected(() => {
   haClient
     .getStates()

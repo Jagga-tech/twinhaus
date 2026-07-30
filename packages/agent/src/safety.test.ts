@@ -25,7 +25,7 @@ describe('assessAction', () => {
     }
   });
 
-  it('does not flag locking or closing — the safe direction', () => {
+  it('does not flag locking or closing, the safe direction', () => {
     expect(assessAction(action('lock', 'lock')).risk).toBe('safe');
     expect(assessAction(action('cover', 'close_cover')).risk).toBe('safe');
   });

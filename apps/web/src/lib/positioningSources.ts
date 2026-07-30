@@ -10,7 +10,7 @@ import {
 /**
  * Ingest Home Assistant distance sensors into live position estimates. The contract is deliberately
  * explicit so it works with any ranging integration (ESPHome BT proxies, ESPresense, Bermuda) once
- * its output is shaped to match — rather than guessing one vendor's entity schema:
+ * its output is shaped to match, rather than guessing one vendor's entity schema:
  *
  *   a distance sensor is a `sensor.*` entity whose attributes carry
  *     - `device_class: 'distance'`
@@ -20,7 +20,7 @@ import {
  *
  * Anchor coordinates come from where the user placed that anchor device in the twin, so no separate
  * calibration step is needed. Entities that don't match are ignored, so the feature is simply inert
- * until a ranging integration is present — it never interferes with a plain setup.
+ * until a ranging integration is present, it never interferes with a plain setup.
  */
 export function deriveLivePositions(
   devices: DevicePlacement[],
@@ -66,7 +66,7 @@ export interface PositioningStatus {
   anchorsReferenced: string[];
   /** Referenced anchors that are placed in the twin (so they have coordinates). */
   anchorsPlaced: string[];
-  /** Referenced anchors not yet placed — the user needs to drop these in the twin. */
+  /** Referenced anchors not yet placed, the user needs to drop these in the twin. */
   anchorsMissing: string[];
   /** Devices being located by the distance sensors. */
   targets: string[];

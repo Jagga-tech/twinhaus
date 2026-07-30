@@ -1,8 +1,8 @@
-# Failure recovery — the connection heals itself
+# Failure recovery, the connection heals itself
 
 Home Assistant restarts. Wi-Fi blips. Laptops sleep. When the live WebSocket drops, the twin used
 to freeze on stale data until someone reopened Settings and clicked Connect. Now the connection
-recovers on its own — the failure the system couldn't previously solve.
+recovers on its own, the failure the system couldn't previously solve.
 
 ## What happens on a drop
 
@@ -44,12 +44,12 @@ Key properties:
 
 ## Where it lives
 
-- **`packages/ha-bridge/src/backoff.ts`** — `backoffDelay(attempt, options, random)`, a pure,
+- **`packages/ha-bridge/src/backoff.ts`**, `backoffDelay(attempt, options, random)`, a pure,
   deterministic (with an injected `random`) exponential-backoff-with-jitter function.
-- **`packages/ha-bridge/src/client.ts`** — the reconnect state machine: `openSocket`, `handleClose`,
+- **`packages/ha-bridge/src/client.ts`**, the reconnect state machine: `openSocket`, `handleClose`,
   `scheduleReconnect`, `reestablishSubscriptions`, and the `onReconnected` hook. The socket and
   timer are injectable (`HaClientOptions`) so the whole thing is unit-tested without a network.
-- **`apps/web` `useHaConnection`** — wires `onReconnected` to reload the entity snapshot, and the
+- **`apps/web` `useHaConnection`**, wires `onReconnected` to reload the entity snapshot, and the
   status badge surfaces the `reconnecting` state.
 
 ## Tuning
@@ -67,5 +67,5 @@ opt out entirely, or a finite `maxAttempts` to give up after a bounded number of
 
 The [safety loop](SAFETY.md) stops the agent from doing something _wrong_; resilience stops a
 transient outage from making the twin _wrong_. Together: the agent's circuit breaker halts a burst
-of failing commands, while the connection layer quietly reconnects underneath — so a blip never
+of failing commands, while the connection layer quietly reconnects underneath, so a blip never
 snowballs into a serious issue while operating.
