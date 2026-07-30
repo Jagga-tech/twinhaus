@@ -63,6 +63,15 @@ export interface RawConfigFlow {
   };
 }
 
+/** A floor/storey in Home Assistant, from `config/floor_registry/list`. Areas reference these by
+ * `floor_id`, letting Twinhaus reconstruct a multi-storey building automatically. */
+export interface RawFloor {
+  floor_id: string;
+  name: string;
+  /** Storey number, lowest first (basement negative); may be absent. */
+  level?: number | null;
+}
+
 /** A room/area in Home Assistant, from `config/area_registry/list`. Twinhaus reads these to
  * auto-generate a floor plan so the user never has to draw one. */
 export interface RawArea {

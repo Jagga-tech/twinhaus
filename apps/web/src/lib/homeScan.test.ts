@@ -93,6 +93,32 @@ describe('buildHomeScan', () => {
   });
 });
 
+describe('buildHomeScan with floors', () => {
+  it('creates a level per floor and tags each room with its floor', () => {
+    const floors = [
+      { floor_id: 'f_ground', name: 'Ground', level: 0 },
+      { floor_id: 'f_first', name: 'First', level: 1 },
+    ];
+    const floorAreas = [
+      { area_id: 'living', name: 'Living Room', floor_id: 'f_ground' },
+      { area_id: 'kitchen', name: 'Kitchen', floor_id: 'f_ground' },
+      { area_id: 'bed', name: 'Bedroom', floor_id: 'f_first' },
+    ];
+    const result = buildHomeScan(floorAreas, [], [], floors);
+    expect(result.model.levels?.map((l) => l.name)).toEqual(['Ground', 'First']);
+    const byRoom = new Map(result.model.rooms.map((r) => [r.name, r.levelId]));
+    expect(byRoom.get('Living Room')).toBe('scan_f_ground');
+    expect(byRoom.get('Bedroom')).toBe('scan_f_first');
+  });
+
+  it('falls back to a single Home level when no floors are defined', () => {
+    const result = buildHomeScan(areas, [], []);
+    expect(result.model.levels).toHaveLength(1);
+    expect(result.model.levels?.[0].name).toBe('Home');
+    expect(result.model.rooms.every((r) => r.levelId === 'scan_home')).toBe(true);
+  });
+});
+
 describe('applyReview', () => {
   const result = buildHomeScan(
     areas,

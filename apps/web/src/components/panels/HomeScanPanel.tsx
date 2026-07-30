@@ -32,10 +32,11 @@ export function HomeScanPanel() {
   async function runScan() {
     setScan({ status: 'scanning' });
     try {
-      const [areas, devices, entities] = await Promise.all([
+      const [areas, devices, entities, floors] = await Promise.all([
         haClient.listAreas(),
         haClient.listDeviceRegistry(),
         haClient.listEntityRegistry(),
+        haClient.listFloors().catch(() => []),
       ]);
       if (areas.length === 0) {
         setScan({
@@ -45,7 +46,7 @@ export function HomeScanPanel() {
         return;
       }
       setReview(EMPTY_REVIEW);
-      setScan({ status: 'preview', result: buildHomeScan(areas, devices, entities) });
+      setScan({ status: 'preview', result: buildHomeScan(areas, devices, entities, floors) });
     } catch (err) {
       setScan({ status: 'error', message: err instanceof Error ? err.message : String(err) });
     }

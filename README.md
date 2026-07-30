@@ -86,6 +86,7 @@ Then open `http://localhost:5173`, draw your floor plan, and connect your Home A
 - [x] **Catalog**: searchable cross-brand catalog of devices you can add, feeding the recommendation wizard and the agent ([docs](docs/CATALOG.md))
 - [x] **Agent safety loop**: risk classification, confirmation gate, circuit breaker, action budget, and verify-after-act so the agent can never cause a serious issue while operating ([docs](docs/SAFETY.md))
 - [x] **Self-healing connection**: auto-reconnect with exponential backoff, subscription re-establishment, and snapshot resync so a Home Assistant restart or network blip never leaves the twin stale ([docs](docs/RESILIENCE.md))
+- [x] **Whole-house structure**: multi-floor levels with a floor switcher, building-type starts (bungalow/two-storey/townhouse), and scan-by-HA-floor ([docs](docs/STRUCTURE.md))
 - [x] **Guided onboarding**: a first-run WelcomeFlow that threads connect → build → control → locate → talk into one journey ([workflow](docs/WORKFLOW.md))
 - [x] **Scan your home**: no drawing — generate a room per Home Assistant area and auto-place every device where it already lives ([docs](docs/HOME-SCAN.md))
 - [x] **Position from distance**: trilaterate a device's live spot within a room from Bluetooth ranging (ESPHome proxies / ESPresense / Bermuda), with an honest confidence halo ([docs](docs/POSITIONING.md))

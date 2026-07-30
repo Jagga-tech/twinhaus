@@ -318,6 +318,63 @@ body {
   margin: 0;
 }
 
+/* Level (floor) switcher — the pages of the whole-house structure */
+.level-switcher {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.4rem 0 0.5rem;
+}
+.level-switcher button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+}
+.level-switcher button.active {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+}
+.level-count {
+  font-size: 0.68rem;
+  min-width: 1.1rem;
+  text-align: center;
+  border-radius: 999px;
+  padding: 0 0.3rem;
+  background: var(--line);
+  color: var(--muted);
+}
+.level-x {
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--muted);
+  padding-left: 0.1rem;
+}
+.level-x:hover {
+  color: #e05252;
+}
+.level-add {
+  color: var(--accent) !important;
+  border-style: dashed !important;
+}
+.floor-badge {
+  margin-left: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  vertical-align: middle;
+}
+
 /* First-run WelcomeFlow */
 .welcome {
   position: fixed;

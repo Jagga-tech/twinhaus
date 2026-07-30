@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { HOME_TEMPLATES, templateToTwin } from '../../lib/templates.js';
+import { BUILDING_TYPES, buildingToTwin } from '../../lib/levels.js';
 import { captureToTwin, downloadTwin, parseTwin, type RoomCapture } from '../../lib/twinIo.js';
 import { HomeScanPanel } from './HomeScanPanel.js';
 import { PositioningPanel } from './PositioningPanel.js';
@@ -54,6 +55,21 @@ export function ImportPanel() {
     <div className="panel-block">
       <HomeScanPanel />
       <PositioningPanel />
+
+      <h4>Start from a building</h4>
+      <div className="template-grid">
+        {BUILDING_TYPES.map((building) => (
+          <button key={building.id} onClick={() => importTwin(buildingToTwin(building), 'replace')}>
+            <strong>
+              {building.name}
+              <span className="floor-badge">
+                {building.floors.length} floor{building.floors.length === 1 ? '' : 's'}
+              </span>
+            </strong>
+            <span className="hint">{building.description}</span>
+          </button>
+        ))}
+      </div>
 
       <h4>Start from a template</h4>
       <div className="template-grid">

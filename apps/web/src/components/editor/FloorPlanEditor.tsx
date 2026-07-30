@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid, roomAt } from '../../lib/geometry.js';
+import { roomsOnLevel, devicesOnLevel } from '../../lib/levels.js';
 import { entityLabel, isEntityActive } from '../../lib/deviceState.js';
 import type { Point2D } from '../../store/types.js';
 
@@ -17,8 +18,14 @@ export function FloorPlanEditor() {
 
   const [underlay, setUnderlay] = useState<HTMLImageElement | null>(null);
 
-  const rooms = useTwinStore((state) => state.rooms);
-  const devices = useTwinStore((state) => state.devices);
+  const allRooms = useTwinStore((state) => state.rooms);
+  const allDevices = useTwinStore((state) => state.devices);
+  const activeLevelId = useTwinStore((state) => state.activeLevelId);
+  const rooms = useMemo(() => roomsOnLevel(allRooms, activeLevelId), [allRooms, activeLevelId]);
+  const devices = useMemo(
+    () => devicesOnLevel(allDevices, allRooms, activeLevelId),
+    [allDevices, allRooms, activeLevelId],
+  );
   const entityStates = useTwinStore((state) => state.entityStates);
   const mode = useTwinStore((state) => state.editorMode);
   const selectedEntityId = useTwinStore((state) => state.selectedEntityId);

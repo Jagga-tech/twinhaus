@@ -11,6 +11,7 @@ export {
   type RawConfigFlowStep,
   type RawDeviceRegistryEntry,
   type RawEntityRegistryEntry,
+  type RawFloor,
   type RawFlowSchemaField,
   type ServiceTarget,
   type StateChangedEvent,
