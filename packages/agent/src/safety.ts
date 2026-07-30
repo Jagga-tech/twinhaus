@@ -1,7 +1,7 @@
 /**
  * The agent's safety layer. Every control action the model wants to run is assessed here before
  * it touches Home Assistant, so the loop can never cause a serious, hard-to-undo problem while
- * operating — unlocking the house, disarming the alarm, opening a garage, or cutting the heat in
+ * operating, unlocking the house, disarming the alarm, opening a garage, or cutting the heat in
  * winter. Read-only tools (describe_home, list_entities, …) never reach this layer; only actions
  * that change device state do.
  */
@@ -16,10 +16,9 @@ export interface ControlAction {
 
 /**
  * How risky an action is to run unattended.
- * - `safe`: routine, easily reversed (a light, a plug, a scene) — runs without a prompt.
- * - `sensitive`: affects comfort or many devices at once — needs confirmation.
- * - `critical`: touches physical security or safety (locks, alarms, exterior openings, heating) —
- *   needs confirmation, and is denied outright when no one is available to confirm.
+ * - `safe`: routine, easily reversed (a light, a plug, a scene), runs without a prompt.
+ * - `sensitive`: affects comfort or many devices at once, needs confirmation.
+ * - `critical`: touches physical security or safety (locks, alarms, exterior openings, heating), *   needs confirmation, and is denied outright when no one is available to confirm.
  */
 export type ActionRisk = 'safe' | 'sensitive' | 'critical';
 
@@ -29,7 +28,7 @@ export interface SafetyVerdict {
   reason: string;
 }
 
-/** Services that unlock, disarm, or open a way into the home — the highest-consequence actions. */
+/** Services that unlock, disarm, or open a way into the home, the highest-consequence actions. */
 const CRITICAL_RULES: Array<{ match: (a: ControlAction) => boolean; reason: string }> = [
   {
     match: (a) => a.domain === 'lock' && a.service === 'unlock',
@@ -66,7 +65,7 @@ const SENSITIVE_RULES: Array<{ match: (a: ControlAction) => boolean; reason: str
   },
 ];
 
-/** Classify a single control action. Rules are conservative — when unsure, escalate, never relax. */
+/** Classify a single control action. Rules are conservative, when unsure, escalate, never relax. */
 export function assessAction(action: ControlAction): SafetyVerdict {
   for (const rule of CRITICAL_RULES) {
     if (rule.match(action)) {

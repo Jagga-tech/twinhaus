@@ -20,7 +20,7 @@ export interface BuildingSummary {
 
 /**
  * Roll up the whole house: per-floor room/device counts and power draw, plus building-wide totals.
- * Pure, so the summary panel stays testable — power comes from the same {@link computeRoomEnergy}
+ * Pure, so the summary panel stays testable, power comes from the same {@link computeRoomEnergy}
  * the heatmap uses, scoped to each floor's rooms.
  */
 export function buildingSummary(

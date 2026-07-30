@@ -1,4 +1,4 @@
-# Twinhaus — Home Assistant add-on
+# Twinhaus, Home Assistant add-on
 
 Run Twinhaus as a Home Assistant add-on so it lives right inside your HA dashboard (via
 Ingress) instead of a separate dev server.

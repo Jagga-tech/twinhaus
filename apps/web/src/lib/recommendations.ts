@@ -22,13 +22,13 @@ export interface TierPlan {
 /**
  * Device tiers for the retrofit funnel. A home with zero smart devices still gets a twin, then
  * this wizard recommends a tier and drops the devices in as simulated placements to preview
- * before buying — the "old home" wedge nobody else serves.
+ * before buying, the "old home" wedge nobody else serves.
  */
 export const TIERS: Record<Tier, TierPlan> = {
   starter: {
     id: 'starter',
     name: 'Starter',
-    blurb: 'The essentials — smart lighting and presence, all plug-in or bulb-based.',
+    blurb: 'The essentials, smart lighting and presence, all plug-in or bulb-based.',
     devices: [
       {
         category: 'light',
@@ -44,7 +44,7 @@ export const TIERS: Record<Tier, TierPlan> = {
   mid: {
     id: 'mid',
     name: 'Mid',
-    blurb: 'Comfort and security — adds a smart lock, thermostat, and a camera.',
+    blurb: 'Comfort and security, adds a smart lock, thermostat, and a camera.',
     devices: [
       { category: 'light', label: 'Smart bulb', approxPriceUsd: 15, rangeM: 0 },
       { category: 'motion', label: 'Motion sensor', approxPriceUsd: 20, rangeM: 5 },
@@ -56,7 +56,7 @@ export const TIERS: Record<Tier, TierPlan> = {
   full: {
     id: 'full',
     name: 'Full',
-    blurb: 'Whole-home — per-room sensing, cameras at entries, energy monitoring.',
+    blurb: 'Whole-home, per-room sensing, cameras at entries, energy monitoring.',
     devices: [
       { category: 'light', label: 'Smart bulb', approxPriceUsd: 15, rangeM: 0 },
       { category: 'motion', label: 'Motion sensor', approxPriceUsd: 20, rangeM: 5 },
@@ -103,7 +103,7 @@ export function recommend(input: AuditInput): AuditResult {
     );
   }
   if (input.budget === 'full') {
-    notes.push('Add the energy monitor first — it unlocks the per-room energy heatmap.');
+    notes.push('Add the energy monitor first, it unlocks the per-room energy heatmap.');
   }
 
   const estimatedCost = tier.devices.reduce((sum, device) => sum + device.approxPriceUsd, 0);

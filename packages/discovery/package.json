@@ -1,7 +1,7 @@
 {
   "name": "@twinhaus/discovery",
   "version": "0.1.0",
-  "description": "Consume Home Assistant's pending config flows and drive them to completion — discovered-but-unconfigured devices.",
+  "description": "Consume Home Assistant's pending config flows and drive them to completion, discovered-but-unconfigured devices.",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",

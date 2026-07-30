@@ -17,7 +17,7 @@ export interface Level {
 
 /**
  * A room in the twin. Geometry is stored as a 2D polygon plus a wall height, and is
- * extruded to 3D at render time — the source of truth stays lightweight and editable.
+ * extruded to 3D at render time, the source of truth stays lightweight and editable.
  */
 export interface Room {
   id: string;
@@ -59,7 +59,7 @@ export type DeviceCategory =
   | 'other';
 
 /**
- * A simulated device that isn't backed by Home Assistant — placed to preview coverage before
+ * A simulated device that isn't backed by Home Assistant, placed to preview coverage before
  * buying (the retrofit funnel). Cameras and motion sensors carry range/FOV for coverage viz.
  */
 export interface VirtualDevice {
@@ -95,7 +95,7 @@ export interface ImportedModel {
   url: string;
 }
 
-/** The portable twin document — exported for templates and consumed by the MCP server. */
+/** The portable twin document, exported for templates and consumed by the MCP server. */
 export interface TwinModel {
   version: 1;
   rooms: Room[];

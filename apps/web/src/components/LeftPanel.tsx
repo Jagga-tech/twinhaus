@@ -21,7 +21,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'events', label: 'Events' },
 ];
 
-/** The left workspace column: tabbed access to the editor and every Phase 2–4 tool. */
+/** The left workspace column: tabbed access to the editor and every Phase 2 to 4 tool. */
 export function LeftPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
   const tab = useTwinStore((state) => state.activeLeftTab) as Tab;
   const setTab = useTwinStore((state) => state.setActiveLeftTab);

@@ -50,8 +50,8 @@ function rect(x: number, z: number, w: number, d: number): Point2D[] {
 }
 
 /**
- * Pack one labeled rectangle per area into a centered grid. Deterministic — no randomness or
- * clock — so the same home always scans to the same layout, and it's a starting point the user
+ * Pack one labeled rectangle per area into a centered grid. Deterministic, no randomness or
+ * clock, so the same home always scans to the same layout, and it's a starting point the user
  * nudges in the editor, not a claim of real geometry.
  */
 export function packAreasIntoRooms(
@@ -105,7 +105,7 @@ function spreadInRoom(center: Point2D, indexInRoom: number): Point2D {
 /**
  * Turn Home Assistant's area, device, and entity registries into a ready-to-import {@link TwinModel}:
  * a room per area and every placeable entity dropped into the room its device belongs to. This is
- * the "I don't want to draw" path — HA already knows the rooms and where each device lives.
+ * the "I don't want to draw" path, HA already knows the rooms and where each device lives.
  */
 export function buildHomeScan(
   areas: RawArea[],
@@ -129,7 +129,7 @@ export function buildHomeScan(
   });
   const levelIdForKey = new Map(usedKeys.map((key, i) => [key, levels[i].id]));
 
-  // Pack each floor's areas into its own grid (floors overlap in space — only one shows at a time).
+  // Pack each floor's areas into its own grid (floors overlap in space, only one shows at a time).
   const rooms: Room[] = [];
   const roomByAreaId = new Map<string, Room>();
   for (const key of usedKeys) {

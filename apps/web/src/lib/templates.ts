@@ -7,7 +7,7 @@ export interface HomeTemplate {
   rooms: Array<Pick<Room, 'name' | 'polygon' | 'height'>>;
 }
 
-/** Rectangular room helper — polygon corners in meters, clockwise from top-left. */
+/** Rectangular room helper, polygon corners in meters, clockwise from top-left. */
 function rect(x: number, z: number, w: number, d: number, name: string, height = 2.6) {
   return {
     name,

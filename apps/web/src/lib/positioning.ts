@@ -1,7 +1,7 @@
 import type { Point2D } from '../store/types.js';
 
 /**
- * Positioning "from distance". Home Assistant is still the source — ESPHome Bluetooth proxies (or
+ * Positioning "from distance". Home Assistant is still the source, ESPHome Bluetooth proxies (or
  * ESPresense/Bermuda) report how far a device is from each fixed anchor, and this engine turns
  * those distances into a live (x, z) inside the twin. Twinhaus never ranges hardware itself; it
  * only does the geometry on distances HA already publishes.
@@ -11,7 +11,7 @@ import type { Point2D } from '../store/types.js';
  * can show "roughly here" rather than fake precision.
  */
 
-/** A fixed reference point — a Bluetooth proxy placed in the twin at a known position. */
+/** A fixed reference point, a Bluetooth proxy placed in the twin at a known position. */
 export interface Anchor {
   id: string;
   position: Point2D;
@@ -27,7 +27,7 @@ export type PositionMethod = 'trilateration' | 'proximity';
 
 export interface PositionEstimate {
   position: Point2D;
-  /** 0–1; higher means the distances agree more tightly on this point. */
+  /** 0 to 1; higher means the distances agree more tightly on this point. */
   confidence: number;
   method: PositionMethod;
 }
@@ -35,7 +35,7 @@ export interface PositionEstimate {
 /**
  * Convert a BLE RSSI (dBm) to a distance in meters via the log-distance path-loss model.
  * `refRssi` is the RSSI at 1 m (a per-radio constant, typically ~-59 dBm) and `pathLoss` is the
- * environment exponent (2 in free space, 2.5–4 through walls).
+ * environment exponent (2 in free space, 2.5 to 4 through walls).
  */
 export function rssiToDistanceM(rssi: number, refRssi = -59, pathLoss = 2): number {
   return 10 ** ((refRssi - rssi) / (10 * pathLoss));
@@ -62,7 +62,7 @@ function residual(point: Point2D, anchors: Anchor[], readings: DistanceReading[]
 /**
  * Least-squares trilateration. Subtracts a reference equation to linearize the circle equations,
  * then solves the 2×2 normal equations. Returns null when there are fewer than three anchors or
- * they're collinear/degenerate (a singular system) — the caller falls back to proximity.
+ * they're collinear/degenerate (a singular system), the caller falls back to proximity.
  */
 export function trilaterate(anchors: Anchor[], readings: DistanceReading[]): Point2D | null {
   const byId = new Map(anchors.map((anchor) => [anchor.id, anchor]));
@@ -99,7 +99,7 @@ export function trilaterate(anchors: Anchor[], readings: DistanceReading[]): Poi
   };
 }
 
-/** Distance-weighted blend of anchor positions — closer anchors pull harder. */
+/** Distance-weighted blend of anchor positions, closer anchors pull harder. */
 function proximity(anchors: Anchor[], readings: DistanceReading[]): Point2D | null {
   const byId = new Map(anchors.map((anchor) => [anchor.id, anchor]));
   let x = 0;
@@ -119,7 +119,7 @@ function proximity(anchors: Anchor[], readings: DistanceReading[]): Point2D | nu
 
 /**
  * Estimate a device's position from its distance readings. Prefers trilateration (≥3 anchors) and
- * falls back to a proximity blend (1–2 anchors); returns null when nothing usable is available.
+ * falls back to a proximity blend (1 to 2 anchors); returns null when nothing usable is available.
  * Confidence shrinks as the residual grows, and the proximity fallback is capped lower since a
  * blend of one or two anchors can't pin a point.
  */

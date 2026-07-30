@@ -6,8 +6,7 @@ import { syntheticEntityId } from './discoveryPlacement.js';
 
 /**
  * End-to-end journey with a mocked HA transport: a discovered device appears in the tray, the
- * user adds it (the flow completes), placement is prompted, and the device lands in the twin —
- * the same store path a manually placed device takes, so it renders in 3D.
+ * user adds it (the flow completes), placement is prompted, and the device lands in the twin, * the same store path a manually placed device takes, so it renders in 3D.
  */
 function transport(steps: RawConfigFlowStep[]): DiscoveryTransport {
   let index = 0;

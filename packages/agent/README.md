@@ -24,6 +24,6 @@ const reply = await agent.send('dim the living room and lock the back door', (ev
 });
 ```
 
-- **`Agent`** — runs the tool loop until the model produces a final answer.
-- **`HomeContext`** — the runtime the tools act on (`describe_home`, `get_room_devices`, `call_service`). The consumer wires it to the twin + `@twinhaus/ha-bridge`; the agent stays decoupled from both.
-- **Providers** — `AnthropicProvider` (defaults to `claude-opus-5`), `OpenAiProvider`, `OllamaProvider`.
+- **`Agent`**, runs the tool loop until the model produces a final answer.
+- **`HomeContext`**, the runtime the tools act on (`describe_home`, `get_room_devices`, `call_service`). The consumer wires it to the twin + `@twinhaus/ha-bridge`; the agent stays decoupled from both.
+- **Providers**, `AnthropicProvider` (defaults to `claude-opus-5`), `OpenAiProvider`, `OllamaProvider`.

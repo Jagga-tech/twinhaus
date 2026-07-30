@@ -19,7 +19,7 @@ export interface StateChangedEvent {
   old_state: HaEntityState | null;
 }
 
-/** Target for a service call — any subset is valid. */
+/** Target for a service call, any subset is valid. */
 export interface ServiceTarget {
   entity_id?: string | string[];
   device_id?: string | string[];
@@ -49,7 +49,7 @@ export function entityDomain(entityId: string): string {
 }
 
 /**
- * A config flow Home Assistant has started but not finished — the raw shape of a
+ * A config flow Home Assistant has started but not finished, the raw shape of a
  * discovered-but-unconfigured device, from `GET /api/config/config_entries/flow`.
  */
 export interface RawConfigFlow {

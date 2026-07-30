@@ -17,7 +17,7 @@ type ScanState =
 const EMPTY_REVIEW: ScanReview = { roomNames: {}, assignments: {}, excluded: [] };
 
 /**
- * Scan the home straight from Home Assistant — no drawing. HA already knows the user's rooms
+ * Scan the home straight from Home Assistant, no drawing. HA already knows the user's rooms
  * (areas) and which device lives in which, so this reads the registries, generates a room per area,
  * and drops every device into place. The user reviews and tweaks the result, then applies it.
  */
@@ -83,7 +83,7 @@ export function HomeScanPanel() {
       <div className="panel-block">
         <h4>Scan from Home Assistant</h4>
         <p className="hint">
-          Connect Home Assistant to scan your home automatically — no drawing. It builds a room for
+          Connect Home Assistant to scan your home automatically, no drawing. It builds a room for
           each HA area and places every device where it already lives.
         </p>
       </div>

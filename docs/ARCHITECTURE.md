@@ -8,16 +8,16 @@ Twinhaus is a **3D + AI layer on top of Home Assistant**, never a replacement fo
 
 ### 1. Browser (frontend)
 
-- **3D twin viewer** — React Three Fiber renders the home model. Devices are 3D objects positioned in rooms; their visual state mirrors real state (a light entity that's `on` glows in the model).
-- **Chat control** — a chat panel wired to the agent. Commands and questions in natural language.
+- **3D twin viewer**, React Three Fiber renders the home model. Devices are 3D objects positioned in rooms; their visual state mirrors real state (a light entity that's `on` glows in the model).
+- **Chat control**, a chat panel wired to the agent. Commands and questions in natural language.
 
 ### 2. Twinhaus core
 
-- **Twin state engine** — the source of truth for the twin: room geometry, device-to-room assignments, and a live mirror of HA entity states. Geometry is stored as JSON (floor plan polygons + heights, extruded to 3D at load).
-- **AI agent** — an LLM with tool-calling. Tools map to HA services (`light.turn_on`, `lock.lock`, `climate.set_temperature`) plus twin-specific tools (`get_room_devices`, `get_energy_by_room`). Provider-agnostic: Anthropic/OpenAI APIs or local models via Ollama.
+- **Twin state engine**, the source of truth for the twin: room geometry, device-to-room assignments, and a live mirror of HA entity states. Geometry is stored as JSON (floor plan polygons + heights, extruded to 3D at load).
+- **AI agent**, an LLM with tool-calling. Tools map to HA services (`light.turn_on`, `lock.lock`, `climate.set_temperature`) plus twin-specific tools (`get_room_devices`, `get_energy_by_room`). Provider-agnostic: Anthropic/OpenAI APIs or local models via Ollama.
 
-- **View modes** — the same twin, shaded three ways: normal, an **energy heatmap** (floors colored by per-room power draw), and a **security view** (the device that just changed is highlighted, driven by an event ring buffer).
-- **Simulation** — virtual (not-yet-purchased) devices placed alongside real ones, with camera/motion **coverage footprints** rendered on the floor. The recommendation wizard drops a budget-tier kit in as simulated devices — the "simulate before you buy" path for homes with zero smart devices.
+- **View modes**, the same twin, shaded three ways: normal, an **energy heatmap** (floors colored by per-room power draw), and a **security view** (the device that just changed is highlighted, driven by an event ring buffer).
+- **Simulation**, virtual (not-yet-purchased) devices placed alongside real ones, with camera/motion **coverage footprints** rendered on the floor. The recommendation wizard drops a budget-tier kit in as simulated devices, the "simulate before you buy" path for homes with zero smart devices.
 
 ### 3. Home Assistant (device layer)
 
@@ -38,16 +38,16 @@ Twinhaus is a **3D + AI layer on top of Home Assistant**, never a replacement fo
 
 ## Onboarding paths
 
-1. **Draw** — built-in 2D floor plan editor, auto-extruded to 3D. Works for everyone. A photo or blueprint can be loaded as a tracing underlay.
-2. **Scan** — iPhone LiDAR via a RoomPlan-style capture JSON, imported into rooms.
-3. **Import** — bring a `.glb`/`.gltf` from Blender or SketchUp, or start from a built-in home template.
+1. **Draw**, built-in 2D floor plan editor, auto-extruded to 3D. Works for everyone. A photo or blueprint can be loaded as a tracing underlay.
+2. **Scan**, iPhone LiDAR via a RoomPlan-style capture JSON, imported into rooms.
+3. **Import**, bring a `.glb`/`.gltf` from Blender or SketchUp, or start from a built-in home template.
 
 Users then select unassigned HA entities and place them into rooms. The whole twin can be exported/imported as a JSON document (used for templates and consumed by the MCP server).
 
 ## Packaging
 
 - **Home Assistant add-on** (`addon/`) serves the built web app inside HA via Ingress.
-- **Local-first LLM** — Ollama support means the agent can run with no data leaving the machine.
+- **Local-first LLM**, Ollama support means the agent can run with no data leaving the machine.
 
 ## Non-goals
 

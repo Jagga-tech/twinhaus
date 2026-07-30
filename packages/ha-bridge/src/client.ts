@@ -49,7 +49,7 @@ export interface HaSocket {
 export interface ReconnectOptions extends BackoffOptions {
   /** Auto-reconnect after an unexpected drop. Default true. */
   enabled?: boolean;
-  /** Give up after this many attempts. Default Infinity — keep trying until told to stop. */
+  /** Give up after this many attempts. Default Infinity, keep trying until told to stop. */
   maxAttempts?: number;
   /** Injectable randomness for deterministic backoff in tests. */
   random?: () => number;
@@ -73,7 +73,7 @@ export interface HaClientOptions {
  * Implements the auth handshake, `get_states`, `subscribe_events` (state_changed), and
  * `call_service`. When a live connection drops unexpectedly it auto-reconnects with exponential
  * backoff, re-authenticates, re-subscribes to state_changed and any active subscriptions, and
- * fires `onReconnected` so the app can reload a fresh snapshot — the twin heals itself instead of
+ * fires `onReconnected` so the app can reload a fresh snapshot, the twin heals itself instead of
  * going stale. Twinhaus never talks to hardware directly; this bridge is the only path to devices.
  *
  * @see https://developers.home-assistant.io/docs/api/websocket
@@ -353,7 +353,7 @@ export class HaClient {
   /**
    * Subscribe to a Home Assistant WebSocket subscription command. `onEvent` fires for each
    * streamed event; the returned function cancels the subscription. Subscriptions are tracked so
-   * they survive a reconnect — a dropped connection re-establishes them automatically.
+   * they survive a reconnect, a dropped connection re-establishes them automatically.
    */
   async subscribe(payload: Record<string, unknown>, onEvent: EventListener): Promise<() => void> {
     if (!this.socket || this.status !== 'connected') {
@@ -389,7 +389,7 @@ export class HaClient {
   }
 
   // --- Registries (auto-scan the home: areas + device/entity assignments) ---
-  // Home Assistant already knows the user's rooms and which device lives in which — Twinhaus reads
+  // Home Assistant already knows the user's rooms and which device lives in which, Twinhaus reads
   // these to generate a floor plan and place devices without the user drawing anything.
 
   /** List the floors (storeys) the user has defined in Home Assistant. */

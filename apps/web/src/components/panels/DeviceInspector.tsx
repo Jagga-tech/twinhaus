@@ -5,7 +5,7 @@ import { entityLabel, entitySummary } from '../../lib/deviceState.js';
 import { quickControls } from '../../lib/deviceControl.js';
 
 /**
- * Click a device in the twin to inspect and control it — the same Home Assistant service calls
+ * Click a device in the twin to inspect and control it, the same Home Assistant service calls
  * the agent makes, exposed as one-tap buttons. Appears as a floating card over the viewer.
  */
 export function DeviceInspector() {
@@ -55,7 +55,7 @@ export function DeviceInspector() {
           </div>
         </>
       ) : (
-        <p className="hint">No live state — connect Home Assistant to control this device.</p>
+        <p className="hint">No live state, connect Home Assistant to control this device.</p>
       )}
       {error && <p className="settings-error">{error}</p>}
     </div>

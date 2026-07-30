@@ -4,7 +4,7 @@ export interface BackoffOptions {
   baseMs?: number;
   /** Upper bound on any single delay, in ms. */
   maxMs?: number;
-  /** Fraction of jitter (0–1) added to spread out reconnecting clients. */
+  /** Fraction of jitter (0 to 1) added to spread out reconnecting clients. */
   jitter?: number;
 }
 

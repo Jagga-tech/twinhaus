@@ -9,8 +9,7 @@ import { useTwinStore } from '../store/twinStore.js';
 /**
  * Bridges the agent's tools to the twin state engine and the Home Assistant client.
  *
- * The agent package deliberately knows nothing about the store or the WebSocket bridge —
- * this adapter is where "command down / event up" is wired: tool calls flow into HA service
+ * The agent package deliberately knows nothing about the store or the WebSocket bridge, * this adapter is where "command down / event up" is wired: tool calls flow into HA service
  * calls, and the resulting `state_changed` events flow back into the twin on their own.
  */
 export function createHomeContext(client: HaClient): HomeContext {
@@ -61,7 +60,7 @@ export function createHomeContext(client: HaClient): HomeContext {
       if (all.length === 0) {
         return domain
           ? `No entities in domain "${domain}".`
-          : 'No entities — Home Assistant is not connected.';
+          : 'No entities, Home Assistant is not connected.';
       }
       // Cap the listing so a large home doesn't blow the context window.
       const shown = all.slice(0, 100);
@@ -84,9 +83,9 @@ export function createHomeContext(client: HaClient): HomeContext {
     async listDiscoveredDevices() {
       const { discovered, connectionStatus } = useTwinStore.getState();
       if (connectionStatus !== 'connected') return 'Home Assistant is not connected.';
-      if (discovered.length === 0) return 'Nothing new — no unconfigured devices discovered.';
+      if (discovered.length === 0) return 'Nothing new, no unconfigured devices discovered.';
       return discovered
-        .map((device) => `${device.name} — ${device.brand} (via ${device.source})`)
+        .map((device) => `${device.name}, ${device.brand} (via ${device.source})`)
         .join('\n');
     },
 
@@ -98,14 +97,14 @@ export function createHomeContext(client: HaClient): HomeContext {
       const shown = matches.slice(0, 12);
       const lines = shown.map((device) => {
         const protocols = device.protocols.join('/');
-        const note = device.note ? ` — ${device.note}` : '';
-        return `${device.brand} ${device.model} (${device.category}) — ~$${device.approxPriceUsd}, ${protocols}, ${device.setup} setup via Home Assistant "${device.integration}"${note}`;
+        const note = device.note ? `, ${device.note}` : '';
+        return `${device.brand} ${device.model} (${device.category}), ~$${device.approxPriceUsd}, ${protocols}, ${device.setup} setup via Home Assistant "${device.integration}"${note}`;
       });
       const suffix =
         matches.length > shown.length ? `\n…and ${matches.length - shown.length} more.` : '';
       return (
         `${lines.join('\n')}${suffix}\n\n` +
-        'These are recommendations only — the user adds any device through Home Assistant.'
+        'These are recommendations only, the user adds any device through Home Assistant.'
       );
     },
 
@@ -125,10 +124,10 @@ export function createHomeContext(client: HaClient): HomeContext {
       const read = () => useTwinStore.getState().entityStates[entityId]?.state;
       const confirmed = await confirmState(read, expected);
       if (confirmed) {
-        return `Called ${domain}.${service} on ${entityId} — confirmed it is now "${expected}".`;
+        return `Called ${domain}.${service} on ${entityId}, confirmed it is now "${expected}".`;
       }
       const current = read() ?? 'unknown';
-      return `Called ${domain}.${service} on ${entityId}, but couldn't confirm it took effect (still "${current}"). The device may be offline or slow — tell the user rather than assuming it worked.`;
+      return `Called ${domain}.${service} on ${entityId}, but couldn't confirm it took effect (still "${current}"). The device may be offline or slow, tell the user rather than assuming it worked.`;
     },
   };
 }

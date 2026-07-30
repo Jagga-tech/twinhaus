@@ -1,7 +1,7 @@
 /**
  * Verify-after-act: after the agent calls a control service, confirm the device actually reached
  * the intended state instead of assuming success, and retry transient failures. This is what lets
- * the agent say "couldn't confirm the door locked" rather than a confident lie — the last gap in
+ * the agent say "couldn't confirm the door locked" rather than a confident lie, the last gap in
  * "never a serious issue while operating".
  */
 
@@ -30,7 +30,7 @@ export function expectedStateFor(domain: string, service: string): string | null
 
 /**
  * A transient failure is worth retrying (connection dropped, timing out); a rejection Home
- * Assistant returned on purpose (bad service, entity not found) is not — retrying just repeats it.
+ * Assistant returned on purpose (bad service, entity not found) is not, retrying just repeats it.
  */
 export function isTransientError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);

@@ -9,7 +9,7 @@ export interface OllamaProviderOptions {
 }
 
 /**
- * Ollama provider for fully local inference — no data leaves the machine. Uses Ollama's
+ * Ollama provider for fully local inference, no data leaves the machine. Uses Ollama's
  * OpenAI-compatible endpoint so it shares translation with {@link OpenAiProvider}.
  *
  * Privacy is a first-class concern for the Home Assistant community, so this path is a

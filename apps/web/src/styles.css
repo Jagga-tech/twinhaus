@@ -318,7 +318,7 @@ body {
   margin: 0;
 }
 
-/* Level (floor) switcher — the pages of the whole-house structure */
+/* Level (floor) switcher, the pages of the whole-house structure */
 .level-switcher {
   display: flex;
   gap: 0.35rem;
@@ -497,7 +497,7 @@ body {
   font-size: 0.8rem;
 }
 
-/* Agent safety — inline confirmation for guarded actions */
+/* Agent safety, inline confirmation for guarded actions */
 .confirm-card {
   align-self: stretch;
   border: 1px solid var(--accent);
@@ -891,7 +891,7 @@ select {
   margin: 0.25rem 0;
 }
 
-/* Discovery — Found near you */
+/* Discovery, Found near you */
 .tab-badge {
   margin-left: 0.35rem;
   background: var(--accent);
@@ -988,7 +988,7 @@ select {
   align-items: flex-start;
 }
 
-/* Device catalog — search everything we can recommend */
+/* Device catalog, search everything we can recommend */
 .catalog-search {
   width: 100%;
   padding: 0.45rem 0.6rem;

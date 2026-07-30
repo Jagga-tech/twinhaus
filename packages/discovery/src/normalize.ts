@@ -27,8 +27,7 @@ interface BrandInfo {
 
 /**
  * Best-guess brand and category per integration handler. Discovered devices carry no entity id,
- * so category comes from the integration rather than the `deviceCategory` lib's entity mapping —
- * but the resulting values live in the same {@link DeviceCategory} space.
+ * so category comes from the integration rather than the `deviceCategory` lib's entity mapping, * but the resulting values live in the same {@link DeviceCategory} space.
  */
 const INTEGRATIONS: Record<string, BrandInfo> = {
   hue: { brand: 'Philips Hue', category: 'light' },

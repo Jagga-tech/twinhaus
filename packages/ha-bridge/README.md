@@ -1,6 +1,6 @@
 # @twinhaus/ha-bridge
 
-Home Assistant WebSocket client: auth handshake, entity state sync, `state_changed` event subscription, and service calls. Twinhaus never talks to hardware directly — this is the only path to devices, and Home Assistant owns every integration behind it.
+Home Assistant WebSocket client: auth handshake, entity state sync, `state_changed` event subscription, and service calls. Twinhaus never talks to hardware directly, this is the only path to devices, and Home Assistant owns every integration behind it.
 
 ## Usage
 
@@ -21,7 +21,7 @@ await client.callService({
 });
 ```
 
-- `connect(config)` — resolves once authenticated; auto-subscribes to `state_changed`.
-- `getStates()` — snapshot of every entity.
-- `callService(options)` — call any Home Assistant service.
-- `onStateChanged` / `onStatusChange` — live updates and connection status.
+- `connect(config)`, resolves once authenticated; auto-subscribes to `state_changed`.
+- `getStates()`, snapshot of every entity.
+- `callService(options)`, call any Home Assistant service.
+- `onStateChanged` / `onStatusChange`, live updates and connection status.

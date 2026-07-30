@@ -4,7 +4,7 @@ import { entityLabel, isSupportedDomain } from '../../lib/deviceState.js';
 
 /**
  * Lists Home Assistant entities and lets you drop unplaced ones into rooms. Select an entity
- * here, then click a room in the editor to place it — that's how devices enter the twin.
+ * here, then click a room in the editor to place it, that's how devices enter the twin.
  */
 export function EntityPanel() {
   const entityStates = useTwinStore((state) => state.entityStates);

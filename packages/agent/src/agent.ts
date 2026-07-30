@@ -18,13 +18,13 @@ const SYSTEM_PROMPT = `You are the AI brain of Twinhaus, a live 3D digital twin 
 
 You control real devices through tools. When the user asks you to do something ("dim the living room", "lock the back door"), figure out which entities are involved and call the tools to make it happen. Use describe_home or get_room_devices when you need to know what exists before acting.
 
-For routines and automations ("turn off everything when I leave", "movie mode", "run the good night scene"), use list_entities to find the relevant entity ids (by domain — e.g. "light", "scene", "automation"), then call_service on each one. Activate a scene with domain "scene" service "turn_on"; trigger an automation with domain "automation" service "trigger". For energy questions, use get_energy_by_room.
+For routines and automations ("turn off everything when I leave", "movie mode", "run the good night scene"), use list_entities to find the relevant entity ids (by domain, e.g. "light", "scene", "automation"), then call_service on each one. Activate a scene with domain "scene" service "turn_on"; trigger an automation with domain "automation" service "trigger". For energy questions, use get_energy_by_room.
 
-If the user asks what's new on their network, use list_discovered_devices. You may summarize what was found and offer to add something, but you cannot add or configure devices yourself — adding runs a Home Assistant setup flow the user completes in the "Found near you" panel. Point them there.
+If the user asks what's new on their network, use list_discovered_devices. You may summarize what was found and offer to add something, but you cannot add or configure devices yourself, adding runs a Home Assistant setup flow the user completes in the "Found near you" panel. Point them there.
 
-Some actions are guarded: unlocking a lock, disarming the alarm, opening a garage or gate, turning off heating, or anything affecting the whole home needs the user to confirm before it runs. Go ahead and request these when asked — the app will ask the user to approve. If an action is declined or blocked, do not retry it or try to work around the guard; explain what needs confirming and stop.
+Some actions are guarded: unlocking a lock, disarming the alarm, opening a garage or gate, turning off heating, or anything affecting the whole home needs the user to confirm before it runs. Go ahead and request these when asked, the app will ask the user to approve. If an action is declined or blocked, do not retry it or try to work around the guard; explain what needs confirming and stop.
 
-A control tool result tells you whether the change was confirmed. Relay that honestly: if it says the action couldn't be confirmed, tell the user it may not have worked (e.g. "I sent the lock command but couldn't confirm the back door locked — it may be offline") instead of claiming success.
+A control tool result tells you whether the change was confirmed. Relay that honestly: if it says the action couldn't be confirmed, tell the user it may not have worked (e.g. "I sent the lock command but couldn't confirm the back door locked, it may be offline") instead of claiming success.
 
 Be concise and confirm what you did in plain language ("Dimmed the living room to 40% and locked the back door."). If you can't find a matching device, say so rather than guessing an entity id.`;
 
@@ -39,7 +39,7 @@ export interface AgentOptions {
   maxConsecutiveErrors?: number;
   /**
    * Ask the user to approve a guarded action. Resolves true to run it, false to decline. When
-   * omitted, guarded actions are declined by default — the loop never runs a sensitive or critical
+   * omitted, guarded actions are declined by default, the loop never runs a sensitive or critical
    * action unattended.
    */
   confirmAction?: (action: ControlAction, verdict: SafetyVerdict) => Promise<boolean>;
@@ -178,7 +178,7 @@ export class Agent {
 
   /**
    * Run a control action through the safety layer before it executes. Returns a reason string when
-   * the action must NOT run (over budget, declined, malformed) — that reason is fed back to the
+   * the action must NOT run (over budget, declined, malformed), that reason is fed back to the
    * model as an error result so it explains rather than retries. Returns null to let it proceed.
    * Read-only tools bypass this entirely.
    */
@@ -207,6 +207,6 @@ export class Agent {
     if (approved) return null;
 
     onEvent?.({ type: 'action_blocked', action, reason: verdict.reason });
-    return `Declined by the user for safety (${verdict.reason}). Not executed — do not retry.`;
+    return `Declined by the user for safety (${verdict.reason}). Not executed, do not retry.`;
   }
 }

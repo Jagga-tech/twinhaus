@@ -11,7 +11,7 @@ export interface DeviceModel {
 /**
  * A built-in low-poly model per device category, so the twin reads by type at a glance (a
  * camera looks like a camera, a thermostat like a dial). Phase 4's community model library
- * extends this — and any category can be overridden by importing a `.glb`.
+ * extends this, and any category can be overridden by importing a `.glb`.
  */
 export const DEVICE_MODELS: Record<DeviceCategory, DeviceModel> = {
   light: { shape: 'sphere', args: [0.14, 20, 20] },

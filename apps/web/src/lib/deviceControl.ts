@@ -11,7 +11,7 @@ export interface QuickControl {
 
 /**
  * Derive the quick controls for an entity from its domain and current state. This is the
- * click-to-control surface — the same service calls the agent makes, exposed as buttons.
+ * click-to-control surface, the same service calls the agent makes, exposed as buttons.
  */
 export function quickControls(state: HaEntityState): QuickControl[] {
   const entity = state.entity_id;
@@ -71,7 +71,7 @@ export function quickControls(state: HaEntityState): QuickControl[] {
 
     case 'climate':
       return [
-        { label: '−1°', call: climateStep(entity, state, -1) },
+        { label: '-1°', call: climateStep(entity, state, -1) },
         { label: '+1°', call: climateStep(entity, state, +1) },
       ];
 

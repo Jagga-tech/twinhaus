@@ -13,8 +13,8 @@ function provider(turns: AssistantTurn[]): LlmProvider {
   };
 }
 
-const NORMALIZED = 'Front Door Lock — August (via bluetooth)';
-const CATALOG_RESULT = 'Nuki Smart Lock 4.0 (lock) — ~$160, wifi/bluetooth, local setup';
+const NORMALIZED = 'Front Door Lock, August (via bluetooth)';
+const CATALOG_RESULT = 'Nuki Smart Lock 4.0 (lock), ~$160, wifi/bluetooth, local setup';
 
 function context(): HomeContext {
   return {
@@ -84,7 +84,7 @@ describe('search_device_catalog tool', () => {
     expect(reply).toBe('The Nuki is a solid local pick.');
   });
 
-  it('is advisory only — it takes a query but nothing that could add or configure a device', () => {
+  it('is advisory only, it takes a query but nothing that could add or configure a device', () => {
     const tool = TOOL_DEFINITIONS.find((t) => t.name === 'search_device_catalog');
     expect(Object.keys(tool?.inputSchema.properties ?? {})).toEqual(['query']);
     expect(tool?.inputSchema.required).toBeUndefined();

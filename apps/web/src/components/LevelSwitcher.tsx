@@ -2,7 +2,7 @@ import { useTwinStore } from '../store/twinStore.js';
 import { sortedLevels, roomsOnLevel } from '../lib/levels.js';
 
 /**
- * Floor switcher — the "pages" of the whole-house structure. Each level is a storey; picking one
+ * Floor switcher, the "pages" of the whole-house structure. Each level is a storey; picking one
  * shows just that floor in the 2D editor and 3D twin. Add or rename floors inline so a bungalow can
  * grow into a townhouse without leaving the view.
  */

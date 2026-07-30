@@ -23,7 +23,7 @@ function webBluetooth(): WebBluetooth | null {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * An optional, clearly-separated browser-side Bluetooth peek. This is informational only — it
+ * An optional, clearly-separated browser-side Bluetooth peek. This is informational only, it
  * counts nearby BLE advertisements to hint at what's around; it never adds devices and its
  * results are never mixed into the Home-Assistant-backed discovery list. Hidden entirely on
  * browsers without Web Bluetooth (Safari/iOS).
@@ -71,7 +71,7 @@ export function BluetoothQuickScan() {
       </button>
       {result && <span className="hint">{result}</span>}
       <p className="hint">
-        Informational only — for real setup, Home Assistant discovers and configures Bluetooth
+        Informational only, for real setup, Home Assistant discovers and configures Bluetooth
         devices. Extend range with ESPHome Bluetooth proxies.
       </p>
     </div>

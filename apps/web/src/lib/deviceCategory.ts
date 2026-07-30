@@ -3,7 +3,7 @@ import type { DeviceCategory } from '../store/types.js';
 
 /**
  * Map a Home Assistant entity to a coarse {@link DeviceCategory}. Categories drive the twin's
- * device models, the coverage viz, and the recommendation wizard — one place to add a device
+ * device models, the coverage viz, and the recommendation wizard, one place to add a device
  * type and have it render, control, and recommend consistently.
  */
 export function categorize(entityId: string, state?: HaEntityState): DeviceCategory {

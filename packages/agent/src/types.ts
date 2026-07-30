@@ -37,8 +37,8 @@ export interface AssistantTurn {
 }
 
 /**
- * A pluggable LLM backend. The three built-in providers — Anthropic, OpenAI, and Ollama
- * (fully local) — all satisfy this interface so the agent loop stays provider-agnostic.
+ * A pluggable LLM backend. The three built-in providers, Anthropic, OpenAI, and Ollama
+ * (fully local), all satisfy this interface so the agent loop stays provider-agnostic.
  */
 export interface LlmProvider {
   readonly id: string;
