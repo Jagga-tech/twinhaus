@@ -19,6 +19,12 @@ export interface HomeContext {
   /** Per-room power draw in watts, for questions like "which room uses the most energy?". */
   getEnergyByRoom(): Promise<string>;
   /**
+   * Scan the live home for noteworthy conditions, locks left unlocked, climate running with a
+   * window open, many lights on, high power draw, so the agent can answer "anything I should
+   * know?" and proactively flag issues. Read-only; it reports, it doesn't fix anything.
+   */
+  checkHome(): Promise<string>;
+  /**
    * List devices Home Assistant has discovered but not yet configured. Read-only: the agent can
    * tell the user what's new and offer to add it, but adding always requires the user to confirm
    * the config flow in the UI, the agent must never complete a config flow itself.
@@ -74,6 +80,12 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: 'get_energy_by_room',
     description: 'Report current power draw per room in watts, for energy questions.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'check_home',
+    description:
+      'Scan the home for things worth flagging, unlocked locks, heating/cooling running with a cover open, many lights left on, unusually high power draw. Call this for "is everything ok?", "anything I should know before bed?", or before confirming the house is buttoned up. Read-only.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -135,6 +147,8 @@ export async function executeTool(
       return context.listEntities(input.domain ? String(input.domain) : undefined);
     case 'get_energy_by_room':
       return context.getEnergyByRoom();
+    case 'check_home':
+      return context.checkHome();
     case 'list_discovered_devices':
       return context.listDiscoveredDevices();
     case 'search_device_catalog':
