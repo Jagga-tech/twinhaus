@@ -5,7 +5,7 @@
  * (and un-ticks if they undo it). Pure and state-driven, so the whole flow is unit-tested.
  */
 
-export type WelcomeStepId = 'connect' | 'scan' | 'control' | 'locate' | 'talk';
+export type WelcomeStepId = 'connect' | 'scan' | 'control' | 'locate' | 'talk' | 'floors';
 
 /** The signals a step's completion is derived from — a snapshot of what the user has done so far. */
 export interface WelcomeInput {
@@ -14,6 +14,8 @@ export interface WelcomeInput {
   hasDevices: boolean;
   positioningReady: boolean;
   agentUsed: boolean;
+  /** Number of floors/levels in the twin; >1 means a multi-storey home is set up. */
+  levelCount: number;
 }
 
 export interface WelcomeStep {
@@ -77,6 +79,14 @@ const SPECS: StepSpec[] = [
     target: 'chat',
     optional: false,
     isDone: (input) => input.agentUsed,
+  },
+  {
+    id: 'floors',
+    title: 'Add your floors (optional)',
+    body: 'Multi-storey home? Add each floor and switch between them — or scan, and HA floors become levels automatically.',
+    target: 'import',
+    optional: true,
+    isDone: (input) => input.levelCount > 1,
   },
 ];
 

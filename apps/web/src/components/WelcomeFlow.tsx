@@ -16,6 +16,7 @@ export function WelcomeFlow({ onOpenSettings }: { onOpenSettings: () => void }) 
   const devices = useTwinStore((state) => state.devices);
   const entityStates = useTwinStore((state) => state.entityStates);
   const agentUsed = useTwinStore((state) => state.agentUsed);
+  const levelCount = useTwinStore((state) => state.levels.length);
   const setActiveLeftTab = useTwinStore((state) => state.setActiveLeftTab);
   const setWelcomeDismissed = useTwinStore((state) => state.setWelcomeDismissed);
 
@@ -27,8 +28,9 @@ export function WelcomeFlow({ onOpenSettings }: { onOpenSettings: () => void }) 
         hasDevices: devices.length > 0,
         positioningReady: positioningStatus(devices, entityStates).ready,
         agentUsed,
+        levelCount,
       }),
-    [connectionStatus, rooms.length, devices.length, entityStates, agentUsed],
+    [connectionStatus, rooms.length, devices.length, entityStates, agentUsed, levelCount],
   );
 
   if (dismissed) return null;

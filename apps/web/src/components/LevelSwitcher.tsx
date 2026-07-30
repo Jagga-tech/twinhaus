@@ -14,6 +14,8 @@ export function LevelSwitcher() {
   const addLevel = useTwinStore((state) => state.addLevel);
   const renameLevel = useTwinStore((state) => state.renameLevel);
   const removeLevel = useTwinStore((state) => state.removeLevel);
+  const stackedView = useTwinStore((state) => state.stackedView);
+  const setStackedView = useTwinStore((state) => state.setStackedView);
 
   const ordered = sortedLevels(levels);
 
@@ -66,6 +68,15 @@ export function LevelSwitcher() {
       <button className="level-add" onClick={onAdd} title="Add a floor">
         + Floor
       </button>
+      {levels.length > 1 && (
+        <button
+          className={stackedView ? 'level-stack active' : 'level-stack'}
+          onClick={() => setStackedView(!stackedView)}
+          title="Show every floor stacked in 3D"
+        >
+          {stackedView ? '▣ Stacked' : '⬚ Stack floors'}
+        </button>
+      )}
     </div>
   );
 }

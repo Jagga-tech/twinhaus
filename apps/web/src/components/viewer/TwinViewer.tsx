@@ -4,7 +4,7 @@ import { Grid, OrbitControls } from '@react-three/drei';
 import { useTwinStore } from '../../store/twinStore.js';
 import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
 import { polygonCentroid } from '../../lib/geometry.js';
-import { roomsOnLevel, devicesOnLevel } from '../../lib/levels.js';
+import { roomsOnLevel, devicesOnLevel, sortedLevels, levelElevation } from '../../lib/levels.js';
 import { RoomMesh } from './RoomMesh.js';
 import { DeviceMarker } from './DeviceMarker.js';
 import { VirtualDeviceMarker } from './VirtualDeviceMarker.js';
@@ -19,7 +19,9 @@ export function TwinViewer() {
   const allRooms = useTwinStore((state) => state.rooms);
   const allDevices = useTwinStore((state) => state.devices);
   const allVirtualDevices = useTwinStore((state) => state.virtualDevices);
+  const levels = useTwinStore((state) => state.levels);
   const activeLevelId = useTwinStore((state) => state.activeLevelId);
+  const stackedView = useTwinStore((state) => state.stackedView);
   const entityStates = useTwinStore((state) => state.entityStates);
   const viewMode = useTwinStore((state) => state.viewMode);
   const highlightedEntityId = useTwinStore((state) => state.highlightedEntityId);
@@ -31,25 +33,30 @@ export function TwinViewer() {
   const placeDevice = useTwinStore((state) => state.placeDevice);
   const setPendingPlacement = useTwinStore((state) => state.setPendingPlacement);
 
-  // Show only the active floor — the rest of the building is hidden until you switch to it.
-  const rooms = useMemo(() => roomsOnLevel(allRooms, activeLevelId), [allRooms, activeLevelId]);
-  const devices = useMemo(
-    () => devicesOnLevel(allDevices, allRooms, activeLevelId),
-    [allDevices, allRooms, activeLevelId],
-  );
-  const virtualDevices = useMemo(
-    () => devicesOnLevel(allVirtualDevices, allRooms, activeLevelId),
-    [allVirtualDevices, allRooms, activeLevelId],
-  );
+  // Which floors to draw: just the active one, or every storey stacked vertically.
+  const renderLevels = useMemo(() => {
+    const shown = stackedView
+      ? sortedLevels(levels)
+      : (levels.filter((level) => level.id === activeLevelId) ?? []);
+    const list = shown.length > 0 ? shown : [{ id: activeLevelId, name: '', order: 0 }];
+    return list.map((level) => ({
+      id: level.id,
+      y: stackedView ? levelElevation(levels, level.id) : 0,
+      rooms: roomsOnLevel(allRooms, level.id),
+      devices: devicesOnLevel(allDevices, allRooms, level.id),
+      virtual: devicesOnLevel(allVirtualDevices, allRooms, level.id),
+    }));
+  }, [stackedView, levels, activeLevelId, allRooms, allDevices, allVirtualDevices]);
 
-  const energy = useMemo(
-    () => computeRoomEnergy(rooms, devices, entityStates),
-    [rooms, devices, entityStates],
-  );
+  const energy = useMemo(() => {
+    const rooms = renderLevels.flatMap((l) => l.rooms);
+    const devices = renderLevels.flatMap((l) => l.devices);
+    return computeRoomEnergy(rooms, devices, entityStates);
+  }, [renderLevels, entityStates]);
 
   function placeIntoRoom(roomId: string) {
     if (!pendingPlacement) return;
-    const room = rooms.find((r) => r.id === roomId);
+    const room = allRooms.find((r) => r.id === roomId);
     if (!room) return;
     placeDevice(pendingPlacement.entityId, roomId, polygonCentroid(room.polygon));
     setPendingPlacement(null);
@@ -72,35 +79,39 @@ export function TwinViewer() {
         position={[0, 0, 0]}
       />
 
-      {rooms.map((room) => {
-        const watts = energy.byRoom[room.id] ?? 0;
-        const floorColor =
-          viewMode === 'energy' && energy.max > 0 ? heatColor(watts / energy.max) : undefined;
-        const caption = viewMode === 'energy' ? `${Math.round(watts)} W` : undefined;
-        return (
-          <RoomMesh
-            key={room.id}
-            room={room}
-            floorColor={floorColor}
-            caption={caption}
-            onPick={pendingPlacement ? placeIntoRoom : undefined}
-          />
-        );
-      })}
+      {renderLevels.map((floor) => (
+        <group key={floor.id} position={[0, floor.y, 0]}>
+          {floor.rooms.map((room) => {
+            const watts = energy.byRoom[room.id] ?? 0;
+            const floorColor =
+              viewMode === 'energy' && energy.max > 0 ? heatColor(watts / energy.max) : undefined;
+            const caption = viewMode === 'energy' ? `${Math.round(watts)} W` : undefined;
+            return (
+              <RoomMesh
+                key={room.id}
+                room={room}
+                floorColor={floorColor}
+                caption={caption}
+                onPick={pendingPlacement && !stackedView ? placeIntoRoom : undefined}
+              />
+            );
+          })}
 
-      {devices.map((device) => (
-        <DeviceMarker
-          key={device.entityId}
-          device={device}
-          state={entityStates[device.entityId]}
-          highlighted={viewMode === 'security' && highlightedEntityId === device.entityId}
-          livePosition={livePositions[device.entityId]}
-          onSelect={setSelectedDeviceId}
-        />
+          {floor.devices.map((device) => (
+            <DeviceMarker
+              key={device.entityId}
+              device={device}
+              state={entityStates[device.entityId]}
+              highlighted={viewMode === 'security' && highlightedEntityId === device.entityId}
+              livePosition={livePositions[device.entityId]}
+              onSelect={setSelectedDeviceId}
+            />
+          ))}
+
+          {simulationVisible &&
+            floor.virtual.map((device) => <VirtualDeviceMarker key={device.id} device={device} />)}
+        </group>
       ))}
-
-      {simulationVisible &&
-        virtualDevices.map((device) => <VirtualDeviceMarker key={device.id} device={device} />)}
 
       {importedModels.map((model) => (
         <ImportedModelMesh key={model.id} model={model} />

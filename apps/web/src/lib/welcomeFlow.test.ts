@@ -7,6 +7,7 @@ const FRESH: WelcomeInput = {
   hasDevices: false,
   positioningReady: false,
   agentUsed: false,
+  levelCount: 1,
 };
 
 describe('resolveWelcome', () => {
@@ -42,6 +43,7 @@ describe('resolveWelcome', () => {
       hasDevices: true,
       positioningReady: false,
       agentUsed: true,
+      levelCount: 1,
     });
     // locate (optional) is still not done, so it's the nudge…
     expect(flow.currentId).toBe('locate');
@@ -56,10 +58,25 @@ describe('resolveWelcome', () => {
       hasDevices: true,
       positioningReady: true,
       agentUsed: true,
+      levelCount: 2,
     });
     expect(flow.currentId).toBeNull();
     expect(flow.doneCount).toBe(flow.total);
     expect(flow.allRequiredDone).toBe(true);
+  });
+
+  it('nudges the optional floors step only once required steps are done', () => {
+    const flow = resolveWelcome({
+      connected: true,
+      hasLayout: true,
+      hasDevices: true,
+      positioningReady: true,
+      agentUsed: true,
+      levelCount: 1,
+    });
+    expect(flow.currentId).toBe('floors');
+    expect(flow.allRequiredDone).toBe(true);
+    expect(flow.steps.find((s) => s.id === 'floors')?.optional).toBe(true);
   });
 
   it('marks exactly one step current and re-opens if a prerequisite regresses', () => {
