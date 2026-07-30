@@ -66,7 +66,7 @@ const SPECS: StepSpec[] = [
   },
   {
     id: 'locate',
-    title: 'See devices move (optional)',
+    title: 'See devices move',
     body: 'Add a few Bluetooth proxies to track where devices and people actually are, live in the twin.',
     target: 'import',
     optional: true,
@@ -82,7 +82,7 @@ const SPECS: StepSpec[] = [
   },
   {
     id: 'floors',
-    title: 'Add your floors (optional)',
+    title: 'Add your floors',
     body: 'Multi-storey home? Add each floor and switch between them, or scan, and HA floors become levels automatically.',
     target: 'import',
     optional: true,
