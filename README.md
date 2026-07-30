@@ -15,6 +15,10 @@
   <img src="https://img.shields.io/badge/built%20with-Three.js-black" alt="Three.js"/>
 </p>
 
+<p align="center">
+  <img src="assets/twinhaus-demo.gif" alt="Twinhaus — scan your home from Home Assistant, control it in 3D, and talk to it safely" width="100%"/>
+</p>
+
 ---
 
 ## What is Twinhaus?
