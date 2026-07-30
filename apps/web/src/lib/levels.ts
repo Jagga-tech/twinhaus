@@ -28,6 +28,15 @@ export function sortedLevels(levels: Level[]): Level[] {
   return [...levels].sort((a, b) => a.order - b.order);
 }
 
+/** Vertical gap between stacked storeys, in meters (wall height + a little slab). */
+export const LEVEL_GAP = 3.4;
+
+/** Height a level sits at in the stacked 3D view — its index in storey order × the gap. */
+export function levelElevation(levels: Level[], levelId: string): number {
+  const index = sortedLevels(levels).findIndex((level) => level.id === levelId);
+  return Math.max(0, index) * LEVEL_GAP;
+}
+
 /**
  * Normalize a twin document's levels: guarantee at least one level and that every room references
  * one that exists (rooms with a dangling or missing `levelId` fall back to the first level).

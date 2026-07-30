@@ -30,6 +30,20 @@ starts — **Bungalow** (1), **Two-storey house** (2), **Townhouse** (3) — mat
 `buildingToTwin` into a `TwinModel` with stacked levels. They sit alongside the single-floor
 templates in the Import tab.
 
+## Stacked 3D view
+
+The floor switcher's **Stack floors** toggle (shown once there's more than one storey) explodes the
+whole building vertically — every floor rendered at its own elevation (`levelElevation`, storey ×
+`LEVEL_GAP`) so you see the house as a stack instead of one floor at a time. Picking/placing is
+disabled while stacked; switch back to a single floor to edit.
+
+## Whole-house summary
+
+The Devices tab shows a **Whole house** rollup once a home has 2+ floors (`buildingSummary`):
+rooms, devices, and power draw per storey, plus building-wide totals. Power reuses the same
+`computeRoomEnergy` as the heatmap, scoped per floor. Click a floor row to jump the editor and twin
+to it. The first-run WelcomeFlow also gains an optional "Add your floors" nudge.
+
 ## Scanning a multi-storey home
 
 Home Assistant has a **floor registry**, and areas reference it by `floor_id`. The scan

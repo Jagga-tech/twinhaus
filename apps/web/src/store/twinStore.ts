@@ -65,6 +65,8 @@ interface TwinState {
   activeLeftTab: string;
   editorMode: EditorMode;
   viewMode: ViewMode;
+  /** Show every floor stacked in 3D (exploded vertically) instead of just the active one. */
+  stackedView: boolean;
   selectedEntityId: string | null;
   selectedDeviceId: string | null;
   highlightedEntityId: string | null;
@@ -83,6 +85,7 @@ interface TwinState {
   renameLevel: (levelId: string, name: string) => void;
   removeLevel: (levelId: string) => void;
   setActiveLevel: (levelId: string) => void;
+  setStackedView: (stacked: boolean) => void;
 
   // --- Device actions ---
   placeDevice: (entityId: string, roomId: string, position: Point2D) => void;
@@ -163,6 +166,7 @@ export const useTwinStore = create<TwinState>()(
       activeLeftTab: 'plan',
       editorMode: 'view',
       viewMode: 'normal',
+      stackedView: false,
       selectedEntityId: null,
       selectedDeviceId: null,
       highlightedEntityId: null,
@@ -213,6 +217,7 @@ export const useTwinStore = create<TwinState>()(
         }),
 
       setActiveLevel: (levelId) => set(() => ({ activeLevelId: levelId })),
+      setStackedView: (stacked) => set(() => ({ stackedView: stacked })),
 
       removeRoom: (roomId) =>
         set((state) => ({
