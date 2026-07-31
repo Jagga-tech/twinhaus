@@ -70,6 +70,17 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           </>
         ) : null}
 
+        {active.id === 'mqtt' ? (
+          <label>
+            Broker WebSocket URL
+            <input
+              value={haConfig.url}
+              placeholder="ws://broker.local:9001"
+              onChange={(event) => setHaConfig({ ...haConfig, url: event.target.value })}
+            />
+          </label>
+        ) : null}
+
         <div className="settings-actions">
           {status === 'connected' ? (
             <button onClick={disconnect}>Disconnect</button>

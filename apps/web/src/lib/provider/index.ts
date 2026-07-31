@@ -2,6 +2,8 @@ import { HaClient } from '@twinhaus/ha-bridge';
 import type { DeviceProvider } from './types.js';
 import { HomeAssistantProvider } from './haProvider.js';
 import { DemoProvider } from './demoProvider.js';
+import { MqttProvider } from './mqttProvider.js';
+import { createMqttTransport } from './mqttTransport.js';
 
 export type { DeviceProvider, ProviderConfig, EntityState } from './types.js';
 
@@ -27,6 +29,7 @@ registerProvider(
     clearIntervalFn: (handle) => clearInterval(handle),
   }),
 );
+registerProvider(new MqttProvider(createMqttTransport()));
 let active: DeviceProvider = homeAssistant;
 
 export function listProviders(): DeviceProvider[] {
