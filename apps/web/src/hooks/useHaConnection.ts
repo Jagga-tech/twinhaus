@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { DeviceProvider } from '../lib/provider/index.js';
-import { activeProvider, haClient } from '../lib/provider/index.js';
+import { activeProvider, getProvider, haClient, setActiveProvider } from '../lib/provider/index.js';
+import { demoHome } from '../lib/demoHome.js';
 import { useTwinStore } from '../store/twinStore.js';
 
 // Re-exported so the HA-only seams (registry home-scan, config-flow discovery) keep one import site.
@@ -27,12 +28,15 @@ export function wireProviderToStore(provider: DeviceProvider): () => void {
   return () => offs.forEach((off) => off());
 }
 
-// Wire the default backend for the app's lifetime. Switching backends re-wires via the same helper.
-wireProviderToStore(activeProvider());
+// Restore the backend the user last chose (persisted), then wire it for the app's lifetime.
+const savedProviderId = useTwinStore.getState().providerId;
+if (savedProviderId && getProvider(savedProviderId)) setActiveProvider(savedProviderId);
+let unwire = wireProviderToStore(activeProvider());
 
 interface UseHaConnection {
   connect: () => Promise<void>;
   disconnect: () => void;
+  switchProvider: (id: string) => void;
   error: string | null;
   connecting: boolean;
 }
@@ -62,7 +66,25 @@ export function useHaConnection(): UseHaConnection {
     activeProvider().disconnect();
   }
 
-  useEffect(() => () => undefined, []);
+  /**
+   * Switch the device backend: tear down the old connection and wiring, make the new one active,
+   * re-wire it to the store, and clear the stale live mirror. Selecting the standalone Demo backend
+   * also seeds a furnished home when the twin is still empty, so it has something to show.
+   */
+  function switchProvider(id: string) {
+    const next = getProvider(id);
+    if (!next || next.id === activeProvider().id) return;
+    setError(null);
+    activeProvider().disconnect();
+    unwire();
+    setActiveProvider(id);
+    unwire = wireProviderToStore(next);
 
-  return { connect, disconnect, error, connecting };
+    const store = useTwinStore.getState();
+    store.setProviderId(id);
+    store.setEntityStates([]);
+    if (next.standalone && store.rooms.length === 0) store.importTwin(demoHome());
+  }
+
+  return { connect, disconnect, switchProvider, error, connecting };
 }

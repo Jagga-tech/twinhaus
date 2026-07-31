@@ -55,6 +55,8 @@ interface TwinState {
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
   llmConfig: LlmConfig;
+  /** The active device backend id (`homeassistant`, `demo`, `mqtt`, …). */
+  providerId: string;
 
   // --- Onboarding (persisted) ---
   /** True once the user has finished or skipped the first-run WelcomeFlow. */
@@ -113,6 +115,7 @@ interface TwinState {
   setPendingPlacement: (placement: { entityId: string; label: string } | null) => void;
   setLivePositions: (positions: Record<string, PositionEstimate>) => void;
   setPositioningScale: (scale: number) => void;
+  setProviderId: (id: string) => void;
   setWelcomeDismissed: (dismissed: boolean) => void;
   markAgentUsed: () => void;
 
@@ -165,6 +168,7 @@ export const useTwinStore = create<TwinState>()(
       positioningScale: 1,
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
+      providerId: 'homeassistant',
       welcomeDismissed: false,
       agentUsed: false,
       activeLeftTab: 'plan',
@@ -313,6 +317,7 @@ export const useTwinStore = create<TwinState>()(
       setLivePositions: (positions) => set(() => ({ livePositions: positions })),
       setPositioningScale: (scale) =>
         set(() => ({ positioningScale: Math.max(0.6, Math.min(1.4, scale)) })),
+      setProviderId: (id) => set(() => ({ providerId: id })),
       setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
       markAgentUsed: () => set(() => ({ agentUsed: true })),
 
@@ -372,6 +377,7 @@ export const useTwinStore = create<TwinState>()(
         welcomeDismissed: state.welcomeDismissed,
         agentUsed: state.agentUsed,
         positioningScale: state.positioningScale,
+        providerId: state.providerId,
       }),
     },
   ),

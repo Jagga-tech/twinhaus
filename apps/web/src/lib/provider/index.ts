@@ -1,6 +1,7 @@
 import { HaClient } from '@twinhaus/ha-bridge';
 import type { DeviceProvider } from './types.js';
 import { HomeAssistantProvider } from './haProvider.js';
+import { DemoProvider } from './demoProvider.js';
 
 export type { DeviceProvider, ProviderConfig, EntityState } from './types.js';
 
@@ -20,6 +21,12 @@ export function registerProvider(provider: DeviceProvider): DeviceProvider {
 }
 
 const homeAssistant = registerProvider(new HomeAssistantProvider(haClient));
+registerProvider(
+  new DemoProvider({
+    setIntervalFn: (handler, ms) => setInterval(handler, ms),
+    clearIntervalFn: (handle) => clearInterval(handle),
+  }),
+);
 let active: DeviceProvider = homeAssistant;
 
 export function listProviders(): DeviceProvider[] {

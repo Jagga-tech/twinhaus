@@ -25,6 +25,7 @@ export function App() {
   const setEditorMode = useTwinStore((state) => state.setEditorMode);
   const status = useTwinStore((state) => state.connectionStatus);
   const providerId = useTwinStore((state) => state.llmConfig.provider);
+  const backendId = useTwinStore((state) => state.providerId);
 
   return (
     <div className="app">
@@ -44,7 +45,9 @@ export function App() {
           ))}
         </div>
         <div className="topbar-right">
-          <span className={`status status-${status}`}>HA: {status}</span>
+          <span className={`status status-${status}`}>
+            {backendTag(backendId)}: {status}
+          </span>
           <span className="provider-tag">{providerLabel(providerId)}</span>
           <button onClick={() => setSettingsOpen((open) => !open)}>Settings</button>
         </div>
@@ -87,4 +90,11 @@ export function App() {
 
 function providerLabel(provider: LlmProviderId): string {
   return { anthropic: 'Anthropic', openai: 'OpenAI', ollama: 'Ollama (local)' }[provider];
+}
+
+/** Short prefix for the connection pill, so it reflects the active device backend, not just HA. */
+function backendTag(backendId: string): string {
+  return (
+    { homeassistant: 'HA', demo: 'Demo', mqtt: 'MQTT', matter: 'Matter' }[backendId] ?? 'Backend'
+  );
 }

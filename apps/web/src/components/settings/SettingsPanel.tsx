@@ -1,5 +1,6 @@
 import { useTwinStore, type LlmProviderId } from '../../store/twinStore.js';
 import { useHaConnection } from '../../hooks/useHaConnection.js';
+import { listProviders } from '../../lib/provider/index.js';
 
 const MODEL_PLACEHOLDER: Record<LlmProviderId, string> = {
   anthropic: 'claude-opus-5',
@@ -14,8 +15,11 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const llmConfig = useTwinStore((state) => state.llmConfig);
   const setLlmConfig = useTwinStore((state) => state.setLlmConfig);
   const status = useTwinStore((state) => state.connectionStatus);
+  const providerId = useTwinStore((state) => state.providerId);
 
-  const { connect, disconnect, connecting, error } = useHaConnection();
+  const { connect, disconnect, switchProvider, connecting, error } = useHaConnection();
+  const providers = listProviders();
+  const active = providers.find((provider) => provider.id === providerId) ?? providers[0];
 
   return (
     <div className="settings">
@@ -27,30 +31,51 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <section>
-        <h3>Home Assistant</h3>
+        <h3>Device backend</h3>
+        <p className="hint">
+          Where your devices come from. Home Assistant gives the widest coverage; Demo runs a
+          simulated home with no hub or hardware at all.
+        </p>
         <label>
-          URL
-          <input
-            value={haConfig.url}
-            placeholder="http://homeassistant.local:8123"
-            onChange={(event) => setHaConfig({ ...haConfig, url: event.target.value })}
-          />
+          Backend
+          <select value={active.id} onChange={(event) => switchProvider(event.target.value)}>
+            {providers.map((provider) => (
+              <option key={provider.id} value={provider.id}>
+                {provider.label}
+              </option>
+            ))}
+          </select>
         </label>
-        <label>
-          Long-lived access token
-          <input
-            type="password"
-            value={haConfig.token}
-            placeholder="Profile → Long-Lived Access Tokens"
-            onChange={(event) => setHaConfig({ ...haConfig, token: event.target.value })}
-          />
-        </label>
+        <p className="hint">{active.summary}</p>
+
+        {active.id === 'homeassistant' ? (
+          <>
+            <label>
+              URL
+              <input
+                value={haConfig.url}
+                placeholder="http://homeassistant.local:8123"
+                onChange={(event) => setHaConfig({ ...haConfig, url: event.target.value })}
+              />
+            </label>
+            <label>
+              Long-lived access token
+              <input
+                type="password"
+                value={haConfig.token}
+                placeholder="Profile → Long-Lived Access Tokens"
+                onChange={(event) => setHaConfig({ ...haConfig, token: event.target.value })}
+              />
+            </label>
+          </>
+        ) : null}
+
         <div className="settings-actions">
           {status === 'connected' ? (
             <button onClick={disconnect}>Disconnect</button>
           ) : (
-            <button onClick={connect} disabled={connecting}>
-              {connecting ? 'Connecting…' : 'Connect'}
+            <button className="primary" onClick={connect} disabled={connecting}>
+              {connecting ? 'Connecting…' : active.standalone ? 'Start demo' : 'Connect'}
             </button>
           )}
           <span className={`status status-${status}`}>{status}</span>
