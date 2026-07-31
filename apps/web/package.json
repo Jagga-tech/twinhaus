@@ -16,6 +16,7 @@
     "@twinhaus/agent": "*",
     "@twinhaus/discovery": "*",
     "@twinhaus/ha-bridge": "*",
+    "mqtt": "^5.15.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "three": "^0.169.0",

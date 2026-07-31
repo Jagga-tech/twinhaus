@@ -36,6 +36,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 - **Add devices as they appear.** A "Found near you" tray surfaces devices Home Assistant has discovered but not yet configured, one click adds them and drops them straight into the twin. See [docs/DISCOVERY.md](docs/DISCOVERY.md).
 - **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, _then_ spend money.
 - **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM, cloud APIs or fully local via Ollama.
+- **HA-optional, not HA-hostile.** Home Assistant gives the widest device coverage, but it's one backend behind a small provider interface, not a hard requirement. Explore a simulated home with **no hub at all** (Demo), or control real devices without HA via **MQTT (zigbee2mqtt)** or **Matter** (through a local companion service). See [docs/BACKENDS.md](docs/BACKENDS.md).
 
 ## How it works
 
@@ -63,7 +64,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
         Zigbee · Matter · WiFi devices
 ```
 
-Twinhaus never talks to hardware directly, Home Assistant is the device layer. We are the 3D + AI layer on top.
+Twinhaus never talks to hardware directly, a device backend is always the device layer. Home Assistant is the default (and widest) backend; MQTT, Matter, and a hardware-free Demo are others, all behind one provider interface ([docs/BACKENDS.md](docs/BACKENDS.md)). We are the 3D + AI layer on top.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
