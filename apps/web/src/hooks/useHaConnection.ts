@@ -1,24 +1,34 @@
 import { useEffect, useState } from 'react';
-import { HaClient } from '@twinhaus/ha-bridge';
+import type { DeviceProvider } from '../lib/provider/index.js';
+import { activeProvider, haClient } from '../lib/provider/index.js';
 import { useTwinStore } from '../store/twinStore.js';
 
-/** Shared client instance, the chat agent and the viewer both act on the same connection. */
-export const haClient = new HaClient();
+// Re-exported so the HA-only seams (registry home-scan, config-flow discovery) keep one import site.
+export { haClient };
 
-// Keep the store's live mirror in sync with Home Assistant for the app's lifetime.
-haClient.onStatusChange((status) => useTwinStore.getState().setConnectionStatus(status));
-haClient.onStateChanged((event) => {
-  useTwinStore.getState().applyStateChange(event.entity_id, event.new_state);
-});
+/**
+ * Mirror a backend's live state into the store: connection status, per-entity changes, and a full
+ * snapshot reload after an auto-reconnect (events are missed while offline). Returns a teardown so
+ * the wiring can be swapped when the user switches backends.
+ */
+export function wireProviderToStore(provider: DeviceProvider): () => void {
+  const offs = [
+    provider.onStatusChange((status) => useTwinStore.getState().setConnectionStatus(status)),
+    provider.onStateChanged((event) =>
+      useTwinStore.getState().applyStateChange(event.entity_id, event.new_state),
+    ),
+    provider.onReconnected(() => {
+      provider
+        .getStates()
+        .then((states) => useTwinStore.getState().setEntityStates(states))
+        .catch(() => undefined);
+    }),
+  ];
+  return () => offs.forEach((off) => off());
+}
 
-// After an auto-reconnect the live mirror is stale (events were missed while offline), so reload a
-// full snapshot to heal it. Failures are swallowed, the next reconnect attempt will try again.
-haClient.onReconnected(() => {
-  haClient
-    .getStates()
-    .then((states) => useTwinStore.getState().setEntityStates(states))
-    .catch(() => undefined);
-});
+// Wire the default backend for the app's lifetime. Switching backends re-wires via the same helper.
+wireProviderToStore(activeProvider());
 
 interface UseHaConnection {
   connect: () => Promise<void>;
@@ -27,22 +37,20 @@ interface UseHaConnection {
   connecting: boolean;
 }
 
-/** Manage the connection lifecycle and load the initial entity snapshot on connect. */
+/** Manage the active backend's connection lifecycle and load the initial entity snapshot. */
 export function useHaConnection(): UseHaConnection {
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
 
   async function connect() {
+    const provider = activeProvider();
     const { haConfig, setEntityStates } = useTwinStore.getState();
-    if (!haConfig.url || !haConfig.token) {
-      setError('Enter your Home Assistant URL and access token in Settings first.');
-      return;
-    }
     setConnecting(true);
     setError(null);
     try {
-      await haClient.connect(haConfig);
-      setEntityStates(await haClient.getStates());
+      // Each backend validates its own config: HA rejects a missing URL/token, Demo ignores it.
+      await provider.connect({ ...haConfig });
+      setEntityStates(await provider.getStates());
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -51,10 +59,9 @@ export function useHaConnection(): UseHaConnection {
   }
 
   function disconnect() {
-    haClient.disconnect();
+    activeProvider().disconnect();
   }
 
-  // Tear down the socket if the component using this hook unmounts for good.
   useEffect(() => () => undefined, []);
 
   return { connect, disconnect, error, connecting };

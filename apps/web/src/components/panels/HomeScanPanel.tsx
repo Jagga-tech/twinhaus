@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
-import { haClient } from '../../hooks/useHaConnection.js';
+import { activeProvider } from '../../lib/provider/index.js';
 import {
   applyReview,
   buildHomeScan,
@@ -30,13 +30,21 @@ export function HomeScanPanel() {
   const [review, setReview] = useState<ScanReview>(EMPTY_REVIEW);
 
   async function runScan() {
+    const registry = activeProvider().registry;
+    if (!registry) {
+      setScan({
+        status: 'error',
+        message: `The ${activeProvider().label} backend can't auto-scan rooms. Draw your plan, or connect Home Assistant.`,
+      });
+      return;
+    }
     setScan({ status: 'scanning' });
     try {
       const [areas, devices, entities, floors] = await Promise.all([
-        haClient.listAreas(),
-        haClient.listDeviceRegistry(),
-        haClient.listEntityRegistry(),
-        haClient.listFloors().catch(() => []),
+        registry.listAreas(),
+        registry.listDeviceRegistry(),
+        registry.listEntityRegistry(),
+        registry.listFloors().catch(() => []),
       ]);
       if (areas.length === 0) {
         setScan({

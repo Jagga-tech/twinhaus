@@ -1,6 +1,11 @@
 import type { HomeContext } from '@twinhaus/agent';
-import { entityDomain, type HaClient } from '@twinhaus/ha-bridge';
+import { entityDomain, type CallServiceOptions } from '@twinhaus/ha-bridge';
 import { searchCatalog } from '@twinhaus/discovery';
+
+/** The minimal control surface the agent needs, satisfied by any {@link DeviceProvider} backend. */
+interface Controller {
+  callService(options: CallServiceOptions): Promise<void>;
+}
 import { confirmState, expectedStateFor, withRetry } from './verifyAction.js';
 import { entitySummary } from './deviceState.js';
 import { computeRoomEnergy } from './energy.js';
@@ -14,7 +19,7 @@ import { useTwinStore } from '../store/twinStore.js';
  * The agent package deliberately knows nothing about the store or the WebSocket bridge, * this adapter is where "command down / event up" is wired: tool calls flow into HA service
  * calls, and the resulting `state_changed` events flow back into the twin on their own.
  */
-export function createHomeContext(client: HaClient): HomeContext {
+export function createHomeContext(client: Controller): HomeContext {
   return {
     async describeHome() {
       const { rooms, devices, entityStates } = useTwinStore.getState();

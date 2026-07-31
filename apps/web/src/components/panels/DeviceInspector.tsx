@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
-import { haClient } from '../../hooks/useHaConnection.js';
+import { activeProvider } from '../../lib/provider/index.js';
 import { entityLabel, entitySummary } from '../../lib/deviceState.js';
 import { quickControls } from '../../lib/deviceControl.js';
 
@@ -22,7 +22,7 @@ export function DeviceInspector() {
     const control = quickControls(state)[index];
     setError(null);
     try {
-      await haClient.callService(control.call);
+      await activeProvider().callService(control.call);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }

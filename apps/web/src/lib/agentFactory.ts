@@ -9,7 +9,7 @@ import {
 } from '@twinhaus/agent';
 import type { LlmConfig } from '../store/twinStore.js';
 import { createHomeContext } from './homeContext.js';
-import { haClient } from '../hooks/useHaConnection.js';
+import { activeProvider } from './provider/index.js';
 
 /** Build an {@link LlmProvider} from the user's saved settings. */
 export function createProvider(config: LlmConfig): LlmProvider {
@@ -38,7 +38,7 @@ export type ConfirmAction = (action: ControlAction, verdict: SafetyVerdict) => P
 export function createAgent(config: LlmConfig, confirmAction?: ConfirmAction): Agent {
   return new Agent({
     provider: createProvider(config),
-    context: createHomeContext(haClient),
+    context: createHomeContext(activeProvider()),
     confirmAction,
   });
 }
