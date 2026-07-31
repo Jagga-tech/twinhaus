@@ -4,6 +4,8 @@ import { HomeAssistantProvider } from './haProvider.js';
 import { DemoProvider } from './demoProvider.js';
 import { MqttProvider } from './mqttProvider.js';
 import { createMqttTransport } from './mqttTransport.js';
+import { MatterProvider } from './matterProvider.js';
+import { createCompanionSocket } from './companionSocket.js';
 
 export type { DeviceProvider, ProviderConfig, EntityState } from './types.js';
 
@@ -30,6 +32,7 @@ registerProvider(
   }),
 );
 registerProvider(new MqttProvider(createMqttTransport()));
+registerProvider(new MatterProvider(createCompanionSocket()));
 let active: DeviceProvider = homeAssistant;
 
 export function listProviders(): DeviceProvider[] {

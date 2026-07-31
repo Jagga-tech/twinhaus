@@ -81,6 +81,17 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           </label>
         ) : null}
 
+        {active.id === 'matter' ? (
+          <label>
+            Companion service URL
+            <input
+              value={haConfig.url}
+              placeholder="ws://localhost:5580"
+              onChange={(event) => setHaConfig({ ...haConfig, url: event.target.value })}
+            />
+          </label>
+        ) : null}
+
         <div className="settings-actions">
           {status === 'connected' ? (
             <button onClick={disconnect}>Disconnect</button>
