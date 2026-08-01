@@ -10,6 +10,7 @@ import {
 } from '@twinhaus/discovery';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
+import { virtualFromCatalog } from '../../lib/plan.js';
 import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import type { DeviceCategory } from '../../store/types.js';
 
@@ -50,15 +51,7 @@ export function DeviceCatalog() {
     }
     const room = rooms[0];
     const center = polygonCentroid(room.polygon);
-    addVirtualDevice({
-      category: device.category,
-      label: `${device.brand} ${device.model}`,
-      roomId: room.id,
-      position: center,
-      rotationY: 0,
-      rangeM: device.rangeM,
-      fovDeg: device.category === 'camera' ? 90 : 360,
-    });
+    addVirtualDevice(virtualFromCatalog(device, room.id, center));
     setSimulationVisible(true);
     setAdded(device.id);
   }

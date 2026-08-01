@@ -12,11 +12,11 @@ import { BuildingSummaryPanel } from './panels/BuildingSummaryPanel.js';
 type Tab = 'plan' | 'devices' | 'found' | 'catalog' | 'simulate' | 'import' | 'events';
 
 const TABS: Array<{ id: Tab; label: string }> = [
-  { id: 'plan', label: 'Plan' },
+  { id: 'plan', label: 'Design' },
   { id: 'devices', label: 'Devices' },
   { id: 'found', label: 'Found near you' },
   { id: 'catalog', label: 'Catalog' },
-  { id: 'simulate', label: 'Simulate' },
+  { id: 'simulate', label: 'Plan' },
   { id: 'import', label: 'Import' },
   { id: 'events', label: 'Events' },
 ];
