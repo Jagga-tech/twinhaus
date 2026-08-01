@@ -76,6 +76,12 @@ export interface VirtualDevice {
   rangeM: number;
   /** Camera horizontal field of view in degrees; ignored for omnidirectional sensors. */
   fovDeg: number;
+  /** Planned product this stands in for (from the catalog), so the plan can price it. */
+  catalogId?: string;
+  brand?: string;
+  model?: string;
+  /** Estimated price in USD, for the plan's shopping-list total. */
+  priceUsd?: number;
 }
 
 /** A recent Home Assistant state change, kept for the spatial security timeline. */

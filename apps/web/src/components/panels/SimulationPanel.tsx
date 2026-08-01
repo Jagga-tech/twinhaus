@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { suggestForCategory } from '@twinhaus/discovery';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
+import { planSummary, virtualFromCatalog } from '../../lib/plan.js';
 import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import type { DeviceCategory } from '../../store/types.js';
 
@@ -18,9 +20,10 @@ const PLACEABLE: Array<{
 ];
 
 /**
- * Simulation mode: drop virtual (not-yet-purchased) devices into rooms and see their coverage
- * in 3D before spending money. Cameras and motion sensors carry range/FOV; rotate a camera to
- * aim it. This is the "simulate before you buy" wedge.
+ * Plan mode: design a home with no hardware, drop planned devices into rooms, preview their
+ * coverage in 3D, and build a shopping list with an estimated total before spending a penny. Each
+ * placement is matched to a real catalog product so the plan is priced; cameras and motion sensors
+ * carry range/FOV you can tune. This is the "plan and simulate before you buy" wedge.
  */
 export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
   const rooms = useTwinStore((state) => state.rooms);
@@ -34,23 +37,32 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
   const [category, setCategory] = useState<DeviceCategory>('camera');
   const [roomId, setRoomId] = useState('');
 
+  const summary = useMemo(() => planSummary(virtualDevices), [virtualDevices]);
+
   function place() {
     const targetRoomId = roomId || rooms[0]?.id;
     const room = rooms.find((r) => r.id === targetRoomId);
     if (!room) {
-      window.alert('Draw a room first.');
+      window.alert('Design a room first (Design tab), then plan a device.');
       return;
     }
     const spec = PLACEABLE.find((p) => p.category === category)!;
-    addVirtualDevice({
-      category,
-      label: spec.label,
-      roomId: room.id,
-      position: polygonCentroid(room.polygon),
-      rotationY: 0,
-      rangeM: spec.rangeM,
-      fovDeg: spec.fovDeg,
-    });
+    const center = polygonCentroid(room.polygon);
+    // Match a real catalog product so the plan is priced; fall back to a generic placement.
+    const product = suggestForCategory(category);
+    addVirtualDevice(
+      product
+        ? virtualFromCatalog(product, room.id, center)
+        : {
+            category,
+            label: spec.label,
+            roomId: room.id,
+            position: center,
+            rotationY: 0,
+            rangeM: spec.rangeM,
+            fovDeg: spec.fovDeg,
+          },
+    );
     setViewMode('normal');
   }
 
@@ -59,7 +71,7 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
       <button className="primary" onClick={onOpenWizard}>
         Recommend devices for my home →
       </button>
-      <p className="hint">No smart devices yet? The wizard suggests a kit and places it here.</p>
+      <p className="hint">No smart devices yet? The wizard suggests a kit and plans it here.</p>
 
       <div className="sim-form">
         <select
@@ -80,17 +92,47 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
             </option>
           ))}
         </select>
-        <button onClick={place}>Place</button>
+        <button onClick={place}>Plan</button>
       </div>
 
-      {virtualDevices.length > 0 && (
+      {summary.deviceCount > 0 && (
         <>
           <div className="panel-row">
-            <h4>Simulated ({virtualDevices.length})</h4>
+            <h4>Shopping list</h4>
             <button className="link" onClick={clearVirtualDevices}>
               Clear all
             </button>
           </div>
+          <ul className="plan-list">
+            {summary.lines.map((line) => (
+              <li key={`${line.label}-${line.unitPriceUsd}`} className="plan-line">
+                <span className="plan-line-label">
+                  {CATEGORY_GLYPH[line.category]} {line.label}
+                  {line.count > 1 ? ` ×${line.count}` : ''}
+                </span>
+                <span className="plan-line-price">
+                  {line.unitPriceUsd > 0 ? `$${line.lineTotalUsd}` : '—'}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="plan-total">
+            <span>Estimated total</span>
+            <strong>${summary.totalUsd}</strong>
+          </div>
+          {summary.unpricedCount > 0 && (
+            <p className="hint">
+              {summary.unpricedCount} planned device{summary.unpricedCount === 1 ? '' : 's'} without
+              a price. Add from the Catalog tab to price{' '}
+              {summary.unpricedCount === 1 ? 'it' : 'them'}.
+            </p>
+          )}
+        </>
+      )}
+
+      {virtualDevices.length > 0 && (
+        <>
+          <h4>Placed ({virtualDevices.length})</h4>
           <ul className="sim-list">
             {virtualDevices.map((device) => (
               <li key={device.id}>

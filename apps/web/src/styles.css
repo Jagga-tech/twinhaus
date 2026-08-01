@@ -1054,6 +1054,49 @@ button:focus-visible {
   color: var(--accent);
 }
 
+/* Plan shopping list */
+.plan-list {
+  list-style: none;
+  margin: 0.3rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.plan-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  padding: 0.15rem 0;
+}
+.plan-line-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plan-line-price {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.plan-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 2px solid var(--line-2);
+  font-size: 0.9rem;
+}
+.plan-total strong {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
 /* Simulation */
 .sim-form {
   display: flex;
