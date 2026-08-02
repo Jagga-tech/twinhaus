@@ -7,7 +7,7 @@ Ingress) instead of a separate dev server.
 
 1. Copy this repository (or just the `addon/` folder) into your HA config's `addons/` share,
    e.g. `/addons/twinhaus/`.
-2. In Home Assistant: **Settings to Add-ons to Add-on Store to ⋮ to Repositories**, or use the
+2. In Home Assistant: **Settings to Add-ons to Add-on Store to the overflow menu to Repositories**, or use the
    local add-ons that appear automatically.
 3. Find **Twinhaus**, click **Install**, then **Start**.
 4. Open the add-on (Ingress) and go to **Settings** inside Twinhaus to connect to Home

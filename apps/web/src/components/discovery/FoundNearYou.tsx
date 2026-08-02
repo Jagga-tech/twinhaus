@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { DiscoveredDevice, DiscoverySource } from '@twinhaus/discovery';
 import { useTwinStore } from '../../store/twinStore.js';
-import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import { syntheticEntityId } from '../../lib/discoveryPlacement.js';
 import { AddDeviceModal } from './AddDeviceModal.js';
 
@@ -65,7 +64,6 @@ export function FoundNearYou() {
       <ul className="found-list">
         {discovered.map((device) => (
           <li key={device.id} className="found-item">
-            <span className="found-glyph">{CATEGORY_GLYPH[device.category]}</span>
             <span className="found-meta">
               <span className="found-name">{device.name}</span>
               <span className="found-brand">{device.brand}</span>

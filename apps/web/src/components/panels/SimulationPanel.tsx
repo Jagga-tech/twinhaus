@@ -3,7 +3,6 @@ import { suggestForCategory } from '@twinhaus/discovery';
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
 import { planSummary, virtualFromCatalog } from '../../lib/plan.js';
-import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import type { DeviceCategory } from '../../store/types.js';
 
 const PLACEABLE: Array<{
@@ -80,7 +79,7 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
         >
           {PLACEABLE.map((spec) => (
             <option key={spec.category} value={spec.category}>
-              {CATEGORY_GLYPH[spec.category]} {spec.label}
+              {spec.label}
             </option>
           ))}
         </select>
@@ -107,7 +106,7 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
             {summary.lines.map((line) => (
               <li key={`${line.label}-${line.unitPriceUsd}`} className="plan-line">
                 <span className="plan-line-label">
-                  {CATEGORY_GLYPH[line.category]} {line.label}
+                  {line.label}
                   {line.count > 1 ? ` x${line.count}` : ''}
                 </span>
                 <span className="plan-line-price">
@@ -137,9 +136,7 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
             {virtualDevices.map((device) => (
               <li key={device.id}>
                 <div className="panel-row">
-                  <span>
-                    {CATEGORY_GLYPH[device.category]} {device.label}
-                  </span>
+                  <span>{device.label}</span>
                   <button className="link" onClick={() => removeVirtualDevice(device.id)}>
                     remove
                   </button>

@@ -1,5 +1,4 @@
 import { Html } from '@react-three/drei';
-import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import { CoverageViz } from './CoverageViz.js';
 import type { VirtualDevice } from '../../store/types.js';
 
@@ -14,9 +13,7 @@ export function VirtualDeviceMarker({ device }: { device: VirtualDevice }) {
           <meshStandardMaterial color="#5c6bc0" transparent opacity={0.7} wireframe />
         </mesh>
         <Html distanceFactor={8} position={[0, 0.28, 0]} center>
-          <div className="device-label device-label-virtual">
-            {CATEGORY_GLYPH[device.category]} {device.label}
-          </div>
+          <div className="device-label device-label-virtual">{device.label}</div>
         </Html>
       </group>
     </group>

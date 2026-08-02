@@ -4,14 +4,14 @@ Twinhaus is a browser-based digital twin. It never speaks a device protocol itse
 **device backend** through one small interface, `DeviceProvider`. Home Assistant is one backend; it
 is no longer the only one. This is how Twinhaus stays useful with or without HA.
 
-```
-Twin, Agent, Energy, Positioning   (never learn which backend they're on)
-              │
-        DeviceProvider          connect, status, state stream, getStates, callService
-   ┌──────────┼───────────┬──────────────┬───────────────┐
-Home Assistant   Demo        MQTT            Matter
-(widest cover)  (no hub)   (zigbee2mqtt)  (companion svc)
-```
+The twin, agent, energy, and positioning layers never learn which backend they are on. They all
+talk to one `DeviceProvider` interface (connect, status, state stream, getStates, callService), and
+each backend implements it:
+
+- Home Assistant: widest device coverage.
+- Demo: no hub or hardware.
+- MQTT: zigbee2mqtt over WebSocket.
+- Matter: via a local companion service.
 
 The interface lives in `apps/web/src/lib/provider/types.ts`. A backend implements connect/disconnect,
 a status + state-change subscription, `getStates()`, and `callService()`. An optional `registry`
