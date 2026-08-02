@@ -5,7 +5,7 @@
 # located). Ranging integrations (ESPresense, Bermuda) expose per-proxy distances under their own
 # names; this template sensor re-publishes one of them in the shape Twinhaus expects.
 #
-# Add to configuration.yaml (one template sensor per anchor × target pair), adjust the source
+# Add to configuration.yaml (one template sensor per anchor x target pair), adjust the source
 # entity, and reload template entities.
 
 template:

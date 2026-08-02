@@ -74,7 +74,7 @@ export function LevelSwitcher() {
           onClick={() => setStackedView(!stackedView)}
           title="Show every floor stacked in 3D"
         >
-          {stackedView ? '▣ Stacked' : '⬚ Stack floors'}
+          {stackedView ? 'Stacked' : 'Stack floors'}
         </button>
       )}
     </div>

@@ -11,7 +11,6 @@ import {
 import { useTwinStore } from '../../store/twinStore.js';
 import { polygonCentroid } from '../../lib/geometry.js';
 import { virtualFromCatalog } from '../../lib/plan.js';
-import { CATEGORY_GLYPH } from '../../lib/deviceCategory.js';
 import type { DeviceCategory } from '../../store/types.js';
 
 const CATEGORIES = catalogCategories();
@@ -79,7 +78,7 @@ export function DeviceCatalog() {
           <option value="">All types</option>
           {CATEGORIES.map((value) => (
             <option key={value} value={value}>
-              {CATEGORY_GLYPH[value]} {value}
+              {value}
             </option>
           ))}
         </select>
@@ -111,7 +110,6 @@ export function DeviceCatalog() {
       <ul className="catalog-list">
         {results.map((device) => (
           <li key={device.id} className="catalog-item">
-            <span className="catalog-glyph">{CATEGORY_GLYPH[device.category]}</span>
             <div className="catalog-meta">
               <div className="panel-row">
                 <span className="catalog-name">

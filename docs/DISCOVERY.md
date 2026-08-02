@@ -11,28 +11,15 @@ Twinhaus **never scans hardware directly.** Home Assistant is the discovery laye
 the network and radios and starts a _config flow_ whenever it spots a supported device that isn't
 set up yet. Twinhaus only consumes those flows over the WebSocket + REST API:
 
-```
-Device powers on
-      │  mDNS / SSDP / DHCP / Bluetooth
-      ▼
-Home Assistant starts a config flow  ──(config_entries/flow/subscribe)──▶  ha-bridge
-      │                                                                        │
-      │  GET /api/config/config_entries/flow                                   ▼
-      └──────────────────────────────────────────────────────────▶  @twinhaus/discovery
-                                                                     normalize to DiscoveredDevice
-                                                                                │
-                                                                                ▼
-                                                              "Found near you" tray (count badge)
-                                                                                │  Add
-                                                                                ▼
-                                                              drive the flow (PIN/credentials form)
-                                                                                │  create_entry
-                                                                                ▼
-                                                              "Where does this live?" to click a room
-                                                                                │
-                                                                                ▼
-                                                              device placed in the 3D twin
-```
+The flow, step by step:
+
+1. A device powers on and Home Assistant spots it over mDNS, SSDP, DHCP, or Bluetooth, and starts a config flow.
+2. ha-bridge learns about it via the `config_entries/flow/subscribe` WebSocket signal and the REST list endpoint.
+3. `@twinhaus/discovery` normalizes each flow into a DiscoveredDevice.
+4. The "Found near you" tray shows them with a count badge.
+5. Add walks the flow's own form (PIN or credentials) to `create_entry`.
+6. A "Where does this live?" prompt asks you to click a room.
+7. The device is placed in the 3D twin.
 
 - **`packages/discovery`** normalizes raw config flows into `DiscoveredDevice` (name, brand,
   source, best-guess category) and drives a flow to completion (`ConfigFlowController`).

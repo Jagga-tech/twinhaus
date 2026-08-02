@@ -3,7 +3,7 @@ import { Html } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { HaEntityState } from '@twinhaus/ha-bridge';
 import { entityLabel, isEntityActive, deviceGlow, compactState } from '../../lib/deviceState.js';
-import { CATEGORY_GLYPH, categorize } from '../../lib/deviceCategory.js';
+import { categorize } from '../../lib/deviceCategory.js';
 import { DEVICE_MODELS } from '../../lib/deviceLibrary.js';
 import type { PositionEstimate } from '../../lib/positioning.js';
 import type { DevicePlacement } from '../../store/types.js';
@@ -97,7 +97,7 @@ export function DeviceMarker({
       )}
       <Html distanceFactor={8} position={[0, 0.28, 0]} center>
         <div className={`device-label${hovered ? ' hovered' : ''}`}>
-          {CATEGORY_GLYPH[category]} {entityLabel(device.entityId, state)}
+          {entityLabel(device.entityId, state)}
           {badge && <span className="device-label-state">{badge}</span>}
         </div>
       </Html>

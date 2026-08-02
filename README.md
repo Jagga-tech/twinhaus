@@ -40,29 +40,12 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 
 ## How it works
 
-```
-┌─────────────────────────────────────────────┐
-│  Browser                                    │
-│  ┌──────────────────┐  ┌─────────────────┐  │
-│  │  3D twin viewer  │  │  Chat control   │  │
-│  │  (Three.js)      │  │  (talk to home) │  │
-│  └──────────────────┘  └─────────────────┘  │
-└──────────────────────┬──────────────────────┘
-                       │
-┌──────────────────────┴──────────────────────┐
-│  Twinhaus core                              │
-│  ┌──────────────────┐  ┌─────────────────┐  │
-│  │ Twin state engine│  │    AI agent     │  │
-│  │ rooms, devices  │  │ LLM + tool calls│  │
-│  └──────────────────┘  └─────────────────┘  │
-└──────────────────────┬──────────────────────┘
-                       │  WebSocket API
-┌──────────────────────┴──────────────────────┐
-│  Home Assistant  (2000+ integrations)       │
-└──────────────────────┬──────────────────────┘
-                       │
-        Zigbee, Matter, WiFi devices
-```
+The stack, top to bottom:
+
+1. Browser: the 3D twin viewer (Three.js) and chat control (talk to your home).
+2. Twinhaus core: the twin state engine (rooms, devices) and the AI agent (LLM plus tool calls).
+3. Device backend, over its API: Home Assistant (2000+ integrations) by default, or MQTT, Matter, or Demo.
+4. The backend talks to the real Zigbee, Matter, and WiFi devices.
 
 Twinhaus never talks to hardware directly, a device backend is always the device layer. Home Assistant is the default (and widest) backend; MQTT, Matter, and a hardware-free Demo are others, all behind one provider interface ([docs/BACKENDS.md](docs/BACKENDS.md)). We are the 3D + AI layer on top.
 
@@ -70,7 +53,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
 ## Getting started
 
-> ⚠️ Twinhaus is in early development. The MVP targets: floor plan editor to 3D extrusion to live Home Assistant device states to chat control of lights.
+> Note: Twinhaus is in early development. The MVP targets: floor plan editor to 3D extrusion to live Home Assistant device states to chat control of lights.
 
 ```bash
 git clone https://github.com/Jagga-tech/twinhaus.git
@@ -108,4 +91,4 @@ Contributions are very welcome, this project is being built in the open from day
 
 ---
 
-<p align="center">Made with ☕ in Hayward, CA</p>
+<p align="center">Made in Hayward, CA</p>

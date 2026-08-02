@@ -33,7 +33,7 @@ export function DeviceInspector() {
       <div className="inspector-header">
         <strong>{entityLabel(selectedDeviceId, state)}</strong>
         <button className="link" onClick={() => setSelectedDeviceId(null)}>
-          ✕
+          Close
         </button>
       </div>
       {state ? (

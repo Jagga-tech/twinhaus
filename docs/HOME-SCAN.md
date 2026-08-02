@@ -6,17 +6,12 @@ Twinhaus can build the whole layout and place every device in one click. No draw
 
 ## How it works
 
-```
-Home Assistant registries                     Twinhaus
-─────────────────────────                     ────────
-config/area_registry/list    ──▶  areas   ──▶  one room per area (packed into a tidy grid)
-config/device_registry/list  ──▶  devices ─┐
-config/entity_registry/list  ──▶ entities ─┴▶  entity to device to area to room
-                                               placeable entities dropped into their room
-                                                       │
-                                                       ▼
-                                          preview ("6 rooms, 18 devices") to Apply
-```
+How it maps Home Assistant's registries into a twin:
+
+1. `config/area_registry/list` gives the areas, one room per area, packed into a tidy grid.
+2. `config/device_registry/list` and `config/entity_registry/list` give devices and entities, resolved entity to device to area to room.
+3. Placeable entities are dropped into their room.
+4. You get a preview ("6 rooms, 18 devices") to Apply.
 
 - **`packages/ha-bridge`** exposes `listAreas()`, `listDeviceRegistry()`, and
   `listEntityRegistry()`, thin reads over HA's WebSocket registry commands.

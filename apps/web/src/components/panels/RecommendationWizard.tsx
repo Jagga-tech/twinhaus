@@ -111,7 +111,7 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
           <p className="hint">Browse every option in the Catalog tab.</p>
           {result.notes.map((note, index) => (
             <p key={index} className="wizard-note">
-              💡 {note}
+              {note}
             </p>
           ))}
         </div>

@@ -10,16 +10,11 @@ Twinhaus never ranges hardware itself, Home Assistant does. ESPHome **Bluetooth 
 ESP32s) or the **ESPresense** / **Bermuda** integrations already report how far a device is from
 each fixed proxy. Twinhaus consumes those distances and does the geometry:
 
-```
-ESP32 proxy A (placed in twin) ─┐   distance sensors in HA
-ESP32 proxy B (placed in twin) ─┼─► (device_class: distance, anchor, target)
-ESP32 proxy C (placed in twin) ─┘            │
-                                             ▼
-                              estimatePosition to trilaterate to (x, z) + confidence
-                                             │
-                                             ▼
-                              device dot moves in the twin, ringed by a confidence halo
-```
+The pipeline:
+
+1. ESP32 proxies A, B, C are placed in the twin, and HA publishes distance sensors for them (device_class distance, with anchor and target).
+2. `estimatePosition` trilaterates those distances into an (x, z) plus a confidence.
+3. The device dot moves in the twin, ringed by a confidence halo.
 
 ## How the math works
 

@@ -6,22 +6,13 @@ recovers on its own, the failure the system couldn't previously solve.
 
 ## What happens on a drop
 
-```
-socket drops (HA restart / network blip)
-      │
-      ▼
-status to "reconnecting"        the badge pulses; the app knows it's degraded, not dead
-      │  exponential backoff (1s, 2s, 4s ... capped at 30s, + jitter)
-      ▼
-reopen socket to re-auth
-      │
-      ├─ re-subscribe to state_changed          live updates resume
-      ├─ re-establish every active subscription  discovery flows keep streaming
-      └─ onReconnected to reload full snapshot     stale mirror is healed (missed events don't matter)
-      │
-      ▼
-status to "connected"
-```
+What happens when the socket drops (HA restart or network blip):
+
+1. Status goes to "reconnecting", the badge pulses so the app reads as degraded, not dead.
+2. The client retries with exponential backoff (1s, 2s, 4s, capped at 30s, plus jitter).
+3. It reopens the socket and re-authenticates.
+4. It re-subscribes to state_changed (live updates resume), re-establishes every active subscription (discovery flows keep streaming), and fires onReconnected to reload a full snapshot (the stale mirror is healed, so missed events do not matter).
+5. Status goes back to "connected".
 
 Key properties:
 

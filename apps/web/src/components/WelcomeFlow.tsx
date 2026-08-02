@@ -52,7 +52,7 @@ export function WelcomeFlow({ onOpenSettings }: { onOpenSettings: () => void }) 
       </div>
 
       {flow.allRequiredDone && (
-        <p className="welcome-done">🎉 Your home is live. Explore, or finish the tour.</p>
+        <p className="welcome-done">Your home is live. Explore, or finish the tour.</p>
       )}
 
       <ol className="welcome-steps">
