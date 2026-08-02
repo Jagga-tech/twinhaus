@@ -103,7 +103,7 @@ export function ChatPanel() {
       <div className="chat-log">
         {transcript.length === 0 && (
           <p className="chat-empty">
-            Hi, I&apos;m Homie 👋 Ask me to <em>"turn on the living room light"</em>, or say{' '}
+            Hi, I&apos;m Homie. Ask me to <em>"turn on the living room light"</em>, or say{' '}
             <em>"is everything okay before bed?"</em>
           </p>
         )}
