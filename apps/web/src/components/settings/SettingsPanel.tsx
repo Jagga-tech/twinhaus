@@ -8,6 +8,16 @@ const MODEL_PLACEHOLDER: Record<LlmProviderId, string> = {
   ollama: 'llama3.1',
 };
 
+/**
+ * Known-good model ids offered as autocomplete on the model field, so a typo like "claude-opus-4"
+ * (which the API 404s) is easy to avoid. Free text is still allowed for other or newer models.
+ */
+const MODEL_SUGGESTIONS: Record<LlmProviderId, string[]> = {
+  anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5-20251001'],
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1'],
+  ollama: ['llama3.1', 'llama3.2', 'qwen2.5'],
+};
+
 /** Connect Home Assistant and pick an LLM provider, cloud APIs or fully local via Ollama. */
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const haConfig = useTwinStore((state) => state.haConfig);
@@ -128,10 +138,16 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         <label>
           Model
           <input
+            list="model-suggestions"
             value={llmConfig.model}
             placeholder={MODEL_PLACEHOLDER[llmConfig.provider]}
             onChange={(event) => setLlmConfig({ model: event.target.value })}
           />
+          <datalist id="model-suggestions">
+            {MODEL_SUGGESTIONS[llmConfig.provider].map((model) => (
+              <option key={model} value={model} />
+            ))}
+          </datalist>
         </label>
         {llmConfig.provider !== 'ollama' && (
           <label>
