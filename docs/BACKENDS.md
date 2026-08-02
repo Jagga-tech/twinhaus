@@ -5,9 +5,9 @@ Twinhaus is a browser-based digital twin. It never speaks a device protocol itse
 is no longer the only one. This is how Twinhaus stays useful with or without HA.
 
 ```
-Twin · Agent · Energy · Positioning   (never learn which backend they're on)
+Twin, Agent, Energy, Positioning   (never learn which backend they're on)
               │
-        DeviceProvider          connect · status · state stream · getStates · callService
+        DeviceProvider          connect, status, state stream, getStates, callService
    ┌──────────┼───────────┬──────────────┬───────────────┐
 Home Assistant   Demo        MQTT            Matter
 (widest cover)  (no hub)   (zigbee2mqtt)  (companion svc)
@@ -18,23 +18,23 @@ a status + state-change subscription, `getStates()`, and `callService()`. An opt
 capability (area/floor/device lists) powers the auto home-scan; backends without it simply omit it and
 the scan UI steps aside.
 
-Pick the backend in **Settings → Device backend**. The choice is persisted, and the topbar pill shows
+Pick the backend in **Settings to Device backend**. The choice is persisted, and the topbar pill shows
 which one is live (HA / Demo / MQTT / Matter).
 
-## Home Assistant — `homeassistant`
+## Home Assistant , `homeassistant`
 
 The default. Adapts the existing `HaClient` (auth, state subscription, auto-reconnect, service calls)
 to `DeviceProvider`, and exposes the area/floor registry for home-scan. HA gives the widest device
 coverage because you inherit its entire integration ecosystem. Needs a URL + long-lived token.
 
-## Demo — `demo`
+## Demo , `demo`
 
 A fully self-contained backend: no hub, no hardware. It seeds ten live devices, answers control by
 mutating in-memory state (emitting the same `state_changed` events a real backend would), and gently
 animates itself. Selecting it also loads a furnished four-room twin when your twin is empty, so a
 first-run visitor can explore, control devices, and watch the twin react before connecting anything.
 
-## MQTT (zigbee2mqtt) — `mqtt`
+## MQTT (zigbee2mqtt) , `mqtt`
 
 An HA-free live backend that speaks MQTT straight to a [zigbee2mqtt](https://www.zigbee2mqtt.io/)
 bridge over WebSocket, so you control a real Zigbee network with just a broker.
@@ -48,18 +48,18 @@ Requirements: an MQTT broker with a WebSocket listener (e.g. Mosquitto on `ws://
 zigbee2mqtt bridge publishing to it. Enter the broker's WebSocket URL in Settings. The mapping and
 provider are tested against a fake transport; a live broker is needed to exercise it end to end.
 
-## Matter — `matter`
+## Matter , `matter`
 
 A browser **cannot** commission or drive Matter devices directly: that needs a native controller
 (BLE/Thread/mDNS, certificates, PASE/CASE). So the Matter backend talks to a small **local companion
 service** that runs the Matter fabric and bridges it to this JSON-over-WebSocket contract:
 
 ```
-browser → service:   { "type": "subscribe" }
+browser to service:   { "type": "subscribe" }
                      { "type": "command", "domain": "...", "service": "...",
                        "entity_id": "...", "data": { ... } }
 
-service → browser:   { "type": "snapshot", "states": [ EntityState, ... ] }
+service to browser:   { "type": "snapshot", "states": [ EntityState, ... ] }
                      { "type": "event", "state": EntityState }
 ```
 

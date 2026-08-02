@@ -4,7 +4,7 @@ import { positioningStatus } from '../lib/positioningSources.js';
 import { resolveWelcome, type WelcomeStep } from '../lib/welcomeFlow.js';
 
 /**
- * The first-run spine. A dismissible checklist that threads Twinhaus's features into one journey, * connect → build → control → locate → talk, steering the user to the right tab for each step and
+ * The first-run spine. A dismissible checklist that threads Twinhaus's features into one journey, * connect to build to control to locate to talk, steering the user to the right tab for each step and
  * ticking steps off live as they're done. It's guidance, not a wall: the app stays fully usable
  * underneath, and finishing or skipping hides it for good.
  */
@@ -61,11 +61,11 @@ export function WelcomeFlow({ onOpenSettings }: { onOpenSettings: () => void }) 
             key={step.id}
             className={`welcome-step${step.done ? ' done' : ''}${step.current ? ' current' : ''}`}
           >
-            <span className="welcome-check">{step.done ? '✓' : '○'}</span>
+            <span className="welcome-check">{step.done ? 'done' : ''}</span>
             <div className="welcome-step-body">
               <span className="welcome-step-title">
                 {step.title}
-                {step.optional && !step.done ? ' · optional' : ''}
+                {step.optional && !step.done ? ', optional' : ''}
               </span>
               {step.current && (
                 <>

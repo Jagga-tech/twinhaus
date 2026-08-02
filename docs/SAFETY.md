@@ -11,7 +11,7 @@ loop with four independent guards, all in `packages/agent` and fully unit-tested
 - **`packages/agent/src/agent.ts`**, the loop enforces the guards around every tool call.
 - **`apps/web` chat**, renders the inline Approve/Deny prompt for guarded actions.
 
-Read-only tools (`describe_home`, `list_entities`, `search_device_catalog`, …) never touch this
+Read-only tools (`describe_home`, `list_entities`, `search_device_catalog`, ...) never touch this
 layer; only state-changing actions (`call_service`) do.
 
 ## The four guards
@@ -58,8 +58,8 @@ device actually reached the intended state instead of assuming success:
   service, unknown entity), that would just repeat the error.
 - **Confirm the outcome.** For unambiguous transitions (`expectedStateFor`, on/off, lock/unlock,
   cover open/close), `confirmState` polls the live state for a couple of seconds. If it lands, the
-  tool reports "confirmed it is now …"; if not, it reports "couldn't confirm it took effect (still
-  …)" and the agent is instructed to tell the user rather than claim success.
+  tool reports "confirmed it is now ..."; if not, it reports "couldn't confirm it took effect (still
+  ...)" and the agent is instructed to tell the user rather than claim success.
 
 Lives in `apps/web/src/lib/verifyAction.ts` (pure and injectable, so it's unit-tested without
 timers), wired into the `call_service` adapter in `homeContext.ts`.

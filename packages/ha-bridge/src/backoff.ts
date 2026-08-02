@@ -1,4 +1,4 @@
-/** Tuning for {@link backoffDelay}. Defaults give 1s, 2s, 4s … capped at 30s. */
+/** Tuning for {@link backoffDelay}. Defaults give 1s, 2s, 4s ... capped at 30s. */
 export interface BackoffOptions {
   /** Delay for the first retry, in ms. */
   baseMs?: number;

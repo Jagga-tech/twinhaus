@@ -15,7 +15,7 @@ ESP32 proxy A (placed in twin) ─┐   distance sensors in HA
 ESP32 proxy B (placed in twin) ─┼─► (device_class: distance, anchor, target)
 ESP32 proxy C (placed in twin) ─┘            │
                                              ▼
-                              estimatePosition → trilaterate → (x, z) + confidence
+                              estimatePosition to trilaterate to (x, z) + confidence
                                              │
                                              ▼
                               device dot moves in the twin, ringed by a confidence halo
@@ -23,14 +23,14 @@ ESP32 proxy C (placed in twin) ─┘            │
 
 ## How the math works
 
-- **RSSI → distance.** Signal strength falls off with distance by the log-distance path-loss model:
-  `distance = 10^((refRssi - rssi) / (10·n))`, where `refRssi` is the RSSI at 1 m and `n` is the
+- **RSSI to distance.** Signal strength falls off with distance by the log-distance path-loss model:
+  `distance = 10^((refRssi - rssi) / (10,n))`, where `refRssi` is the RSSI at 1 m and `n` is the
   environment exponent (2 in open air, higher through walls). `rssiToDistanceM` does this, useful
   if an integration gives raw RSSI rather than meters.
-- **Distances → a point (trilateration).** Each anchor's distance defines a circle; the device sits
+- **Distances to a point (trilateration).** Each anchor's distance defines a circle; the device sits
   where they intersect. `trilaterate` linearizes the circle equations (subtracting a reference) and
-  solves the 2×2 least-squares system, so it uses _all_ anchors, not just three, and averages out
-  noise. It needs ≥3 anchors and returns null if they're collinear.
+  solves the 2x2 least-squares system, so it uses _all_ anchors, not just three, and averages out
+  noise. It needs >=3 anchors and returns null if they're collinear.
 - **Fallbacks.** With one or two anchors, `estimatePosition` blends anchor positions weighted by
   proximity (closer pulls harder) at capped confidence. With none, it declines.
 - **Confidence.** Every estimate carries a 0 to 1 confidence from how tightly the distances agree
@@ -60,14 +60,14 @@ Turnkey setup files live in [`docs/positioning/`](positioning/):
 - [`distance-template-sensor.yaml`](positioning/distance-template-sensor.yaml), a HA template
   sensor that re-publishes an ESPresense/Bermuda distance in the shape above.
 
-In the app, the **Import → Live positioning** panel reports readiness: how many referenced anchors
+In the app, the **Import to Live positioning** panel reports readiness: how many referenced anchors
 are placed, which are still missing, and whether there's enough to trilaterate (`positioningStatus`).
 
 ## Where it lives
 
 - **`apps/web/src/lib/positioning.ts`**, the pure engine: `rssiToDistanceM`, `trilaterate`,
   `estimatePosition`. Fully unit-tested with exact and noisy fixtures.
-- **`apps/web/src/lib/positioningSources.ts`**, `deriveLivePositions`, the HA-sensor → estimate
+- **`apps/web/src/lib/positioningSources.ts`**, `deriveLivePositions`, the HA-sensor to estimate
   ingestion.
 - **`apps/web/src/hooks/useLivePositioning.ts`**, recomputes as placements and live state change.
 - **`apps/web` store + `DeviceMarker`**, `livePositions` overrides a device's static placement and

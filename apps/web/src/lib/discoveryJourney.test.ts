@@ -47,7 +47,7 @@ describe('discovery journey', () => {
     });
   });
 
-  it('device appears → add → flow completes → placement → visible in the twin', async () => {
+  it('device appears to add to flow completes to placement to visible in the twin', async () => {
     const store = useTwinStore.getState();
 
     const flows: RawConfigFlow[] = [

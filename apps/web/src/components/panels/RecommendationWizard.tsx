@@ -98,7 +98,7 @@ export function RecommendationWizard({ onClose }: { onClose: () => void }) {
               return (
                 <li key={index}>
                   {device.label}, ~${device.approxPriceUsd}
-                  {device.note ? ` · ${device.note}` : ''}
+                  {device.note ? `, ${device.note}` : ''}
                   {pick && (
                     <span className="recommend-pick">
                       e.g. {pick.brand} {pick.model}

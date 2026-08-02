@@ -45,9 +45,9 @@ describe('resolveWelcome', () => {
       agentUsed: true,
       levelCount: 1,
     });
-    // locate (optional) is still not done, so it's the nudge…
+    // locate (optional) is still not done, so it's the nudge...
     expect(flow.currentId).toBe('locate');
-    // …but every required step is done, so the flow can be finished.
+    // ...but every required step is done, so the flow can be finished.
     expect(flow.allRequiredDone).toBe(true);
   });
 

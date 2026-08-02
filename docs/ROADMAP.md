@@ -17,7 +17,7 @@ The smallest thing that's demo-able and useful.
 
 ## Phase 2, Depth
 
-- [x] Capture import (RoomPlan-style JSON → rooms), `apps/web/src/lib/twinIo.ts`
+- [x] Capture import (RoomPlan-style JSON to rooms), `apps/web/src/lib/twinIo.ts`
 - [x] More device types (locks, climate, cameras, media, covers) + click-to-control inspector
 - [x] Per-room energy heatmap (from power/energy entities), `apps/web/src/lib/energy.ts`
 - [x] Agent automations ("turn everything off when I leave") via `list_entities` + `call_service`
@@ -52,7 +52,7 @@ The smallest thing that's demo-able and useful.
 
 - [x] Cross-brand `DEVICE_CATALOG` spanning every category, local & cloud setups, all radios, `packages/discovery/src/catalog.ts`
 - [x] `searchCatalog` free-text + category/protocol/setup/price filters, cheapest-first
-- [x] Catalog browse tab: search, filter, simulate-in-twin, and "How to add →" HA docs link
+- [x] Catalog browse tab: search, filter, simulate-in-twin, and "How to add" HA docs link
 - [x] Recommendation wizard names a real catalog pick per device (`suggestForCategory`)
 - [x] Read-only agent tool `search_device_catalog` (recommends only; HA still does the adding)
 - [x] `docs/CATALOG.md`, data model, search semantics, why it's curated
@@ -79,14 +79,14 @@ The smallest thing that's demo-able and useful.
 
 - [x] Read HA's area/device/entity registries, `listAreas`/`listDeviceRegistry`/`listEntityRegistry` in `packages/ha-bridge`
 - [x] Auto-generate a room per area and place every placeable device in its room, `apps/web/src/lib/homeScan.ts`
-- [x] Entity→device→area resolution (entity area overrides device area); non-placeable/no-area entities skipped and reported
+- [x] Entitytodevicetoarea resolution (entity area overrides device area); non-placeable/no-area entities skipped and reported
 - [x] "Scan from Home Assistant" in the Import tab: one click, then a review step to rename rooms, reassign, or drop devices before applying (`applyReview`)
 - [x] `docs/HOME-SCAN.md`, how it works and the Slice 2 (review) / Slice 3 (position-from-distance) roadmap
-- [x] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies → Bermuda/ESPresense), `apps/web/src/lib/positioning.ts`
+- [x] Slice 3: fine position within a room from Bluetooth/UWB ranging (ESPHome BT proxies to Bermuda/ESPresense), `apps/web/src/lib/positioning.ts`
 
 ## Position from distance
 
-- [x] Log-distance RSSI→meters + least-squares trilateration (≥3 anchors) with proximity fallback, `positioning.ts`
+- [x] Log-distance RSSItometers + least-squares trilateration (>=3 anchors) with proximity fallback, `positioning.ts`
 - [x] Confidence per estimate from the fit residual; honest "roughly here" halo in the twin
 - [x] Documented HA distance-sensor ingestion (`device_class: distance` + `anchor`/`target`), inert without ranging, `positioningSources.ts`
 - [x] Live `livePositions` store slice + `useLivePositioning` so device dots follow movement; `DeviceMarker` overrides static placement
@@ -97,5 +97,5 @@ The smallest thing that's demo-able and useful.
 
 - Matter and energy monitors (Emporia/Shelly) are consumed automatically as Home Assistant
   entities, the energy heatmap reads their power values with no extra integration.
-- Native on-device LiDAR scanning and photo→floorplan CV are iOS/vision problems outside the
+- Native on-device LiDAR scanning and phototofloorplan CV are iOS/vision problems outside the
   web app; Twinhaus implements the **import** side so those pipelines land as editable rooms.

@@ -53,7 +53,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 │  Twinhaus core                              │
 │  ┌──────────────────┐  ┌─────────────────┐  │
 │  │ Twin state engine│  │    AI agent     │  │
-│  │ rooms · devices  │  │ LLM + tool calls│  │
+│  │ rooms, devices  │  │ LLM + tool calls│  │
 │  └──────────────────┘  └─────────────────┘  │
 └──────────────────────┬──────────────────────┘
                        │  WebSocket API
@@ -61,7 +61,7 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 │  Home Assistant  (2000+ integrations)       │
 └──────────────────────┬──────────────────────┘
                        │
-        Zigbee · Matter · WiFi devices
+        Zigbee, Matter, WiFi devices
 ```
 
 Twinhaus never talks to hardware directly, a device backend is always the device layer. Home Assistant is the default (and widest) backend; MQTT, Matter, and a hardware-free Demo are others, all behind one provider interface ([docs/BACKENDS.md](docs/BACKENDS.md)). We are the 3D + AI layer on top.
@@ -70,7 +70,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
 ## Getting started
 
-> ⚠️ Twinhaus is in early development. The MVP targets: floor plan editor → 3D extrusion → live Home Assistant device states → chat control of lights.
+> ⚠️ Twinhaus is in early development. The MVP targets: floor plan editor to 3D extrusion to live Home Assistant device states to chat control of lights.
 
 ```bash
 git clone https://github.com/Jagga-tech/twinhaus.git
@@ -79,7 +79,7 @@ npm install
 npm run dev
 ```
 
-Then open `http://localhost:5173`, draw your floor plan, and connect your Home Assistant instance (Settings → paste your HA URL + long-lived access token).
+Then open `http://localhost:5173`, draw your floor plan, and connect your Home Assistant instance (Settings to paste your HA URL + long-lived access token).
 
 ## Roadmap
 
@@ -92,7 +92,7 @@ Then open `http://localhost:5173`, draw your floor plan, and connect your Home A
 - [x] **Agent safety loop**: risk classification, confirmation gate, circuit breaker, action budget, and verify-after-act so the agent can never cause a serious issue while operating ([docs](docs/SAFETY.md))
 - [x] **Self-healing connection**: auto-reconnect with exponential backoff, subscription re-establishment, and snapshot resync so a Home Assistant restart or network blip never leaves the twin stale ([docs](docs/RESILIENCE.md))
 - [x] **Whole-house structure**: multi-floor levels with a floor switcher, stacked 3D view, per-floor + whole-home summaries, building-type starts, and scan-by-HA-floor ([docs](docs/STRUCTURE.md))
-- [x] **Guided onboarding**: a first-run WelcomeFlow that threads connect → build → control → locate → talk into one journey ([workflow](docs/WORKFLOW.md))
+- [x] **Guided onboarding**: a first-run WelcomeFlow that threads connect to build to control to locate to talk into one journey ([workflow](docs/WORKFLOW.md))
 - [x] **Scan your home**: no drawing, generate a room per Home Assistant area and auto-place every device where it already lives ([docs](docs/HOME-SCAN.md))
 - [x] **Position from distance**: trilaterate a device's live spot within a room from Bluetooth ranging (ESPHome proxies / ESPresense / Bermuda), with an honest confidence halo ([docs](docs/POSITIONING.md))
 

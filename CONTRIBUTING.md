@@ -28,7 +28,7 @@ Before opening a PR, run the same checks CI runs:
 
 ```bash
 npm run typecheck   # all workspaces
-npm test            # vitest (agent loop, geometry, energy, IO, controls, …)
+npm test            # vitest (agent loop, geometry, energy, IO, controls, ...)
 npm run build       # web production build
 ```
 

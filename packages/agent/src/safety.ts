@@ -2,7 +2,7 @@
  * The agent's safety layer. Every control action the model wants to run is assessed here before
  * it touches Home Assistant, so the loop can never cause a serious, hard-to-undo problem while
  * operating, unlocking the house, disarming the alarm, opening a garage, or cutting the heat in
- * winter. Read-only tools (describe_home, list_entities, …) never reach this layer; only actions
+ * winter. Read-only tools (describe_home, list_entities, ...) never reach this layer; only actions
  * that change device state do.
  */
 

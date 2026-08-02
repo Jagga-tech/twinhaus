@@ -61,7 +61,7 @@ function residual(point: Point2D, anchors: Anchor[], readings: DistanceReading[]
 
 /**
  * Least-squares trilateration. Subtracts a reference equation to linearize the circle equations,
- * then solves the 2×2 normal equations. Returns null when there are fewer than three anchors or
+ * then solves the 2x2 normal equations. Returns null when there are fewer than three anchors or
  * they're collinear/degenerate (a singular system), the caller falls back to proximity.
  */
 export function trilaterate(anchors: Anchor[], readings: DistanceReading[]): Point2D | null {
@@ -118,7 +118,7 @@ function proximity(anchors: Anchor[], readings: DistanceReading[]): Point2D | nu
 }
 
 /**
- * Estimate a device's position from its distance readings. Prefers trilateration (≥3 anchors) and
+ * Estimate a device's position from its distance readings. Prefers trilateration (>=3 anchors) and
  * falls back to a proximity blend (1 to 2 anchors); returns null when nothing usable is available.
  * Confidence shrinks as the residual grows, and the proximity fallback is capped lower since a
  * blend of one or two anchors can't pin a point.

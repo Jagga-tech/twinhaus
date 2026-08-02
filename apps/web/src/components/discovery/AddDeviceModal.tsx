@@ -60,10 +60,10 @@ export function AddDeviceModal({
           </button>
         </div>
         <p className="hint">
-          {device.brand} · via {device.source}
+          {device.brand}, via {device.source}
         </p>
 
-        {flow.status === 'progress' && <p>Starting setup…</p>}
+        {flow.status === 'progress' && <p>Starting setup...</p>}
 
         {flow.status === 'form' && (
           <>
@@ -80,7 +80,7 @@ export function AddDeviceModal({
             ))}
             <div className="settings-actions">
               <button className="primary" onClick={submit} disabled={busy}>
-                {busy ? 'Adding…' : flow.fields.length ? 'Submit' : 'Confirm'}
+                {busy ? 'Adding...' : flow.fields.length ? 'Submit' : 'Confirm'}
               </button>
             </div>
           </>
@@ -117,7 +117,7 @@ function FieldInput({
         />
       ) : field.type === 'select' ? (
         <select value={String(value ?? '')} onChange={(e) => onChange(e.target.value)}>
-          <option value="">Select…</option>
+          <option value="">Select...</option>
           {field.options?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

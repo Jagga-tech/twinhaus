@@ -1,6 +1,6 @@
 /**
  * The first-run spine. Twinhaus has many features living in separate tabs; this resolves them into
- * one ordered journey, connect → scan → control → locate → talk, and tracks progress from live
+ * one ordered journey, connect to scan to control to locate to talk, and tracks progress from live
  * app state rather than a stored cursor, so a step ticks off the moment the user actually does it
  * (and un-ticks if they undo it). Pure and state-driven, so the whole flow is unit-tested.
  */
@@ -59,7 +59,7 @@ const SPECS: StepSpec[] = [
   {
     id: 'control',
     title: 'Control your twin',
-    body: 'Tap a device in the 3D view to control it. No smart devices yet? Open Simulate → Recommend to plan a kit and preview it.',
+    body: 'Tap a device in the 3D view to control it. No smart devices yet? Open Simulate to Recommend to plan a kit and preview it.',
     target: 'simulate',
     optional: false,
     isDone: (input) => input.hasDevices,

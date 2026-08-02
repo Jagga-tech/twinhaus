@@ -14,8 +14,8 @@ integration that actually adds the device, so a recommendation always ends in HA
   is the same domain as "Found near you": what Home Assistant can configure. Integration handlers
   match `normalize.ts`, so a device discovered on the network can be cross-referenced to its catalog
   entry.
-- **`apps/web` → Catalog tab**, the browse UI: a search box, category / protocol / local-or-cloud
-  filters, and a card per device. Each card links to HA's docs ("How to add →") and can drop the
+- **`apps/web` to Catalog tab**, the browse UI: a search box, category / protocol / local-or-cloud
+  filters, and a card per device. Each card links to HA's docs ("How to add") and can drop the
   device into the twin as a **simulated placement** to preview coverage before buying.
 - **Recommendation wizard**, each recommended device now names a real catalog pick
   (`suggestForCategory`), and points to the Catalog tab for the full list.

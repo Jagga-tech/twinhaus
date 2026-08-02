@@ -67,7 +67,7 @@ export function deriveLivePositions(
 }
 
 export interface PositioningStatus {
-  /** Whether there's enough to trilaterate: ≥3 placed anchors and at least one tracked device. */
+  /** Whether there's enough to trilaterate: >=3 placed anchors and at least one tracked device. */
   ready: boolean;
   /** Anchor entity ids referenced by distance sensors. */
   anchorsReferenced: string[];

@@ -47,10 +47,10 @@ export function computeRoomEnergy(
   return { byRoom, max, total };
 }
 
-/** Map a normalized 0..1 intensity to a green→amber→red heatmap color. */
+/** Map a normalized 0..1 intensity to a greentoambertored heatmap color. */
 export function heatColor(intensity: number): string {
   const t = Math.max(0, Math.min(1, intensity));
-  // green (76,175,80) → amber (255,193,7) → red (229,57,53)
+  // green (76,175,80) to amber (255,193,7) to red (229,57,53)
   const stops =
     t < 0.5
       ? lerp([76, 175, 80], [255, 193, 7], t / 0.5)

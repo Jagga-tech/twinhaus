@@ -11,11 +11,11 @@ Home Assistant registries                     Twinhaus
 ─────────────────────────                     ────────
 config/area_registry/list    ──▶  areas   ──▶  one room per area (packed into a tidy grid)
 config/device_registry/list  ──▶  devices ─┐
-config/entity_registry/list  ──▶ entities ─┴▶  entity → device → area → room
+config/entity_registry/list  ──▶ entities ─┴▶  entity to device to area to room
                                                placeable entities dropped into their room
                                                        │
                                                        ▼
-                                          preview ("6 rooms, 18 devices") → Apply
+                                          preview ("6 rooms, 18 devices") to Apply
 ```
 
 - **`packages/ha-bridge`** exposes `listAreas()`, `listDeviceRegistry()`, and
@@ -23,7 +23,7 @@ config/entity_registry/list  ──▶ entities ─┴▶  entity → device →
 - **`apps/web/src/lib/homeScan.ts`** is the pure builder: `packAreasIntoRooms` lays out a room per
   area, `resolveEntityArea` maps each entity to its area (the entity's own assignment wins, else it
   inherits its device's), and `buildHomeScan` returns a ready-to-import `TwinModel`.
-- **Import tab → "Scan from Home Assistant"** runs it, shows a preview, and applies it to the twin.
+- **Import tab to "Scan from Home Assistant"** runs it, shows a preview, and applies it to the twin.
 
 ## What gets placed
 

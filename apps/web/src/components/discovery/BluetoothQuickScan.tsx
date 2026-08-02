@@ -67,7 +67,7 @@ export function BluetoothQuickScan() {
   return (
     <div className="bt-scan">
       <button onClick={scan} disabled={scanning}>
-        {scanning ? 'Scanning…' : 'Quick scan (beta)'}
+        {scanning ? 'Scanning...' : 'Quick scan (beta)'}
       </button>
       {result && <span className="hint">{result}</span>}
       <p className="hint">

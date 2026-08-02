@@ -35,7 +35,7 @@ export interface PlanLine {
   count: number;
   /** Unit price if the device is a priced catalog product; 0 for generic placements. */
   unitPriceUsd: number;
-  /** count × unitPriceUsd. */
+  /** count x unitPriceUsd. */
   lineTotalUsd: number;
 }
 
