@@ -29,8 +29,11 @@ export function ChatPanel() {
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
 
-  // One agent per provider configuration; a new key rebuilds it with fresh settings.
-  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}`;
+  // One agent per provider configuration. The API key is part of the identity, entering or changing
+  // it must rebuild the agent, otherwise an agent created before the key was saved keeps sending an
+  // empty x-api-key and the API 401s. A short fingerprint keeps the secret out of the render key.
+  const keyFingerprint = `${llmConfig.apiKey.length}:${llmConfig.apiKey.slice(-4)}`;
+  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}:${keyFingerprint}`;
   const agentRef = useRef<{ key: string; agent: Agent } | null>(null);
   const agent = useMemo(() => {
     if (agentRef.current?.key !== agentKey) {
