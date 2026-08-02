@@ -66,7 +66,7 @@ export function DeviceCatalog() {
       <input
         className="catalog-search"
         type="search"
-        placeholder="Search brand, category, protocol…"
+        placeholder="Search brand, category, protocol..."
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
@@ -130,10 +130,10 @@ export function DeviceCatalog() {
               {device.note && <p className="catalog-note">{device.note}</p>}
               <div className="catalog-actions">
                 <button onClick={() => simulate(device)}>
-                  {added === device.id ? 'Simulated ✓' : 'Simulate in twin'}
+                  {added === device.id ? 'Added to plan' : 'Simulate in twin'}
                 </button>
                 <a href={catalogDocsUrl(device)} target="_blank" rel="noreferrer">
-                  How to add →
+                  How to add
                 </a>
               </div>
             </div>

@@ -69,7 +69,7 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
   return (
     <div className="panel-block">
       <button className="primary" onClick={onOpenWizard}>
-        Recommend devices for my home →
+        Recommend devices for my home
       </button>
       <p className="hint">No smart devices yet? The wizard suggests a kit and plans it here.</p>
 
@@ -108,10 +108,10 @@ export function SimulationPanel({ onOpenWizard }: { onOpenWizard: () => void }) 
               <li key={`${line.label}-${line.unitPriceUsd}`} className="plan-line">
                 <span className="plan-line-label">
                   {CATEGORY_GLYPH[line.category]} {line.label}
-                  {line.count > 1 ? ` ×${line.count}` : ''}
+                  {line.count > 1 ? ` x${line.count}` : ''}
                 </span>
                 <span className="plan-line-price">
-                  {line.unitPriceUsd > 0 ? `$${line.lineTotalUsd}` : '—'}
+                  {line.unitPriceUsd > 0 ? `$${line.lineTotalUsd}` : 'n/a'}
                 </span>
               </li>
             ))}

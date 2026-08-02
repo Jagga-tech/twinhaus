@@ -79,7 +79,7 @@ describe('DemoProvider', () => {
     await provider.connect({});
     expect(fire).toBeTypeOf('function');
     fire!();
-    // random 0.9 > 0.6 → motion detected.
+    // random 0.9 > 0.6 to motion detected.
     expect(events.some((e) => e.entity_id === 'binary_sensor.demo_hall_motion')).toBe(true);
   });
 });

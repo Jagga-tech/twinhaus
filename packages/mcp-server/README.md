@@ -14,7 +14,7 @@ exported from the web app and (optionally) connects to Home Assistant for live s
 
 ## Run
 
-Export your twin from the web app (**Import → Export twin**), then:
+Export your twin from the web app (**Import to Export twin**), then:
 
 ```bash
 npm install

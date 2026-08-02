@@ -13,7 +13,7 @@ describe('packAreasIntoRooms', () => {
     const rooms = packAreasIntoRooms(areas);
     expect(rooms.map((r) => r.name)).toEqual(['Living Room', 'Kitchen', 'Hall']);
     expect(rooms.map((r) => r.id)).toEqual(['scan_living', 'scan_kitchen', 'scan_hall']);
-    // Same input → same layout (no randomness or clock).
+    // Same input to same layout (no randomness or clock).
     expect(packAreasIntoRooms(areas)).toEqual(rooms);
   });
 
@@ -34,7 +34,7 @@ describe('packAreasIntoRooms', () => {
 describe('resolveEntityArea', () => {
   const deviceAreas = new Map([['dev1', 'kitchen']]);
 
-  it('prefers the entity’s own area over its device’s', () => {
+  it("prefers the entity's own area over its device's", () => {
     const entity: RawEntityRegistryEntry = {
       entity_id: 'light.x',
       device_id: 'dev1',
@@ -43,7 +43,7 @@ describe('resolveEntityArea', () => {
     expect(resolveEntityArea(entity, deviceAreas)).toBe('living');
   });
 
-  it('falls back to the device’s area', () => {
+  it("falls back to the device's area", () => {
     const entity: RawEntityRegistryEntry = { entity_id: 'light.x', device_id: 'dev1' };
     expect(resolveEntityArea(entity, deviceAreas)).toBe('kitchen');
   });

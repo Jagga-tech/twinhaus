@@ -44,7 +44,7 @@ describe('quickControls', () => {
     expect(playing[0].label).toBe('Pause');
     expect(playing[0].active).toBe(true);
     expect(quickControls(state('media_player.tv', 'idle'))[0].label).toBe('Play');
-    expect(playing.map((c) => c.label)).toEqual(['Pause', '⏮', '⏭', 'Vol -', 'Vol +']);
+    expect(playing.map((c) => c.label)).toEqual(['Pause', 'Prev', 'Next', 'Vol -', 'Vol +']);
   });
 
   it('offers clean/dock for a vacuum', () => {

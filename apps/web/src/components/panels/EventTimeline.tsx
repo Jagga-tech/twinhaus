@@ -37,7 +37,7 @@ export function EventTimeline() {
               {entityLabel(event.entityId, entityStates[event.entityId])}
             </span>
             <span className="event-detail">
-              {event.from} → {event.to} · {roomName(event.roomId)}
+              {event.from} to {event.to}, {roomName(event.roomId)}
             </span>
             <span className="event-time">{formatTime(event.at)}</span>
           </button>

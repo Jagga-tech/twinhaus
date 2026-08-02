@@ -162,7 +162,7 @@ describe('HaClient reconnection', () => {
     h.fireTimer();
     h.sockets[1].drop(); // attempt 2 scheduled
     h.fireTimer();
-    h.sockets[2].drop(); // over budget → give up
+    h.sockets[2].drop(); // over budget to give up
 
     expect(h.client.getStatus()).toBe('disconnected');
     expect(h.hasTimer()).toBe(false);

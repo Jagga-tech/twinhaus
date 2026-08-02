@@ -83,14 +83,14 @@ export function ChatPanel() {
 
   function onAgentEvent(event: AgentEvent) {
     if (event.type === 'tool_call') {
-      appendItem({ role: 'tool', text: `→ ${event.name}(${JSON.stringify(event.input)})` });
+      appendItem({ role: 'tool', text: `${event.name}(${JSON.stringify(event.input)})` });
     } else if (event.type === 'tool_result') {
-      const prefix = event.isError ? '✗' : '✓';
+      const prefix = event.isError ? 'error:' : 'ok:';
       appendItem({ role: 'tool', text: `${prefix} ${truncate(event.content)}` });
     } else if (event.type === 'action_blocked') {
-      appendItem({ role: 'tool', text: `🛡️ Declined (${event.reason}), not executed.` });
+      appendItem({ role: 'tool', text: `Declined (${event.reason}), not executed.` });
     } else if (event.type === 'loop_halted') {
-      appendItem({ role: 'tool', text: `🛑 Stopped for safety: ${event.reason}.` });
+      appendItem({ role: 'tool', text: `Stopped for safety: ${event.reason}.` });
     }
   }
 
@@ -115,7 +115,7 @@ export function ChatPanel() {
 
         {pending && (
           <div className="confirm-card">
-            <div className="confirm-head">🛡️ Confirm {pending.verdict.risk} action</div>
+            <div className="confirm-head">Confirm {pending.verdict.risk} action</div>
             <p className="confirm-body">
               The agent wants to run{' '}
               <code>
@@ -145,15 +145,15 @@ export function ChatPanel() {
           value={input}
           placeholder={
             connectionStatus === 'connected'
-              ? 'Talk to your home…'
-              : 'Connect Home Assistant to control devices…'
+              ? 'Talk to your home...'
+              : 'Connect Home Assistant to control devices...'
           }
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => event.key === 'Enter' && handleSend()}
           disabled={busy}
         />
         <button onClick={handleSend} disabled={busy || !input.trim()}>
-          {busy ? '…' : 'Send'}
+          {busy ? '...' : 'Send'}
         </button>
       </div>
     </div>
@@ -161,5 +161,5 @@ export function ChatPanel() {
 }
 
 function truncate(text: string, max = 140): string {
-  return text.length > max ? `${text.slice(0, max)}…` : text;
+  return text.length > max ? `${text.slice(0, max)}...` : text;
 }

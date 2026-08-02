@@ -39,7 +39,7 @@ export type ConnectionStatus =
 export interface HaConnectionConfig {
   /** Base URL of the Home Assistant instance, e.g. `http://homeassistant.local:8123`. */
   url: string;
-  /** A long-lived access token (Profile → Long-Lived Access Tokens in HA). */
+  /** A long-lived access token (Profile to Long-Lived Access Tokens in HA). */
   token: string;
 }
 

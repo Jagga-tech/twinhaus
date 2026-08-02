@@ -1,6 +1,6 @@
 import { entityDomain, type HaEntityState } from '@twinhaus/ha-bridge';
 
-/** Domains whose "active" visual should glow in the twin (lights, switches, motion, …). */
+/** Domains whose "active" visual should glow in the twin (lights, switches, motion, ...). */
 const ACTIVE_STATES = new Set([
   'on',
   'open',

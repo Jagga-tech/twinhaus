@@ -178,9 +178,9 @@ export function buildHomeScan(
 
 /** User edits to a scan before applying it: rename rooms, move a device, or drop one entirely. */
 export interface ScanReview {
-  /** roomId → new name. */
+  /** roomId to new name. */
   roomNames: Record<string, string>;
-  /** entityId → the roomId it should live in (overrides the auto-assignment). */
+  /** entityId to the roomId it should live in (overrides the auto-assignment). */
   assignments: Record<string, string>;
   /** entityIds to leave out of the twin. */
   excluded: string[];

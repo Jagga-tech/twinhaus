@@ -10,17 +10,17 @@ recovers on its own, the failure the system couldn't previously solve.
 socket drops (HA restart / network blip)
       │
       ▼
-status → "reconnecting"        the badge pulses; the app knows it's degraded, not dead
-      │  exponential backoff (1s, 2s, 4s … capped at 30s, + jitter)
+status to "reconnecting"        the badge pulses; the app knows it's degraded, not dead
+      │  exponential backoff (1s, 2s, 4s ... capped at 30s, + jitter)
       ▼
-reopen socket → re-auth
+reopen socket to re-auth
       │
       ├─ re-subscribe to state_changed          live updates resume
       ├─ re-establish every active subscription  discovery flows keep streaming
-      └─ onReconnected → reload full snapshot     stale mirror is healed (missed events don't matter)
+      └─ onReconnected to reload full snapshot     stale mirror is healed (missed events don't matter)
       │
       ▼
-status → "connected"
+status to "connected"
 ```
 
 Key properties:

@@ -1,7 +1,7 @@
 # Twinhaus, the blended workflow
 
 One journey that stitches every shipped feature into a single product story:
-**connect → scan → live twin → recommend → locate → talk**, with safety and resilience running
+**connect to scan to live twin to recommend to locate to talk**, with safety and resilience running
 underneath the whole time. Each node maps to code that already exists, this is a build spec for
 the connective tissue (a guided first-run flow), not new subsystems.
 
@@ -15,7 +15,7 @@ flowchart TD
     Retry --> Connect
 
     Layout -->|"no, scan it"| Scan["Scan my home<br/>read HA areas + registries"]
-    Layout -->|"no, start blank"| Alt["Template · LiDAR · .glb · photo trace"]
+    Layout -->|"no, start blank"| Alt["Template, LiDAR, .glb, photo trace"]
     Layout -->|already built| Twin
 
     Scan --> Review["Review: rename rooms,<br/>reassign or drop devices"]
@@ -24,12 +24,12 @@ flowchart TD
     Apply --> Twin
 
     Twin["Live 3D twin<br/>rooms + devices, real state"] --> Tap["Tap a device to control"]
-    Twin --> Views["Energy heatmap ·<br/>security timeline"]
-    Twin --> Gaps{"Coverage gaps?<br/>no lock, no camera…"}
+    Twin --> Views["Energy heatmap ,<br/>security timeline"]
+    Twin --> Gaps{"Coverage gaps?<br/>no lock, no camera..."}
 
     Gaps -->|yes| Recommend["Recommend a kit<br/>tier + real catalog picks"]
     Recommend --> Simulate["Simulate in twin<br/>preview coverage before buying"]
-    Simulate --> AddFlow["Add via Home Assistant<br/>Found near you → config flow"]
+    Simulate --> AddFlow["Add via Home Assistant<br/>Found near you to config flow"]
     AddFlow --> Twin
 
     Twin --> Locate{"Want live<br/>positioning?"}
@@ -64,30 +64,30 @@ flowchart TD
     Twin -.heals via.-> Resilience
 ```
 
-## Node → code map (what to reuse, not rebuild)
+## Node to code map (what to reuse, not rebuild)
 
-| Flow node                       | Lives in                                                                                     |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| Connect Home Assistant          | `apps/web` Settings, `packages/ha-bridge` `HaClient.connect`                                 |
-| Scan my home                    | `packages/ha-bridge` registry reads · `apps/web/src/lib/homeScan.ts`                         |
-| Review (rename/reassign/drop)   | `homeScan.ts` `applyReview` · `HomeScanPanel`                                                |
-| Template · LiDAR · .glb · photo | `templates.ts` · `twinIo.ts` · `ImportPanel`                                                 |
-| Live 3D twin + tap to control   | `components/viewer/*` · `deviceControl.ts`                                                   |
-| Energy / security views         | `energy.ts` · security timeline                                                              |
-| Recommend a kit                 | `recommendations.ts` · `RecommendationWizard`                                                |
-| Catalog picks                   | `packages/discovery` `catalog.ts` · `DeviceCatalog`                                          |
-| Simulate before buying          | `SimulationPanel` · `CoverageViz` · virtual devices                                          |
-| Add via HA (Found near you)     | `packages/discovery` flows · `FoundNearYou`                                                  |
-| BLE proxies + readiness         | `docs/positioning/*.yaml` · `positioningSources.ts` `positioningStatus` · `PositioningPanel` |
-| Live device dots                | `positioning.ts` · `useLivePositioning` · `DeviceMarker`                                     |
-| Talk to your home (agent)       | `packages/agent` · `ChatPanel`                                                               |
-| Safety loop                     | `packages/agent` `safety.ts` + `agent.ts` · `verifyAction.ts`                                |
-| Connection resilience           | `packages/ha-bridge` `backoff.ts` + `client.ts`                                              |
+| Flow node                     | Lives in                                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| Connect Home Assistant        | `apps/web` Settings, `packages/ha-bridge` `HaClient.connect`                               |
+| Scan my home                  | `packages/ha-bridge` registry reads, `apps/web/src/lib/homeScan.ts`                        |
+| Review (rename/reassign/drop) | `homeScan.ts` `applyReview`, `HomeScanPanel`                                               |
+| Template, LiDAR, .glb, photo  | `templates.ts`, `twinIo.ts`, `ImportPanel`                                                 |
+| Live 3D twin + tap to control | `components/viewer/*`, `deviceControl.ts`                                                  |
+| Energy / security views       | `energy.ts`, security timeline                                                             |
+| Recommend a kit               | `recommendations.ts`, `RecommendationWizard`                                               |
+| Catalog picks                 | `packages/discovery` `catalog.ts`, `DeviceCatalog`                                         |
+| Simulate before buying        | `SimulationPanel`, `CoverageViz`, virtual devices                                          |
+| Add via HA (Found near you)   | `packages/discovery` flows, `FoundNearYou`                                                 |
+| BLE proxies + readiness       | `docs/positioning/*.yaml`, `positioningSources.ts` `positioningStatus`, `PositioningPanel` |
+| Live device dots              | `positioning.ts`, `useLivePositioning`, `DeviceMarker`                                     |
+| Talk to your home (agent)     | `packages/agent`, `ChatPanel`                                                              |
+| Safety loop                   | `packages/agent` `safety.ts` + `agent.ts`, `verifyAction.ts`                               |
+| Connection resilience         | `packages/ha-bridge` `backoff.ts` + `client.ts`                                            |
 
 ## The spine, WelcomeFlow (built)
 
 The features used to live in separate tabs the user had to discover. The **`WelcomeFlow`** now
-threads them into one first-run journey, connect → build → control → locate (optional) → talk, steering the user to the right tab for each step and ticking steps off **live** as they're done
+threads them into one first-run journey, connect to build to control to locate (optional) to talk, steering the user to the right tab for each step and ticking steps off **live** as they're done
 (and re-opening one if a prerequisite regresses, e.g. Home Assistant disconnects).
 
 - **`apps/web/src/lib/welcomeFlow.ts`**, `resolveWelcome(input)`, a pure state-driven resolver
@@ -101,7 +101,7 @@ threads them into one first-run journey, connect → build → control → locat
 
 ```mermaid
 flowchart LR
-    Core["Free open-source core<br/>twin · agent · scan · safety"] --> Cloud["Hosted / remote access"]
+    Core["Free open-source core<br/>twin, agent, scan, safety"] --> Cloud["Hosted / remote access"]
     Core --> Kit["Positioning starter kit<br/>pre-flashed BLE proxies"]
     Core --> Affil["Catalog affiliate<br/>recommended devices"]
     Core --> Pro["Pro install + support"]

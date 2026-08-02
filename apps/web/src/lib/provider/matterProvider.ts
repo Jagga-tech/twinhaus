@@ -14,9 +14,9 @@ import type { CompanionSocket } from './companionSocket.js';
  * companion service that runs the Matter fabric (e.g. python-matter-server behind a thin adapter)
  * and speaks this JSON-over-WebSocket contract:
  *
- *   browser → service:  { type: 'subscribe' }
+ *   browser to service:  { type: 'subscribe' }
  *                       { type: 'command', domain, service, entity_id, data }
- *   service → browser:  { type: 'snapshot', states: EntityState[] }
+ *   service to browser:  { type: 'snapshot', states: EntityState[] }
  *                       { type: 'event', state: EntityState }
  *
  * Twinhaus ships this browser half; the service half is the deployment's responsibility. See

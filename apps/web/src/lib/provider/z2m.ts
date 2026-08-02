@@ -23,7 +23,7 @@ export interface Z2mDevice {
 
 const DOMAIN_EXPOSE_TYPES = new Set(['light', 'switch', 'lock', 'cover', 'fan', 'climate']);
 
-/** Slugify a friendly name into the entity-id suffix (`Living Room Lamp` → `living_room_lamp`). */
+/** Slugify a friendly name into the entity-id suffix (`Living Room Lamp` to `living_room_lamp`). */
 export function slug(name: string): string {
   return name
     .toLowerCase()

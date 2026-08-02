@@ -19,7 +19,7 @@ Home Assistant starts a config flow  ──(config_entries/flow/subscribe)──
       │                                                                        │
       │  GET /api/config/config_entries/flow                                   ▼
       └──────────────────────────────────────────────────────────▶  @twinhaus/discovery
-                                                                     normalize → DiscoveredDevice
+                                                                     normalize to DiscoveredDevice
                                                                                 │
                                                                                 ▼
                                                               "Found near you" tray (count badge)
@@ -28,7 +28,7 @@ Home Assistant starts a config flow  ──(config_entries/flow/subscribe)──
                                                               drive the flow (PIN/credentials form)
                                                                                 │  create_entry
                                                                                 ▼
-                                                              "Where does this live?" → click a room
+                                                              "Where does this live?" to click a room
                                                                                 │
                                                                                 ▼
                                                               device placed in the 3D twin

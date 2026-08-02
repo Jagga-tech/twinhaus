@@ -55,7 +55,7 @@ interface TwinState {
   // --- Configuration (persisted) ---
   haConfig: HaConnectionConfig;
   llmConfig: LlmConfig;
-  /** The active device backend id (`homeassistant`, `demo`, `mqtt`, …). */
+  /** The active device backend id (`homeassistant`, `demo`, `mqtt`, ...). */
   providerId: string;
 
   // --- Onboarding (persisted) ---

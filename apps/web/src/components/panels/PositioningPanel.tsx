@@ -44,7 +44,7 @@ export function PositioningPanel() {
       ) : (
         <>
           <p className={status.ready ? 'positioning-ready' : 'hint'}>
-            {status.ready ? '✓ Ready, ' : ''}
+            {status.ready ? 'Ready, ' : ''}
             {status.anchorsPlaced.length} of {status.anchorsReferenced.length} anchor
             {status.anchorsReferenced.length === 1 ? '' : 's'} placed, tracking{' '}
             {status.targets.length} device{status.targets.length === 1 ? '' : 's'}.
@@ -66,7 +66,7 @@ export function PositioningPanel() {
                   <span className="track-name">{entityLabel(id, entityStates[id])}</span>
                   {estimate ? (
                     <span className={`track-confidence ${confidenceClass(estimate.confidence)}`}>
-                      {estimate.method === 'trilateration' ? 'fixed' : 'approx'} ·{' '}
+                      {estimate.method === 'trilateration' ? 'fixed' : 'approx'} ,{' '}
                       {Math.round(estimate.confidence * 100)}%
                     </span>
                   ) : (
@@ -80,7 +80,7 @@ export function PositioningPanel() {
           <label className="calibration">
             <span className="calibration-label">
               Environment calibration
-              <span className="calibration-value">×{positioningScale.toFixed(2)}</span>
+              <span className="calibration-value">x{positioningScale.toFixed(2)}</span>
             </span>
             <input
               type="range"

@@ -49,7 +49,7 @@ export function HomeScanPanel() {
       if (areas.length === 0) {
         setScan({
           status: 'error',
-          message: 'No areas found in Home Assistant. Add areas in HA (Settings → Areas) first.',
+          message: 'No areas found in Home Assistant. Add areas in HA (Settings to Areas) first.',
         });
         return;
       }
@@ -108,7 +108,7 @@ export function HomeScanPanel() {
 
       {scan.status !== 'preview' && (
         <button className="primary" onClick={runScan} disabled={scan.status === 'scanning'}>
-          {scan.status === 'scanning' ? 'Scanning…' : 'Scan my home'}
+          {scan.status === 'scanning' ? 'Scanning...' : 'Scan my home'}
         </button>
       )}
 

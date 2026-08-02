@@ -107,7 +107,7 @@ function scriptedTransport(steps: RawConfigFlowStep[]): DiscoveryTransport & { a
 }
 
 describe('ConfigFlowController', () => {
-  it('drives a form → create_entry flow to done', async () => {
+  it('drives a form to create_entry flow to done', async () => {
     const transport = scriptedTransport([
       {
         type: 'form',

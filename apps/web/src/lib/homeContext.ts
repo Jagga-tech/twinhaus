@@ -71,7 +71,7 @@ export function createHomeContext(client: Controller): HomeContext {
       }
       // Cap the listing so a large home doesn't blow the context window.
       const shown = all.slice(0, 100);
-      const suffix = all.length > shown.length ? `\n…and ${all.length - shown.length} more.` : '';
+      const suffix = all.length > shown.length ? `\n...and ${all.length - shown.length} more.` : '';
       return shown.map((state) => entitySummary(state)).join('\n') + suffix;
     },
 
@@ -118,7 +118,7 @@ export function createHomeContext(client: Controller): HomeContext {
         return `${device.brand} ${device.model} (${device.category}), ~$${device.approxPriceUsd}, ${protocols}, ${device.setup} setup via Home Assistant "${device.integration}"${note}`;
       });
       const suffix =
-        matches.length > shown.length ? `\n…and ${matches.length - shown.length} more.` : '';
+        matches.length > shown.length ? `\n...and ${matches.length - shown.length} more.` : '';
       return (
         `${lines.join('\n')}${suffix}\n\n` +
         'These are recommendations only, the user adds any device through Home Assistant.'

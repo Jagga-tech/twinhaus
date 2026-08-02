@@ -74,7 +74,7 @@ describe('normalizeLevels', () => {
       ],
     };
     const out = normalizeLevels(model);
-    expect(out.rooms.find((r) => r.id === 'a')?.levelId).toBe('ground'); // dangling → first
+    expect(out.rooms.find((r) => r.id === 'a')?.levelId).toBe('ground'); // dangling to first
     expect(out.rooms.find((r) => r.id === 'b')?.levelId).toBe('up'); // valid kept
   });
 });

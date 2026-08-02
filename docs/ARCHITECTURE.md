@@ -32,9 +32,9 @@ Twinhaus is a **3D + AI layer on top of Home Assistant**, never a replacement fo
 
 ## Data flow
 
-**Event up:** device changes → HA `state_changed` event → ha-bridge → twin state engine → 3D viewer re-renders that device.
+**Event up:** device changes to HA `state_changed` event to ha-bridge to twin state engine to 3D viewer re-renders that device.
 
-**Command down:** user message → agent → tool call → ha-bridge → HA service call → real device changes → event flows back up → twin confirms visually.
+**Command down:** user message to agent to tool call to ha-bridge to HA service call to real device changes to event flows back up to twin confirms visually.
 
 ## Onboarding paths
 

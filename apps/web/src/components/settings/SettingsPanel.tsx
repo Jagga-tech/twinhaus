@@ -73,7 +73,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               <input
                 type="password"
                 value={haConfig.token}
-                placeholder="Profile → Long-Lived Access Tokens"
+                placeholder="Profile to Long-Lived Access Tokens"
                 onChange={(event) => setHaConfig({ ...haConfig, token: event.target.value })}
               />
             </label>
@@ -107,7 +107,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             <button onClick={disconnect}>Disconnect</button>
           ) : (
             <button className="primary" onClick={connect} disabled={connecting}>
-              {connecting ? 'Connecting…' : active.standalone ? 'Start demo' : 'Connect'}
+              {connecting ? 'Connecting...' : active.standalone ? 'Start demo' : 'Connect'}
             </button>
           )}
           <span className={`status status-${status}`}>{status}</span>

@@ -117,8 +117,8 @@ export function quickControls(state: HaEntityState): QuickControl[] {
           call: { domain, service: 'media_play_pause', target },
           active: playing,
         },
-        { label: '⏮', call: { domain, service: 'media_previous_track', target } },
-        { label: '⏭', call: { domain, service: 'media_next_track', target } },
+        { label: 'Prev', call: { domain, service: 'media_previous_track', target } },
+        { label: 'Next', call: { domain, service: 'media_next_track', target } },
         { label: 'Vol -', call: { domain, service: 'volume_down', target } },
         { label: 'Vol +', call: { domain, service: 'volume_up', target } },
       ];

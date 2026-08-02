@@ -59,7 +59,7 @@ export function LevelSwitcher() {
                   onRemove(level.id, level.name);
                 }}
               >
-                ×
+                x
               </span>
             )}
           </button>
