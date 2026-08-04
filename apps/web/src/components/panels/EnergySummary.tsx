@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
 import { energyCost, formatUsd } from '../../lib/energyCost.js';
+import { solarSummary } from '../../lib/solar.js';
 
 /** Per-room power draw with a one-click jump to the 3D heatmap. HA has the data; nobody maps it. */
 export function EnergySummary() {
@@ -16,6 +17,7 @@ export function EnergySummary() {
     [rooms, devices, entityStates],
   );
   const cost = rate > 0 ? energyCost(energy.total, rate) : null;
+  const solar = useMemo(() => solarSummary(entityStates), [entityStates]);
 
   const ranked = [...rooms].sort((a, b) => (energy.byRoom[b.id] ?? 0) - (energy.byRoom[a.id] ?? 0));
 
@@ -32,6 +34,17 @@ export function EnergySummary() {
           About {formatUsd(cost.perDayUsd)} a day, {formatUsd(cost.perMonthUsd)} a month at the
           current draw. Set your rate in Settings.
         </p>
+      )}
+      {solar && (
+        <div className="solar-flow">
+          {solar.hasSolar && <span className="solar-chip solar-in">Solar {solar.solarW} W</span>}
+          {solar.gridW !== 0 && <span className="solar-chip">Grid {solar.gridW} W</span>}
+          {solar.hasBattery && (
+            <span className="solar-chip">
+              Battery{solar.batteryPct != null ? ` ${solar.batteryPct}%` : ''}
+            </span>
+          )}
+        </div>
       )}
       {energy.max === 0 ? (
         <p className="hint">
