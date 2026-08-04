@@ -11,6 +11,7 @@ import type {
   ChatMessage,
   LlmProvider,
   ProviderMessage,
+  ToolCall,
   ToolResult,
 } from './types.js';
 
@@ -32,6 +33,8 @@ You control real devices through tools. When the user asks you to do something (
 For routines and automations ("turn off everything when I leave", "movie mode", "run the good night scene"), use list_entities to find the relevant entity ids (by domain, e.g. "light", "scene", "automation"), then call_service on each one. Activate a scene with domain "scene" service "turn_on"; trigger an automation with domain "automation" service "trigger". For energy questions, use get_energy_by_room.
 
 When the user asks whether the home is ok, if anything needs attention, or is buttoning up for the night or leaving ("is everything ok?", "anything I should know before bed?"), call check_home first, it flags unlocked locks, heating or cooling running with a cover open, lots of lights left on, and high power draw. Lead with what it surfaces, then offer to fix it (which may need confirmation for guarded actions). Don't invent concerns it didn't report.
+
+When the user shares a lasting preference in passing (a favourite brightness, a nickname for a room, a routine they like), call remember_preference so you can recall it next time. Saved preferences appear under "Remembered preferences" with each message, honour them without being asked. Do not use it for one-off commands.
 
 If the user asks what's new on their network, use list_discovered_devices. You may summarize what was found and offer to add something, but you cannot add or configure devices yourself, adding runs a Home Assistant setup flow the user completes in the "Found near you" panel. Point them there.
 
@@ -119,16 +122,12 @@ export class Agent {
    */
   async send(userMessage: string, onEvent?: (event: AgentEvent) => void): Promise<string> {
     this.history.push({ role: 'user', content: userMessage });
+    this.trimHistory();
 
-    // Fetch the compact home snapshot once per message so the model can act without a lookup round
-    // trip. Failures are non-fatal, the agent falls back to its lookup tools.
-    let context: string | undefined;
-    try {
-      const summary = await this.context.homeSummary();
-      if (summary) context = `Current home:\n${summary}`;
-    } catch {
-      context = undefined;
-    }
+    // Build per-message context so the model can act without lookups and stay personal: the compact
+    // home snapshot plus any saved preferences. Failures are non-fatal, the agent falls back to its
+    // tools.
+    const context = await this.buildContext();
 
     const guard: LoopGuard = { actions: 0, consecutiveErrors: 0, halted: null };
     let finalText = '';
@@ -158,6 +157,37 @@ export class Agent {
     return finalText;
   }
 
+  /** Compose the per-message context block: saved preferences first, then the live home snapshot. */
+  private async buildContext(): Promise<string | undefined> {
+    const parts: string[] = [];
+    try {
+      const memory = await this.context.recallMemory();
+      if (memory) parts.push(`Remembered preferences:\n${memory}`);
+    } catch {
+      // ignore, memory is best-effort
+    }
+    try {
+      const summary = await this.context.homeSummary();
+      if (summary) parts.push(`Current home:\n${summary}`);
+    } catch {
+      // ignore, the agent falls back to lookup tools
+    }
+    return parts.length ? parts.join('\n\n') : undefined;
+  }
+
+  /**
+   * Keep the conversation from growing without bound across a long session: cap the stored history
+   * to the most recent messages, dropping from the front only up to a whole exchange so it always
+   * starts on a user turn (a tool result must never lead, it has to follow its assistant call).
+   */
+  private trimHistory(): void {
+    const MAX = 24;
+    if (this.history.length <= MAX) return;
+    let start = this.history.length - MAX;
+    while (start < this.history.length && this.history[start].role !== 'user') start += 1;
+    if (start > 0 && start < this.history.length) this.history.splice(0, start);
+  }
+
   private recordAssistantTurn(turn: AssistantTurn, onEvent?: (event: AgentEvent) => void): void {
     this.history.push({ role: 'assistant', content: turn.text, toolCalls: turn.toolCalls });
     if (turn.text && onEvent) onEvent({ type: 'text', text: turn.text });
@@ -168,36 +198,52 @@ export class Agent {
     guard: LoopGuard,
     onEvent?: (event: AgentEvent) => void,
   ): Promise<ToolResult[]> {
-    const results: ToolResult[] = [];
-    for (const call of turn.toolCalls) {
+    // Read-only tools have no side effects and skip the safety gate, so run them concurrently to
+    // cut latency when the model batches lookups. Control actions run sequentially afterwards so
+    // confirmations and the action budget stay strictly ordered.
+    const readCalls = turn.toolCalls.filter((call) => !CONTROL_TOOLS.has(call.name));
+    const controlCalls = turn.toolCalls.filter((call) => CONTROL_TOOLS.has(call.name));
+
+    const results: ToolResult[] = await Promise.all(
+      readCalls.map((call) => this.execTool(call, guard, onEvent)),
+    );
+
+    for (const call of controlCalls) {
       if (guard.halted) {
         results.push({ toolCallId: call.id, content: `Skipped: ${guard.halted}`, isError: true });
         continue;
       }
-
       const gateReason = await this.gateControlAction(call.name, call.input, guard, onEvent);
       if (gateReason) {
         results.push({ toolCallId: call.id, content: gateReason, isError: true });
         continue;
       }
-
-      onEvent?.({ type: 'tool_call', name: call.name, input: call.input });
-      try {
-        const content = await executeTool(this.context, call.name, call.input);
-        results.push({ toolCallId: call.id, content });
-        onEvent?.({ type: 'tool_result', name: call.name, content, isError: false });
-        guard.consecutiveErrors = 0;
-      } catch (err) {
-        const content = err instanceof Error ? err.message : String(err);
-        results.push({ toolCallId: call.id, content, isError: true });
-        onEvent?.({ type: 'tool_result', name: call.name, content, isError: true });
-        guard.consecutiveErrors += 1;
-        if (guard.consecutiveErrors >= this.maxConsecutiveErrors) {
-          guard.halted = `${guard.consecutiveErrors} tool errors in a row`;
-        }
-      }
+      results.push(await this.execTool(call, guard, onEvent));
     }
     return results;
+  }
+
+  /** Execute one tool, emit its events, and update the consecutive-error circuit breaker. */
+  private async execTool(
+    call: ToolCall,
+    guard: LoopGuard,
+    onEvent?: (event: AgentEvent) => void,
+  ): Promise<ToolResult> {
+    onEvent?.({ type: 'tool_call', name: call.name, input: call.input });
+    try {
+      const content = await executeTool(this.context, call.name, call.input);
+      onEvent?.({ type: 'tool_result', name: call.name, content, isError: false });
+      guard.consecutiveErrors = 0;
+      return { toolCallId: call.id, content };
+    } catch (err) {
+      const content = err instanceof Error ? err.message : String(err);
+      onEvent?.({ type: 'tool_result', name: call.name, content, isError: true });
+      guard.consecutiveErrors += 1;
+      if (guard.consecutiveErrors >= this.maxConsecutiveErrors) {
+        guard.halted = `${guard.consecutiveErrors} tool errors in a row`;
+      }
+      return { toolCallId: call.id, content, isError: true };
+    }
   }
 
   /**

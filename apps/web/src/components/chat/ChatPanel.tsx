@@ -28,6 +28,36 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
+  const [listening, setListening] = useState(false);
+
+  /** Dictate a message with the browser's speech recognition; the text lands in the input box. */
+  function startVoice() {
+    const Ctor =
+      (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
+        .SpeechRecognition ??
+      (window as unknown as { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition;
+    if (!Ctor) return;
+    const recognition = new (
+      Ctor as new () => {
+        lang: string;
+        interimResults: boolean;
+        onresult: (event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void;
+        onend: () => void;
+        onerror: () => void;
+        start: () => void;
+      }
+    )();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const said = event.results[0]?.[0]?.transcript ?? '';
+      if (said) setInput(said);
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+    setListening(true);
+    recognition.start();
+  }
 
   // One agent per provider configuration. The API key is part of the identity, entering or changing
   // it must rebuild the agent, otherwise an agent created before the key was saved keeps sending an
@@ -152,11 +182,29 @@ export function ChatPanel() {
           onKeyDown={(event) => event.key === 'Enter' && handleSend()}
           disabled={busy}
         />
+        {voiceSupported() && (
+          <button
+            className={listening ? 'active' : ''}
+            title="Speak"
+            disabled={busy}
+            onClick={startVoice}
+          >
+            {listening ? 'Listening' : 'Voice'}
+          </button>
+        )}
         <button onClick={handleSend} disabled={busy || !input.trim()}>
           {busy ? '...' : 'Send'}
         </button>
       </div>
     </div>
+  );
+}
+
+/** Whether this browser exposes the Web Speech API (Chrome, Edge, Safari). */
+function voiceSupported(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
   );
 }
 

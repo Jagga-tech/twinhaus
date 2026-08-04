@@ -26,6 +26,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const setLlmConfig = useTwinStore((state) => state.setLlmConfig);
   const status = useTwinStore((state) => state.connectionStatus);
   const providerId = useTwinStore((state) => state.providerId);
+  const energyRate = useTwinStore((state) => state.energyRatePerKwh);
+  const setEnergyRate = useTwinStore((state) => state.setEnergyRate);
 
   const { connect, disconnect, switchProvider, connecting, error } = useHaConnection();
   const providers = listProviders();
@@ -173,6 +175,23 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             />
           </label>
         )}
+      </section>
+
+      <section>
+        <h3>Energy</h3>
+        <p className="hint">
+          Your electricity rate, so power draw can be shown as cost. Leave at 0 to hide cost.
+        </p>
+        <label>
+          Rate (per kWh)
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={energyRate}
+            onChange={(event) => setEnergyRate(Number(event.target.value))}
+          />
+        </label>
       </section>
     </div>
   );

@@ -42,6 +42,14 @@ export interface HomeContext {
    * and advisory: it never buys or configures anything, the user adds the device through HA.
    */
   searchDeviceCatalog(query?: string): Promise<string>;
+  /**
+   * Save a durable preference the user states in passing ("I like the bedroom dim at night", "call
+   * the lounge the living room"), so the agent can recall it in future sessions. Returns a short
+   * confirmation. Not for one-off commands, only lasting preferences.
+   */
+  rememberPreference(note: string): Promise<string>;
+  /** The saved preferences, injected into context each message so the agent stays personal. */
+  recallMemory(): Promise<string>;
   /** Call a Home Assistant service against one entity, e.g. `light` / `turn_on`. */
   callService(args: {
     domain: string;
@@ -116,6 +124,18 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
+    name: 'remember_preference',
+    description:
+      'Save a lasting preference the user mentions (a favourite brightness, a nickname for a room, a routine they like) so you can recall it later. Use only for durable preferences, not one-off commands.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        note: { type: 'string', description: 'The preference to remember, in one short sentence.' },
+      },
+      required: ['note'],
+    },
+  },
+  {
     name: 'call_service',
     description:
       'Control a device by calling a Home Assistant service on one entity. Examples: domain "light" service "turn_on"; domain "lock" service "lock"; domain "climate" service "set_temperature"; domain "scene" service "turn_on"; domain "automation" service "trigger". To run a routine like "turn off everything", list the relevant entities first, then call this once per entity.',
@@ -155,6 +175,8 @@ export async function executeTool(
       return context.getEnergyByRoom();
     case 'check_home':
       return context.checkHome();
+    case 'remember_preference':
+      return context.rememberPreference(String(input.note ?? ''));
     case 'list_discovered_devices':
       return context.listDiscoveredDevices();
     case 'search_device_catalog':

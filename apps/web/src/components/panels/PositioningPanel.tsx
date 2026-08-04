@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { positioningStatus } from '../../lib/positioningSources.js';
 import { entityLabel } from '../../lib/deviceState.js';
+import { roomPresence } from '../../lib/presence.js';
 
 const DOCS = 'https://github.com/Jagga-tech/twinhaus/blob/main/docs/POSITIONING.md';
 
@@ -19,16 +20,35 @@ export function PositioningPanel() {
   const positioningScale = useTwinStore((state) => state.positioningScale);
   const setPositioningScale = useTwinStore((state) => state.setPositioningScale);
 
+  const rooms = useTwinStore((state) => state.rooms);
   const status = useMemo(() => positioningStatus(devices, entityStates), [devices, entityStates]);
   const tracked = useMemo(
     () => status.targets.map((id) => ({ id, estimate: livePositions[id] })),
     [status.targets, livePositions],
+  );
+  const presence = useMemo(
+    () => roomPresence(rooms, livePositions, entityStates),
+    [rooms, livePositions, entityStates],
   );
 
   if (connectionStatus !== 'connected') return null;
 
   return (
     <div className="panel-block">
+      {presence.length > 0 && (
+        <div className="presence-block">
+          <h4>Who is where</h4>
+          <ul className="track-list">
+            {presence.map((p) => (
+              <li key={p.entityId} className="track-item">
+                <span className="track-name">{p.label}</span>
+                <span className="track-confidence">{p.roomName ?? 'elsewhere'}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <h4>Live positioning (from distance)</h4>
 
       {status.anchorsReferenced.length === 0 ? (

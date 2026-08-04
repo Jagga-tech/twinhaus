@@ -16,6 +16,7 @@ import type {
   VirtualDevice,
 } from './types.js';
 import { DEFAULT_LEVEL, normalizeLevels, sortedLevels } from '../lib/levels.js';
+import type { Scene } from '../lib/scenes.js';
 
 export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
 
@@ -57,6 +58,12 @@ interface TwinState {
   llmConfig: LlmConfig;
   /** The active device backend id (`homeassistant`, `demo`, `mqtt`, ...). */
   providerId: string;
+  /** Durable preferences the agent has been told to remember, injected into its context. */
+  agentMemory: string[];
+  /** Saved scenes (named snapshots of device state) the user or agent can re-apply. */
+  scenes: Scene[];
+  /** Electricity tariff in dollars per kWh, for turning power draw into cost. */
+  energyRatePerKwh: number;
 
   // --- Onboarding (persisted) ---
   /** True once the user has finished or skipped the first-run WelcomeFlow. */
@@ -116,6 +123,10 @@ interface TwinState {
   setLivePositions: (positions: Record<string, PositionEstimate>) => void;
   setPositioningScale: (scale: number) => void;
   setProviderId: (id: string) => void;
+  addAgentMemory: (note: string) => void;
+  addScene: (scene: Omit<Scene, 'id'>) => string;
+  removeScene: (id: string) => void;
+  setEnergyRate: (rate: number) => void;
   setWelcomeDismissed: (dismissed: boolean) => void;
   markAgentUsed: () => void;
 
@@ -169,6 +180,9 @@ export const useTwinStore = create<TwinState>()(
       haConfig: { url: '', token: '' },
       llmConfig: DEFAULT_LLM_CONFIG,
       providerId: 'homeassistant',
+      agentMemory: [],
+      scenes: [],
+      energyRatePerKwh: 0,
       welcomeDismissed: false,
       agentUsed: false,
       activeLeftTab: 'plan',
@@ -318,6 +332,20 @@ export const useTwinStore = create<TwinState>()(
       setPositioningScale: (scale) =>
         set(() => ({ positioningScale: Math.max(0.6, Math.min(1.4, scale)) })),
       setProviderId: (id) => set(() => ({ providerId: id })),
+      addAgentMemory: (note) =>
+        set((state) => {
+          const trimmed = note.trim();
+          if (!trimmed || state.agentMemory.includes(trimmed)) return {};
+          // Keep the most recent 30 preferences so context stays bounded.
+          return { agentMemory: [...state.agentMemory, trimmed].slice(-30) };
+        }),
+      addScene: (scene) => {
+        const id = nextId('scene');
+        set((state) => ({ scenes: [...state.scenes, { ...scene, id }] }));
+        return id;
+      },
+      removeScene: (id) => set((state) => ({ scenes: state.scenes.filter((s) => s.id !== id) })),
+      setEnergyRate: (rate) => set(() => ({ energyRatePerKwh: Math.max(0, rate) })),
       setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
       markAgentUsed: () => set(() => ({ agentUsed: true })),
 
@@ -378,6 +406,9 @@ export const useTwinStore = create<TwinState>()(
         agentUsed: state.agentUsed,
         positioningScale: state.positioningScale,
         providerId: state.providerId,
+        agentMemory: state.agentMemory,
+        scenes: state.scenes,
+        energyRatePerKwh: state.energyRatePerKwh,
       }),
     },
   ),

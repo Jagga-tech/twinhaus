@@ -20,6 +20,8 @@ function context(): HomeContext {
   return {
     describeHome: async () => 'ok',
     homeSummary: async () => '',
+    rememberPreference: async () => 'ok',
+    recallMemory: async () => '',
     getRoomDevices: async () => 'ok',
     listEntities: async () => 'ok',
     getEnergyByRoom: async () => 'ok',

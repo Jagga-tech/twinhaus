@@ -96,6 +96,11 @@ function deriveState(domain: string, data: Record<string, unknown>): string {
     case 'cover':
       if (typeof data.position === 'number') return data.position > 0 ? 'open' : 'closed';
       return onOff === 'OPEN' ? 'open' : 'closed';
+    case 'climate': {
+      // z2m thermostats report their mode as system_mode (off/heat/cool/auto).
+      const mode = data.system_mode ?? data.running_state;
+      return typeof mode === 'string' ? mode.toLowerCase() : 'unknown';
+    }
     case 'sensor': {
       // Surface the most useful single reading as the state; the rest stay as attributes.
       for (const key of ['temperature', 'humidity', 'contact', 'occupancy', 'battery']) {
@@ -153,6 +158,11 @@ function z2mSetBody(options: CallServiceOptions): Record<string, unknown> | null
     case 'set_temperature':
       if (typeof serviceData?.temperature === 'number') {
         return { current_heating_setpoint: serviceData.temperature };
+      }
+      return null;
+    case 'set_hvac_mode':
+      if (typeof serviceData?.hvac_mode === 'string') {
+        return { system_mode: serviceData.hvac_mode };
       }
       return null;
     default:
