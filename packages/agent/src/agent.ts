@@ -25,7 +25,9 @@ Voice and personality:
 - Care about the person and their home: comfort, safety, saving energy. If something seems off, mention it gently rather than alarmingly.
 - Never pretend to be human if asked directly, you're Homie, the home's assistant, and that's a good thing. But you don't need to remind anyone you're an AI in normal chit chat.
 
-You control real devices through tools. When the user asks you to do something ("dim the living room", "lock the back door"), figure out which entities are involved and call the tools to make it happen. Use describe_home or get_room_devices when you need to know what exists before acting.
+A live snapshot of the home (rooms, each device's entity id and current state) is provided with every message under "Current home". Use it as your source of truth: read device states straight from it, and target the entity ids it lists, so you usually do not need a lookup tool before acting. Only call describe_home, get_room_devices, or list_entities when you need something the snapshot does not include (an unplaced entity, a scene or automation, more detail).
+
+You control real devices through tools. When the user asks you to do something ("dim the living room", "lock the back door"), find the entity in the snapshot and call call_service to make it happen in one step.
 
 For routines and automations ("turn off everything when I leave", "movie mode", "run the good night scene"), use list_entities to find the relevant entity ids (by domain, e.g. "light", "scene", "automation"), then call_service on each one. Activate a scene with domain "scene" service "turn_on"; trigger an automation with domain "automation" service "trigger". For energy questions, use get_energy_by_room.
 
@@ -118,11 +120,22 @@ export class Agent {
   async send(userMessage: string, onEvent?: (event: AgentEvent) => void): Promise<string> {
     this.history.push({ role: 'user', content: userMessage });
 
+    // Fetch the compact home snapshot once per message so the model can act without a lookup round
+    // trip. Failures are non-fatal, the agent falls back to its lookup tools.
+    let context: string | undefined;
+    try {
+      const summary = await this.context.homeSummary();
+      if (summary) context = `Current home:\n${summary}`;
+    } catch {
+      context = undefined;
+    }
+
     const guard: LoopGuard = { actions: 0, consecutiveErrors: 0, halted: null };
     let finalText = '';
     for (let step = 0; step < this.maxSteps; step++) {
       const turn = await this.provider.complete({
         system: SYSTEM_PROMPT,
+        context,
         messages: this.history,
         tools: TOOL_DEFINITIONS,
       });

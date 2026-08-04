@@ -20,6 +20,10 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
       calls.push('describe_home');
       return 'Living Room: light.living_room (on)';
     },
+    // Silent by design so existing call-order assertions stay clean; a dedicated test covers wiring.
+    async homeSummary() {
+      return '';
+    },
     async getRoomDevices(room) {
       calls.push(`get_room_devices:${room}`);
       return 'ok';
@@ -93,6 +97,7 @@ describe('Agent', () => {
   it('reports tool errors back into the loop without throwing', async () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
+      homeSummary: async () => '',
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
@@ -125,6 +130,22 @@ describe('Agent', () => {
 
     expect(events).toContain('true:HA offline');
     expect(reply).toBe("Couldn't reach it.");
+  });
+
+  it('injects the home snapshot as request context so the model can act without a lookup', async () => {
+    const { context } = recordingContext();
+    context.homeSummary = async () => 'Living Room: light.living_room=on';
+    let seenContext: string | undefined;
+    const provider: LlmProvider = {
+      id: 'capture',
+      async complete(request) {
+        seenContext = request.context;
+        return { text: 'done', toolCalls: [] };
+      },
+    };
+    const agent = new Agent({ provider, context });
+    await agent.send('hi');
+    expect(seenContext).toContain('light.living_room=on');
   });
 
   it('stops at maxSteps to avoid an infinite tool loop', async () => {
@@ -193,6 +214,7 @@ describe('Agent safety loop', () => {
   it('trips the circuit breaker after consecutive tool errors', async () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
+      homeSummary: async () => '',
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',

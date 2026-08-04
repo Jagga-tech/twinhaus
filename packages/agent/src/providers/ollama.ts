@@ -31,7 +31,7 @@ export class OllamaProvider implements LlmProvider {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         model: this.model,
-        messages: toOpenAiMessages(request.system, request.messages),
+        messages: toOpenAiMessages(request.system, request.messages, request.context),
         tools: request.tools.map((tool) => ({
           type: 'function',
           function: {

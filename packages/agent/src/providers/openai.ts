@@ -35,7 +35,7 @@ export class OpenAiProvider implements LlmProvider {
       },
       body: JSON.stringify({
         model: this.model,
-        messages: toOpenAiMessages(request.system, request.messages),
+        messages: toOpenAiMessages(request.system, request.messages, request.context),
         tools: request.tools.map((tool) => ({
           type: 'function',
           function: {
@@ -67,8 +67,13 @@ interface OpenAiAssistantMessage {
 }
 
 /** Shared translation to OpenAI wire format, reused by the Ollama provider. */
-export function toOpenAiMessages(system: string, messages: ProviderMessage[]): unknown[] {
+export function toOpenAiMessages(
+  system: string,
+  messages: ProviderMessage[],
+  context?: string,
+): unknown[] {
   const result: unknown[] = [{ role: 'system', content: system }];
+  if (context) result.push({ role: 'system', content: context });
   for (const message of messages) {
     if (message.role === 'user') {
       result.push({ role: 'user', content: message.content });
