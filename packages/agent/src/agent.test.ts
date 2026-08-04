@@ -31,6 +31,10 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
       calls.push(`remember_preference:${note}`);
       return 'ok';
     },
+    async findToBuy(query) {
+      calls.push(`find_to_buy:${query}`);
+      return 'links';
+    },
     async getRoomDevices(room) {
       calls.push(`get_room_devices:${room}`);
       return 'ok';
@@ -105,6 +109,7 @@ describe('Agent', () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
       homeSummary: async () => '',
+      findToBuy: async () => 'links',
       rememberPreference: async () => 'ok',
       recallMemory: async () => '',
       getRoomDevices: async () => 'ok',
@@ -224,6 +229,7 @@ describe('Agent safety loop', () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
       homeSummary: async () => '',
+      findToBuy: async () => 'links',
       rememberPreference: async () => 'ok',
       recallMemory: async () => '',
       getRoomDevices: async () => 'ok',

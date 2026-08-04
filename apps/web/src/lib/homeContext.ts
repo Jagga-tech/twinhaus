@@ -11,6 +11,7 @@ import { entitySummary } from './deviceState.js';
 import { computeRoomEnergy } from './energy.js';
 import { homeInsights } from './homeInsights.js';
 import { matchRoom } from './roomMatch.js';
+import { buyLinks } from './buyLinks.js';
 import { useTwinStore } from '../store/twinStore.js';
 
 /**
@@ -108,6 +109,27 @@ export function createHomeContext(client: Controller): HomeContext {
         (room) => `${room.name}: ${Math.round(energy.byRoom[room.id] ?? 0)} W`,
       );
       lines.push(`Total: ${Math.round(energy.total)} W`);
+      return lines.join('\n');
+    },
+
+    async findToBuy(query) {
+      const trimmed = query.trim();
+      if (!trimmed) return 'Ask what to shop for, e.g. "a smart video doorbell".';
+
+      const lines: string[] = [];
+      const matches = searchCatalog(trimmed).slice(0, 4);
+      if (matches.length > 0) {
+        lines.push('Recommended (works with Home Assistant):');
+        for (const device of matches) {
+          lines.push(
+            `- ${device.brand} ${device.model}, ~$${device.approxPriceUsd}, ${device.setup} setup, integration "${device.integration}"`,
+          );
+        }
+      }
+
+      lines.push(`Where to buy "${trimmed}":`);
+      for (const link of buyLinks(trimmed)) lines.push(`- ${link.retailer}: ${link.url}`);
+      lines.push('Twinhaus does not sell hardware; buy it, then add it through your backend.');
       return lines.join('\n');
     },
 
