@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTwinStore } from '../../store/twinStore.js';
 import { computeRoomEnergy, heatColor } from '../../lib/energy.js';
+import { energyCost, formatUsd } from '../../lib/energyCost.js';
 
 /** Per-room power draw with a one-click jump to the 3D heatmap. HA has the data; nobody maps it. */
 export function EnergySummary() {
@@ -8,11 +9,13 @@ export function EnergySummary() {
   const devices = useTwinStore((state) => state.devices);
   const entityStates = useTwinStore((state) => state.entityStates);
   const setViewMode = useTwinStore((state) => state.setViewMode);
+  const rate = useTwinStore((state) => state.energyRatePerKwh);
 
   const energy = useMemo(
     () => computeRoomEnergy(rooms, devices, entityStates),
     [rooms, devices, entityStates],
   );
+  const cost = rate > 0 ? energyCost(energy.total, rate) : null;
 
   const ranked = [...rooms].sort((a, b) => (energy.byRoom[b.id] ?? 0) - (energy.byRoom[a.id] ?? 0));
 
@@ -24,6 +27,12 @@ export function EnergySummary() {
           Show heatmap
         </button>
       </div>
+      {cost && (
+        <p className="hint">
+          About {formatUsd(cost.perDayUsd)} a day, {formatUsd(cost.perMonthUsd)} a month at the
+          current draw. Set your rate in Settings.
+        </p>
+      )}
       {energy.max === 0 ? (
         <p className="hint">
           No power readings yet. Place a power/energy sensor (Emporia, Shelly, smart plug) in a room

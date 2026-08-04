@@ -52,6 +52,15 @@ describe('z2mToEntityState', () => {
     expect(z2mToEntityState(sensor, JSON.stringify({ temperature: 21.5 }))?.state).toBe('21.5');
   });
 
+  it('maps a climate thermostat mode', () => {
+    const climate: Z2mDevice = {
+      friendlyName: 'Hall',
+      entityId: 'climate.hall',
+      domain: 'climate',
+    };
+    expect(z2mToEntityState(climate, JSON.stringify({ system_mode: 'heat' }))?.state).toBe('heat');
+  });
+
   it('returns null on malformed payloads', () => {
     expect(z2mToEntityState(lamp, 'nope')).toBeNull();
   });
@@ -75,6 +84,15 @@ describe('serviceToZ2mSet', () => {
     expect(
       JSON.parse(serviceToZ2mSet(lamp, { domain: 'cover', service: 'open_cover' })!.payload),
     ).toEqual({ state: 'OPEN' });
+  });
+
+  it('maps a climate hvac mode change', () => {
+    const cmd = serviceToZ2mSet(lamp, {
+      domain: 'climate',
+      service: 'set_hvac_mode',
+      serviceData: { hvac_mode: 'heat' },
+    });
+    expect(JSON.parse(cmd!.payload)).toEqual({ system_mode: 'heat' });
   });
 
   it('returns null for services it does not map', () => {

@@ -111,6 +111,18 @@ export function createHomeContext(client: Controller): HomeContext {
       return lines.join('\n');
     },
 
+    async rememberPreference(note) {
+      const trimmed = note.trim();
+      if (!trimmed) return 'Nothing to remember.';
+      useTwinStore.getState().addAgentMemory(trimmed);
+      return `Got it, I'll remember: ${trimmed}`;
+    },
+
+    async recallMemory() {
+      const { agentMemory } = useTwinStore.getState();
+      return agentMemory.map((note) => `- ${note}`).join('\n');
+    },
+
     async checkHome() {
       const { rooms, devices, entityStates, connectionStatus } = useTwinStore.getState();
       if (connectionStatus !== 'connected') return 'Home Assistant is not connected.';

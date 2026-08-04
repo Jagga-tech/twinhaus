@@ -8,6 +8,7 @@ import { ImportPanel } from './panels/ImportPanel.js';
 import { FoundNearYou } from './discovery/FoundNearYou.js';
 import { DeviceCatalog } from './catalog/DeviceCatalog.js';
 import { BuildingSummaryPanel } from './panels/BuildingSummaryPanel.js';
+import { ScenesPanel } from './panels/ScenesPanel.js';
 
 type Tab = 'plan' | 'devices' | 'found' | 'catalog' | 'simulate' | 'import' | 'events';
 
@@ -49,6 +50,7 @@ export function LeftPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
         {tab === 'devices' && (
           <>
             <EntityPanel />
+            <ScenesPanel />
             <h4 className="section-heading">Energy</h4>
             <EnergySummary />
             <BuildingSummaryPanel />

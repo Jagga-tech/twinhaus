@@ -24,6 +24,13 @@ function recordingContext(): { context: HomeContext; calls: string[] } {
     async homeSummary() {
       return '';
     },
+    async recallMemory() {
+      return '';
+    },
+    async rememberPreference(note) {
+      calls.push(`remember_preference:${note}`);
+      return 'ok';
+    },
     async getRoomDevices(room) {
       calls.push(`get_room_devices:${room}`);
       return 'ok';
@@ -98,6 +105,8 @@ describe('Agent', () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
       homeSummary: async () => '',
+      rememberPreference: async () => 'ok',
+      recallMemory: async () => '',
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',
@@ -215,6 +224,8 @@ describe('Agent safety loop', () => {
     const context: HomeContext = {
       describeHome: async () => 'ok',
       homeSummary: async () => '',
+      rememberPreference: async () => 'ok',
+      recallMemory: async () => '',
       getRoomDevices: async () => 'ok',
       listEntities: async () => 'ok',
       getEnergyByRoom: async () => 'ok',

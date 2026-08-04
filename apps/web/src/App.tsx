@@ -8,6 +8,7 @@ import { SettingsPanel } from './components/settings/SettingsPanel.js';
 import { ViewModeSwitch } from './components/panels/ViewModeSwitch.js';
 import { LevelSwitcher } from './components/LevelSwitcher.js';
 import { DeviceInspector } from './components/panels/DeviceInspector.js';
+import { InsightBanner } from './components/panels/InsightBanner.js';
 import { RecommendationWizard } from './components/panels/RecommendationWizard.js';
 import { PlacementPrompt } from './components/discovery/PlacementPrompt.js';
 import { WelcomeFlow } from './components/WelcomeFlow.js';
@@ -62,6 +63,7 @@ export function App() {
             <ViewModeSwitch />
           </div>
           <LevelSwitcher />
+          <InsightBanner />
           <TwinViewer />
           <PlacementPrompt />
           <DeviceInspector />
