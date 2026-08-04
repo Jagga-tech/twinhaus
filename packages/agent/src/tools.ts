@@ -43,6 +43,13 @@ export interface HomeContext {
    */
   searchDeviceCatalog(query?: string): Promise<string>;
   /**
+   * Find a device to buy: any product the user names, not just the curated catalog. Returns any
+   * matching catalog recommendations (with price and Home Assistant integration) plus real retailer
+   * search links so the user can go buy it. Advisory only, Twinhaus never sells or provisions
+   * hardware.
+   */
+  findToBuy(query: string): Promise<string>;
+  /**
    * Save a durable preference the user states in passing ("I like the bedroom dim at night", "call
    * the lounge the living room"), so the agent can recall it in future sessions. Returns a short
    * confirmation. Not for one-off commands, only lasting preferences.
@@ -124,6 +131,21 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
+    name: 'find_to_buy',
+    description:
+      'Find a device to buy and where to buy it, for any product the user names ("find me a smart video doorbell", "where can I buy a Zigbee water sensor"). Returns catalog recommendations with prices plus real retailer links. Advisory only; you never purchase anything, you point the user to where to buy.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'What to shop for, e.g. "smart video doorbell", "matter smart plug".',
+        },
+      },
+      required: ['query'],
+    },
+  },
+  {
     name: 'remember_preference',
     description:
       'Save a lasting preference the user mentions (a favourite brightness, a nickname for a room, a routine they like) so you can recall it later. Use only for durable preferences, not one-off commands.',
@@ -175,6 +197,8 @@ export async function executeTool(
       return context.getEnergyByRoom();
     case 'check_home':
       return context.checkHome();
+    case 'find_to_buy':
+      return context.findToBuy(String(input.query ?? ''));
     case 'remember_preference':
       return context.rememberPreference(String(input.note ?? ''));
     case 'list_discovered_devices':

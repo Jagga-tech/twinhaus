@@ -20,6 +20,7 @@ function context(): HomeContext {
   return {
     describeHome: async () => 'ok',
     homeSummary: async () => '',
+    findToBuy: async () => 'links',
     rememberPreference: async () => 'ok',
     recallMemory: async () => '',
     getRoomDevices: async () => 'ok',
