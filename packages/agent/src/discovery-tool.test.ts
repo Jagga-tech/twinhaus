@@ -19,6 +19,7 @@ const CATALOG_RESULT = 'Nuki Smart Lock 4.0 (lock), ~$160, wifi/bluetooth, local
 function context(): HomeContext {
   return {
     describeHome: async () => 'ok',
+    homeSummary: async () => '',
     getRoomDevices: async () => 'ok',
     listEntities: async () => 'ok',
     getEnergyByRoom: async () => 'ok',

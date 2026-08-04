@@ -38,13 +38,20 @@ export class AnthropicProvider implements LlmProvider {
     };
     if (this.allowBrowser) headers['anthropic-dangerous-direct-browser-access'] = 'true';
 
+    // Cache the static system prompt so it is not re-billed on every step of the tool loop or on
+    // repeat messages in a session. The dynamic home snapshot rides in a second, uncached block.
+    const system = [
+      { type: 'text', text: request.system, cache_control: { type: 'ephemeral' } },
+      ...(request.context ? [{ type: 'text', text: request.context }] : []),
+    ];
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         model: this.model,
         max_tokens: 1024,
-        system: request.system,
+        system,
         tools: request.tools.map((tool) => ({
           name: tool.name,
           description: tool.description,

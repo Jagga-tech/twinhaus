@@ -51,6 +51,11 @@ export interface LlmProvider {
 
 export interface LlmRequest {
   system: string;
+  /**
+   * Dynamic, per-request context (a compact live home snapshot) appended after the static system
+   * prompt. Kept separate so providers can cache the static prompt while this part changes.
+   */
+  context?: string;
   /** Full conversation history, including prior tool calls and their results. */
   messages: ProviderMessage[];
   tools: ToolDefinition[];

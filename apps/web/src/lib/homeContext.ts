@@ -21,6 +21,30 @@ import { useTwinStore } from '../store/twinStore.js';
  */
 export function createHomeContext(client: Controller): HomeContext {
   return {
+    async homeSummary() {
+      const { rooms, devices, entityStates } = useTwinStore.getState();
+      const placed = devices.filter((device) => rooms.some((room) => room.id === device.roomId));
+      if (placed.length === 0) return '';
+
+      const byRoom = new Map<string, string[]>();
+      // Cap the snapshot so a very large home can't blow the context window; extras fall back to
+      // the describe_home tool.
+      for (const device of placed.slice(0, 80)) {
+        const room = rooms.find((r) => r.id === device.roomId);
+        if (!room) continue;
+        const state = entityStates[device.entityId];
+        const name = state?.attributes.friendly_name;
+        const value = state ? state.state : 'unknown';
+        const label = typeof name === 'string' && name ? ` "${name}"` : '';
+        const line = `${device.entityId}${label}=${value}`;
+        byRoom.set(room.name, [...(byRoom.get(room.name) ?? []), line]);
+      }
+
+      return [...byRoom.entries()]
+        .map(([roomName, lines]) => `${roomName}: ${lines.join('; ')}`)
+        .join('\n');
+    },
+
     async describeHome() {
       const { rooms, devices, entityStates } = useTwinStore.getState();
       if (rooms.length === 0)

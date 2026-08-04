@@ -8,6 +8,12 @@ import type { ToolDefinition } from './types.js';
 export interface HomeContext {
   /** A snapshot of the home the model can reason over: rooms and the devices in each. */
   describeHome(): Promise<string>;
+  /**
+   * A compact live snapshot (rooms, each placed device's entity id and current state) injected into
+   * every request so the model can target devices directly without a `describe_home` round trip.
+   * Returns an empty string when nothing is placed or no backend is connected.
+   */
+  homeSummary(): Promise<string>;
   /** Devices assigned to a named room, with their live state. */
   getRoomDevices(roomName: string): Promise<string>;
   /**
