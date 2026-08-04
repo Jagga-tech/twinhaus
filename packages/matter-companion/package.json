@@ -1,0 +1,22 @@
+{
+  "name": "@twinhaus/matter-companion",
+  "version": "0.1.0",
+  "description": "Reference companion service for the Twinhaus Matter backend: speaks the browser contract over WebSocket, backed by a simulated fabric (swap for python-matter-server for real hardware).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "twinhaus-matter-companion": "./src/server.ts"
+  },
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.1"
+  }
+}

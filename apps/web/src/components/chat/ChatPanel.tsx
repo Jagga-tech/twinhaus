@@ -29,6 +29,15 @@ export function ChatPanel() {
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
   const [listening, setListening] = useState(false);
+  const [speak, setSpeak] = useState(false);
+
+  /** Read a reply aloud with the browser speech synthesiser, when the user has turned it on. */
+  function speakReply(text: string) {
+    if (!speak || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
 
   /** Dictate a message with the browser's speech recognition; the text lands in the input box. */
   function startVoice() {
@@ -103,7 +112,10 @@ export function ChatPanel() {
 
     try {
       const reply = await agent.send(message, onAgentEvent);
-      if (reply) appendItem({ role: 'assistant', text: reply });
+      if (reply) {
+        appendItem({ role: 'assistant', text: reply });
+        speakReply(reply);
+      }
     } catch (err) {
       appendItem({ role: 'tool', text: err instanceof Error ? err.message : String(err) });
     } finally {
@@ -185,11 +197,20 @@ export function ChatPanel() {
         {voiceSupported() && (
           <button
             className={listening ? 'active' : ''}
-            title="Speak"
+            title="Dictate a message"
             disabled={busy}
             onClick={startVoice}
           >
             {listening ? 'Listening' : 'Voice'}
+          </button>
+        )}
+        {ttsSupported() && (
+          <button
+            className={speak ? 'active' : ''}
+            title="Read replies aloud"
+            onClick={() => setSpeak((on) => !on)}
+          >
+            {speak ? 'Speaking' : 'Speak'}
           </button>
         )}
         <button onClick={handleSend} disabled={busy || !input.trim()}>
@@ -206,6 +227,11 @@ function voiceSupported(): boolean {
     typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
   );
+}
+
+/** Whether this browser can speak text aloud. */
+function ttsSupported(): boolean {
+  return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
 
 function truncate(text: string, max = 140): string {

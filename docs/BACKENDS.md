@@ -64,10 +64,18 @@ service to browser:   { "type": "snapshot", "states": [ EntityState, ... ] }
 ```
 
 `EntityState` is the same `{ entity_id, state, attributes, last_changed, last_updated }` every backend
-speaks. Twinhaus ships the **browser half** (`matterProvider.ts` + `companionSocket.ts`); the service
-half is the deployment's responsibility, a thin adapter in front of, for example,
-[`python-matter-server`](https://github.com/home-assistant-libs/python-matter-server) that maps Matter
-clusters to `EntityState` and back. Point Settings at the service URL (e.g. `ws://localhost:5580`).
+speaks. Twinhaus ships the **browser half** (`matterProvider.ts` + `companionSocket.ts`) and a
+runnable **reference service half** in [`packages/matter-companion`](../packages/matter-companion),
+backed by a simulated fabric so Matter works out of the box:
+
+```
+npm run start --workspace @twinhaus/matter-companion
+```
+
+Then point Settings at `ws://localhost:5580`. For real hardware, swap the simulated fabric in that
+package's `core.ts` for a bridge to
+[`python-matter-server`](https://github.com/home-assistant-libs/python-matter-server) that maps
+Matter clusters to `EntityState` and back; the wire messages do not change.
 
 Until such a service is running, selecting Matter connects to nothing and says so, it never pretends
 to control hardware it can't reach.

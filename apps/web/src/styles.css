@@ -967,6 +967,35 @@ button:focus-visible {
   color: var(--muted) !important;
 }
 
+/* Inspector camera snapshot */
+.inspector-camera {
+  width: 100%;
+  border-radius: var(--r-sm);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+/* Solar / energy flow chips */
+.solar-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+.solar-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--r-pill);
+  background: rgba(31, 42, 51, 0.07);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.solar-in {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
 /* Inspector light controls */
 .inspector-light {
   margin-top: 0.5rem;

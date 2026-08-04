@@ -5,6 +5,7 @@ import { activeProvider } from '../../lib/provider/index.js';
 import { entityLabel, entitySummary } from '../../lib/deviceState.js';
 import { quickControls } from '../../lib/deviceControl.js';
 import { LIGHT_SWATCHES, setBrightnessCall, setColorCall } from '../../lib/lightControl.js';
+import { cameraSnapshotUrl } from '../../lib/cameraSnapshot.js';
 
 /**
  * Click a device in the twin to inspect and control it, the same Home Assistant service calls
@@ -14,12 +15,14 @@ import { LIGHT_SWATCHES, setBrightnessCall, setColorCall } from '../../lib/light
 export function DeviceInspector() {
   const selectedDeviceId = useTwinStore((state) => state.selectedDeviceId);
   const entityStates = useTwinStore((state) => state.entityStates);
+  const haConfig = useTwinStore((state) => state.haConfig);
   const setSelectedDeviceId = useTwinStore((state) => state.setSelectedDeviceId);
   const [error, setError] = useState<string | null>(null);
 
   if (!selectedDeviceId) return null;
   const state = entityStates[selectedDeviceId];
   const isLight = entityDomain(selectedDeviceId) === 'light';
+  const cameraUrl = cameraSnapshotUrl(selectedDeviceId, state, haConfig);
   const brightnessPct = state
     ? Math.round((Number(state.attributes.brightness ?? 0) / 255) * 100)
     : 0;
@@ -43,6 +46,7 @@ export function DeviceInspector() {
       </div>
       {state ? (
         <>
+          {cameraUrl && <img className="inspector-camera" src={cameraUrl} alt="Camera snapshot" />}
           <p className="inspector-state">{entitySummary(state)}</p>
           <div className="inspector-controls">
             {quickControls(state).map((control) => (
