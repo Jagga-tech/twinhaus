@@ -1,4 +1,5 @@
 import { executeTool, TOOL_DEFINITIONS, type HomeContext } from './tools.js';
+import type { AgentCapability } from './capabilities.js';
 import {
   assessAction,
   toControlAction,
@@ -17,7 +18,7 @@ import type {
 
 const SYSTEM_PROMPT = `You are Homie, the friendly assistant living inside the user's Twinhaus, a live 3D digital twin of their home built on top of Home Assistant. Think of yourself less as software and more as a helpful housemate who happens to know where everything is and can flip a switch from across the house.
 
-Stay in your lane. You only help with this home and its Twinhaus twin: the rooms and devices, their live state and control, energy and cost, security, positioning and presence, planning and simulating a setup, and recommending or finding smart-home gear to buy. If someone asks about something unrelated (general trivia, the news, coding help, maths, anything not about their home), gently say that is outside what you do here and steer back to the home, do not answer it. Never invent devices, rooms, or states that are not in the home snapshot or returned by a tool.
+Stay in your lane. You only help with this home and its Twinhaus twin: the rooms and devices, their live state and control, energy and cost, security, positioning and presence, planning and simulating a setup, and recommending or finding smart-home gear to buy. If someone asks about something unrelated (general trivia, the news, coding help, maths, anything not about their home), gently say that is outside what you do here and steer back to the home, do not answer it. Never invent devices, rooms, or states that are not in the home snapshot or returned by a tool. You may also have extra "ask" tools from third-party agents the user has connected; use them when a question fits what that agent is for, and relay the answer.
 
 Voice and personality:
 - Talk like a warm, easy-going person, not a manual. Greet people back naturally ("Hey, what can I do for you?"), and match their energy, brief when they're brief, chattier when they want to chat.
@@ -63,6 +64,12 @@ export interface AgentOptions {
    * action unattended.
    */
   confirmAction?: (action: ControlAction, verdict: SafetyVerdict) => Promise<boolean>;
+  /**
+   * Extra capabilities (third-party integrations, external agents) whose tools are added to the
+   * agent. Additive and advisory: a capability tool can never shadow a built-in tool or the
+   * safety-gated control path.
+   */
+  capabilities?: AgentCapability[];
 }
 
 /** Emitted as the agent works, so the UI can show tool activity as it happens. */
@@ -97,6 +104,9 @@ export class Agent {
     verdict: SafetyVerdict,
   ) => Promise<boolean>;
   private readonly history: ProviderMessage[] = [];
+  /** Extra tools contributed by capabilities, keyed by tool name. */
+  private readonly capabilityTools = new Map<string, AgentCapability>();
+  private readonly tools: typeof TOOL_DEFINITIONS;
 
   constructor(options: AgentOptions) {
     this.provider = options.provider;
@@ -105,6 +115,19 @@ export class Agent {
     this.maxActions = options.maxActions ?? 12;
     this.maxConsecutiveErrors = options.maxConsecutiveErrors ?? 3;
     this.confirmAction = options.confirmAction;
+
+    // Merge capability tools, but never let one shadow a built-in tool or the control path.
+    const coreNames = new Set(TOOL_DEFINITIONS.map((tool) => tool.name));
+    const extraTools: typeof TOOL_DEFINITIONS = [];
+    for (const capability of options.capabilities ?? []) {
+      for (const tool of capability.tools) {
+        if (coreNames.has(tool.name) || CONTROL_TOOLS.has(tool.name)) continue;
+        if (this.capabilityTools.has(tool.name)) continue;
+        this.capabilityTools.set(tool.name, capability);
+        extraTools.push(tool);
+      }
+    }
+    this.tools = [...TOOL_DEFINITIONS, ...extraTools];
   }
 
   /** The user-facing conversation so far, tool traffic stripped out. */
@@ -140,7 +163,7 @@ export class Agent {
         system: SYSTEM_PROMPT,
         context,
         messages: this.history,
-        tools: TOOL_DEFINITIONS,
+        tools: this.tools,
       });
 
       this.recordAssistantTurn(turn, onEvent);
@@ -227,6 +250,13 @@ export class Agent {
     return results;
   }
 
+  /** Route a tool call to the core home context or to the capability that owns it. */
+  private dispatch(name: string, input: Record<string, unknown>): Promise<string> {
+    const capability = this.capabilityTools.get(name);
+    if (capability) return capability.execute(name, input);
+    return executeTool(this.context, name, input);
+  }
+
   /** Execute one tool, emit its events, and update the consecutive-error circuit breaker. */
   private async execTool(
     call: ToolCall,
@@ -235,7 +265,7 @@ export class Agent {
   ): Promise<ToolResult> {
     onEvent?.({ type: 'tool_call', name: call.name, input: call.input });
     try {
-      const content = await executeTool(this.context, call.name, call.input);
+      const content = await this.dispatch(call.name, call.input);
       onEvent?.({ type: 'tool_result', name: call.name, content, isError: false });
       guard.consecutiveErrors = 0;
       return { toolCallId: call.id, content };

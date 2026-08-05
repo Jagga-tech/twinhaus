@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTwinStore, type LlmProviderId } from '../../store/twinStore.js';
 import { useHaConnection } from '../../hooks/useHaConnection.js';
 import { listProviders } from '../../lib/provider/index.js';
@@ -28,6 +29,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const providerId = useTwinStore((state) => state.providerId);
   const energyRate = useTwinStore((state) => state.energyRatePerKwh);
   const setEnergyRate = useTwinStore((state) => state.setEnergyRate);
+  const externalAgents = useTwinStore((state) => state.externalAgents);
+  const addExternalAgent = useTwinStore((state) => state.addExternalAgent);
+  const removeExternalAgent = useTwinStore((state) => state.removeExternalAgent);
+  const [agentForm, setAgentForm] = useState({ name: '', description: '', url: '' });
 
   const { connect, disconnect, switchProvider, connecting, error } = useHaConnection();
   const providers = listProviders();
@@ -192,6 +197,62 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             onChange={(event) => setEnergyRate(Number(event.target.value))}
           />
         </label>
+      </section>
+
+      <section>
+        <h3>Capabilities</h3>
+        <p className="hint">
+          Connect a third-party agent so Homie can ask it. Give it a name, say what it is good for,
+          and point it at an endpoint that accepts {'{ query }'} and replies with an answer. Homie
+          gains an ask tool for it.
+        </p>
+        {externalAgents.length > 0 && (
+          <ul className="scene-list">
+            {externalAgents.map((agent) => (
+              <li key={agent.id} className="panel-row">
+                <span>
+                  {agent.name} <span className="hint">({agent.id})</span>
+                </span>
+                <button className="link" onClick={() => removeExternalAgent(agent.id)}>
+                  remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <label>
+          Name
+          <input
+            value={agentForm.name}
+            placeholder="Weather brain"
+            onChange={(event) => setAgentForm({ ...agentForm, name: event.target.value })}
+          />
+        </label>
+        <label>
+          What it is for
+          <input
+            value={agentForm.description}
+            placeholder="Answers questions about the weather"
+            onChange={(event) => setAgentForm({ ...agentForm, description: event.target.value })}
+          />
+        </label>
+        <label>
+          Endpoint URL
+          <input
+            value={agentForm.url}
+            placeholder="https://my-agent.example.com/ask"
+            onChange={(event) => setAgentForm({ ...agentForm, url: event.target.value })}
+          />
+        </label>
+        <button
+          onClick={() => {
+            if (!agentForm.name.trim() || !agentForm.url.trim()) return;
+            addExternalAgent(agentForm);
+            setAgentForm({ name: '', description: '', url: '' });
+          }}
+        >
+          Add capability
+        </button>
       </section>
     </div>
   );

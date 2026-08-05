@@ -9,6 +9,11 @@ export {
 } from './safety.js';
 export { executeTool, TOOL_DEFINITIONS, type HomeContext } from './tools.js';
 export {
+  createHttpAgentCapability,
+  type AgentCapability,
+  type HttpAgentOptions,
+} from './capabilities.js';
+export {
   AnthropicProvider,
   OpenAiProvider,
   OllamaProvider,
