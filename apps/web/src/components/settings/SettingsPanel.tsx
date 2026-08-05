@@ -166,6 +166,16 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             />
           </label>
         )}
+        {llmConfig.provider === 'anthropic' && (
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={llmConfig.webSearch}
+              onChange={(event) => setLlmConfig({ webSearch: event.target.checked })}
+            />
+            Let the agent search the web (find products, prices, reviews)
+          </label>
+        )}
         {llmConfig.provider !== 'anthropic' && (
           <label>
             {llmConfig.provider === 'ollama' ? 'Ollama URL' : 'Base URL (optional)'}
