@@ -6,6 +6,7 @@ import type { PositionEstimate } from '../lib/positioning.js';
 import type {
   DevicePlacement,
   EditorMode,
+  ExternalAgent,
   ImportedModel,
   Level,
   Point2D,
@@ -64,6 +65,8 @@ interface TwinState {
   scenes: Scene[];
   /** Electricity tariff in dollars per kWh, for turning power draw into cost. */
   energyRatePerKwh: number;
+  /** Third-party agents registered as capabilities, each exposed to Homie as an `ask_<id>` tool. */
+  externalAgents: ExternalAgent[];
 
   // --- Onboarding (persisted) ---
   /** True once the user has finished or skipped the first-run WelcomeFlow. */
@@ -127,6 +130,8 @@ interface TwinState {
   addScene: (scene: Omit<Scene, 'id'>) => string;
   removeScene: (id: string) => void;
   setEnergyRate: (rate: number) => void;
+  addExternalAgent: (agent: Omit<ExternalAgent, 'id'>) => void;
+  removeExternalAgent: (id: string) => void;
   setWelcomeDismissed: (dismissed: boolean) => void;
   markAgentUsed: () => void;
 
@@ -183,6 +188,7 @@ export const useTwinStore = create<TwinState>()(
       agentMemory: [],
       scenes: [],
       energyRatePerKwh: 0,
+      externalAgents: [],
       welcomeDismissed: false,
       agentUsed: false,
       activeLeftTab: 'plan',
@@ -346,6 +352,18 @@ export const useTwinStore = create<TwinState>()(
       },
       removeScene: (id) => set((state) => ({ scenes: state.scenes.filter((s) => s.id !== id) })),
       setEnergyRate: (rate) => set(() => ({ energyRatePerKwh: Math.max(0, rate) })),
+      addExternalAgent: (agent) =>
+        set((state) => {
+          const id =
+            agent.name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '_')
+              .replace(/^_+|_+$/g, '') || `agent_${state.externalAgents.length + 1}`;
+          if (!agent.url.trim() || state.externalAgents.some((a) => a.id === id)) return {};
+          return { externalAgents: [...state.externalAgents, { ...agent, id }] };
+        }),
+      removeExternalAgent: (id) =>
+        set((state) => ({ externalAgents: state.externalAgents.filter((a) => a.id !== id) })),
       setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
       markAgentUsed: () => set(() => ({ agentUsed: true })),
 
@@ -409,6 +427,7 @@ export const useTwinStore = create<TwinState>()(
         agentMemory: state.agentMemory,
         scenes: state.scenes,
         energyRatePerKwh: state.energyRatePerKwh,
+        externalAgents: state.externalAgents,
       }),
     },
   ),

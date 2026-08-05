@@ -3,11 +3,13 @@ import {
   AnthropicProvider,
   OllamaProvider,
   OpenAiProvider,
+  createHttpAgentCapability,
+  type AgentCapability,
   type ControlAction,
   type LlmProvider,
   type SafetyVerdict,
 } from '@twinhaus/agent';
-import type { LlmConfig } from '../store/twinStore.js';
+import { useTwinStore, type LlmConfig } from '../store/twinStore.js';
 import { createHomeContext } from './homeContext.js';
 import { activeProvider } from './provider/index.js';
 
@@ -40,5 +42,18 @@ export function createAgent(config: LlmConfig, confirmAction?: ConfirmAction): A
     provider: createProvider(config),
     context: createHomeContext(activeProvider()),
     confirmAction,
+    capabilities: buildCapabilities(),
   });
+}
+
+/** Turn the user's registered external agents into agent capabilities Homie can call. */
+function buildCapabilities(): AgentCapability[] {
+  return useTwinStore.getState().externalAgents.map((agent) =>
+    createHttpAgentCapability({
+      id: agent.id,
+      name: agent.name,
+      description: agent.description,
+      url: agent.url,
+    }),
+  );
 }

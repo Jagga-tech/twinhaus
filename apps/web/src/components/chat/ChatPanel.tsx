@@ -72,7 +72,11 @@ export function ChatPanel() {
   // it must rebuild the agent, otherwise an agent created before the key was saved keeps sending an
   // empty x-api-key and the API 401s. A short fingerprint keeps the secret out of the render key.
   const keyFingerprint = `${llmConfig.apiKey.length}:${llmConfig.apiKey.slice(-4)}`;
-  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}:${keyFingerprint}`;
+  // Rebuild the agent when registered capabilities change, so newly added external agents are wired.
+  const capabilityKey = useTwinStore((state) =>
+    state.externalAgents.map((agent) => agent.id).join(','),
+  );
+  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}:${keyFingerprint}:${capabilityKey}`;
   const agentRef = useRef<{ key: string; agent: Agent } | null>(null);
   const agent = useMemo(() => {
     if (agentRef.current?.key !== agentKey) {

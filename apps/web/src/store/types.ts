@@ -104,6 +104,18 @@ export interface ImportedModel {
 }
 
 /** The portable twin document, exported for templates and consumed by the MCP server. */
+/**
+ * A third-party agent registered as a capability: Homie gains an `ask_<id>` tool that POSTs to the
+ * endpoint. This is how the user extends the system with external brains (a weather agent, a
+ * vendor bot, their own service).
+ */
+export interface ExternalAgent {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+}
+
 export interface TwinModel {
   version: 1;
   rooms: Room[];
