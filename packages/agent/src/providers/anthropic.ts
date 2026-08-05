@@ -15,6 +15,15 @@ export interface AnthropicProviderOptions {
    * enabled by default. Set false if you proxy requests through a server instead.
    */
   allowBrowser?: boolean;
+  /**
+   * Enable Claude's built-in, server-side web search tool, so the agent can actually look things up
+   * on the internet ("find me a smart video doorbell", "what's the best value robot vacuum") and
+   * answer with live results and citations. Runs on Anthropic's servers, so no CORS or extra key.
+   * Default true; a per-search fee applies.
+   */
+  webSearch?: boolean;
+  /** Cap the number of web searches per message. Default 3. */
+  webSearchMaxUses?: number;
 }
 
 /** Anthropic Messages API provider. */
@@ -23,11 +32,15 @@ export class AnthropicProvider implements LlmProvider {
   private readonly apiKey: string;
   private readonly model: string;
   private readonly allowBrowser: boolean;
+  private readonly webSearch: boolean;
+  private readonly webSearchMaxUses: number;
 
   constructor(options: AnthropicProviderOptions) {
     this.apiKey = options.apiKey;
     this.model = options.model ?? 'claude-opus-5';
     this.allowBrowser = options.allowBrowser ?? true;
+    this.webSearch = options.webSearch ?? true;
+    this.webSearchMaxUses = options.webSearchMaxUses ?? 3;
   }
 
   async complete(request: LlmRequest): Promise<AssistantTurn> {
@@ -45,6 +58,21 @@ export class AnthropicProvider implements LlmProvider {
       ...(request.context ? [{ type: 'text', text: request.context }] : []),
     ];
 
+    const tools: unknown[] = request.tools.map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      input_schema: tool.inputSchema,
+    }));
+    // Claude runs this one server-side: it searches the web and folds the results into its answer,
+    // so nothing comes back into our tool loop, we just get text with citations.
+    if (this.webSearch) {
+      tools.push({
+        type: 'web_search_20250305',
+        name: 'web_search',
+        max_uses: this.webSearchMaxUses,
+      });
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers,
@@ -52,11 +80,7 @@ export class AnthropicProvider implements LlmProvider {
         model: this.model,
         max_tokens: 1024,
         system,
-        tools: request.tools.map((tool) => ({
-          name: tool.name,
-          description: tool.description,
-          input_schema: tool.inputSchema,
-        })),
+        tools,
         messages: request.messages.map(toAnthropicMessage),
       }),
     });

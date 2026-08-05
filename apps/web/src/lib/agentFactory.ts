@@ -17,7 +17,11 @@ import { activeProvider } from './provider/index.js';
 export function createProvider(config: LlmConfig): LlmProvider {
   switch (config.provider) {
     case 'anthropic':
-      return new AnthropicProvider({ apiKey: config.apiKey, model: config.model });
+      return new AnthropicProvider({
+        apiKey: config.apiKey,
+        model: config.model,
+        webSearch: config.webSearch,
+      });
     case 'openai':
       return new OpenAiProvider({
         apiKey: config.apiKey,

@@ -76,7 +76,7 @@ export function ChatPanel() {
   const capabilityKey = useTwinStore((state) =>
     state.externalAgents.map((agent) => agent.id).join(','),
   );
-  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}:${keyFingerprint}:${capabilityKey}`;
+  const agentKey = `${llmConfig.provider}:${llmConfig.model}:${llmConfig.baseUrl}:${keyFingerprint}:${capabilityKey}:${llmConfig.webSearch}`;
   const agentRef = useRef<{ key: string; agent: Agent } | null>(null);
   const agent = useMemo(() => {
     if (agentRef.current?.key !== agentKey) {

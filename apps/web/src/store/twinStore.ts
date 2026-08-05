@@ -27,6 +27,8 @@ export interface LlmConfig {
   model: string;
   /** Base URL for OpenAI-compatible gateways / the local Ollama daemon. */
   baseUrl: string;
+  /** Let the agent use Claude's built-in web search (Anthropic only). Default on. */
+  webSearch: boolean;
 }
 
 const MAX_EVENTS = 200;
@@ -156,6 +158,7 @@ const DEFAULT_LLM_CONFIG: LlmConfig = {
   apiKey: '',
   model: 'claude-opus-5',
   baseUrl: '',
+  webSearch: true,
 };
 
 let idCounter = 0;
