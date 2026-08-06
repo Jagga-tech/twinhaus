@@ -1,5 +1,5 @@
 import { parsePhotoScan, type PhotoScanResult } from './photoScan.js';
-import type { LlmProviderId } from '../store/twinStore.js';
+import { providerNeedsKey, type LlmProviderId } from '../store/twinStore.js';
 
 /**
  * The vision half of photo-to-twin: send a phone photo to an AI and get back a structured reading
@@ -43,8 +43,11 @@ export interface VisionScanOptions {
 
 /** Downscale a photo, send it to the chosen AI, and parse the reply into a {@link PhotoScanResult}. */
 export async function scanPhoto(options: VisionScanOptions): Promise<PhotoScanResult> {
-  if (options.provider !== 'ollama' && !options.apiKey) {
+  if (providerNeedsKey(options.provider) && !options.apiKey) {
     throw new Error(`Add your ${label(options.provider)} API key in Settings to read photos.`);
+  }
+  if (options.provider === 'custom' && !options.baseUrl?.trim()) {
+    throw new Error('Add the endpoint base URL for your custom provider in Settings.');
   }
   const image = await downscaleImage(options.file);
   const text =
@@ -190,7 +193,9 @@ function defaultBaseUrl(provider: LlmProviderId): string {
 }
 
 function label(provider: LlmProviderId): string {
-  return { anthropic: 'Anthropic', openai: 'OpenAI', ollama: 'Ollama' }[provider];
+  return { anthropic: 'Anthropic', openai: 'OpenAI', ollama: 'Ollama', custom: 'Custom endpoint' }[
+    provider
+  ];
 }
 
 interface EncodedImage {

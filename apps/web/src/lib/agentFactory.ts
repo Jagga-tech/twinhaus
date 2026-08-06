@@ -30,6 +30,13 @@ export function createProvider(config: LlmConfig): LlmProvider {
       });
     case 'ollama':
       return new OllamaProvider({ model: config.model, baseUrl: config.baseUrl || undefined });
+    case 'custom':
+      // Any OpenAI-compatible endpoint (OpenRouter, Groq, Together, LM Studio, vLLM, ...).
+      return new OpenAiProvider({
+        apiKey: config.apiKey,
+        model: config.model,
+        baseUrl: config.baseUrl || undefined,
+      });
   }
 }
 

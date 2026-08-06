@@ -18,6 +18,7 @@ const PROVIDER_LABEL: Record<string, string> = {
   anthropic: 'Claude',
   openai: 'GPT',
   ollama: 'your local model',
+  custom: 'your model',
 };
 
 export function PhotoScanPanel() {
