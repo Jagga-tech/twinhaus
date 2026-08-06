@@ -14,6 +14,7 @@ import { PlacementPrompt } from './components/discovery/PlacementPrompt.js';
 import { WelcomeFlow } from './components/WelcomeFlow.js';
 import { useDiscovery } from './hooks/useDiscovery.js';
 import { useLivePositioning } from './hooks/useLivePositioning.js';
+import { useCentralBrain } from './hooks/useCentralBrain.js';
 
 const MODES: EditorMode[] = ['view', 'draw', 'place'];
 
@@ -22,6 +23,7 @@ export function App() {
   const [wizardOpen, setWizardOpen] = useState(false);
   useDiscovery();
   useLivePositioning();
+  useCentralBrain();
   const mode = useTwinStore((state) => state.editorMode);
   const setEditorMode = useTwinStore((state) => state.setEditorMode);
   const status = useTwinStore((state) => state.connectionStatus);
