@@ -14,13 +14,21 @@ type ScanState =
  * layout and any smart devices it can see, and one tap turns that into rooms and placed devices you
  * can refine. Scan room by room to grow the whole home.
  */
+const PROVIDER_LABEL: Record<string, string> = {
+  anthropic: 'Claude',
+  openai: 'GPT',
+  ollama: 'your local model',
+};
+
 export function PhotoScanPanel() {
   const provider = useTwinStore((state) => state.llmConfig.provider);
   const apiKey = useTwinStore((state) => state.llmConfig.apiKey);
   const model = useTwinStore((state) => state.llmConfig.model);
+  const baseUrl = useTwinStore((state) => state.llmConfig.baseUrl);
   const rooms = useTwinStore((state) => state.rooms);
   const importTwin = useTwinStore((state) => state.importTwin);
   const setActiveLeftTab = useTwinStore((state) => state.setActiveLeftTab);
+  const visionName = PROVIDER_LABEL[provider] ?? 'your AI';
 
   const [scan, setScan] = useState<ScanState>({ status: 'idle' });
   const [roomNames, setRoomNames] = useState<Record<number, string>>({});
@@ -32,7 +40,7 @@ export function PhotoScanPanel() {
     setDropped(new Set());
     setScan({ status: 'scanning' });
     try {
-      const result = await scanPhoto({ apiKey, model, file });
+      const result = await scanPhoto({ provider, apiKey, model, baseUrl, file });
       setScan({ status: 'preview', result, previewUrl: URL.createObjectURL(file) });
     } catch (err) {
       setScan({ status: 'error', message: err instanceof Error ? err.message : String(err) });
@@ -51,24 +59,13 @@ export function PhotoScanPanel() {
     setActiveLeftTab('plan');
   }
 
-  if (provider !== 'anthropic') {
-    return (
-      <div className="panel-block">
-        <h4>Build from a photo</h4>
-        <p className="hint">
-          Photo reading uses Claude vision. Switch the chat provider to Anthropic in Settings and
-          add your key, then a photo of any room becomes rooms and devices here.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="panel-block">
       <h4>Build from a photo</h4>
       <p className="hint">
-        Take or upload a photo of a room. Claude reads the layout and any smart devices in it, then
-        turns them into a room you can refine. Scan each room to build the whole home.
+        Take or upload a photo of a room. {visionName} reads the layout and any smart devices in it,
+        then turns them into a room you can refine. Scan each room to build the whole home. It uses
+        whichever AI you run the chat on, set in Settings.
       </p>
 
       {scan.status !== 'preview' && (
