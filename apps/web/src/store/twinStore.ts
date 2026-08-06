@@ -19,6 +19,7 @@ import type {
 import { DEFAULT_LEVEL, normalizeLevels, sortedLevels } from '../lib/levels.js';
 import type { Scene } from '../lib/scenes.js';
 import type { BrainMode } from '../lib/brain.js';
+import { observationFrom, type Observation } from '../lib/patterns.js';
 
 export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
 
@@ -33,6 +34,8 @@ export interface LlmConfig {
 }
 
 const MAX_EVENTS = 200;
+/** How many recent controllable actions to keep for routine learning; a few weeks of normal use. */
+const MAX_OBSERVATIONS = 500;
 
 interface TwinState {
   // --- Geometry (persisted) ---
@@ -74,6 +77,8 @@ interface TwinState {
   brainMode: BrainMode;
   /** Recent things the brain did or suggested, newest first (not persisted). */
   brainLog: string[];
+  /** A rolling history of controllable actions, so the brain can learn the home's routines. */
+  brainObservations: Observation[];
 
   // --- Onboarding (persisted) ---
   /** True once the user has finished or skipped the first-run WelcomeFlow. */
@@ -201,6 +206,7 @@ export const useTwinStore = create<TwinState>()(
       externalAgents: [],
       brainMode: 'off',
       brainLog: [],
+      brainObservations: [],
       welcomeDismissed: false,
       agentUsed: false,
       activeLeftTab: 'plan',
@@ -337,7 +343,16 @@ export const useTwinStore = create<TwinState>()(
             events = [event, ...prev.events].slice(0, MAX_EVENTS);
           }
 
-          return { entityStates: nextStates, events };
+          // Learn the home's rhythm: record controllable transitions for routine detection.
+          let brainObservations = prev.brainObservations;
+          if (state && previous && previous.state !== state.state) {
+            const observation = observationFrom(state);
+            if (observation) {
+              brainObservations = [...prev.brainObservations, observation].slice(-MAX_OBSERVATIONS);
+            }
+          }
+
+          return { entityStates: nextStates, events, brainObservations };
         }),
 
       setConnectionStatus: (status) => set(() => ({ connectionStatus: status })),
@@ -444,6 +459,7 @@ export const useTwinStore = create<TwinState>()(
         energyRatePerKwh: state.energyRatePerKwh,
         externalAgents: state.externalAgents,
         brainMode: state.brainMode,
+        brainObservations: state.brainObservations,
       }),
     },
   ),
