@@ -4,6 +4,7 @@ import { HOME_TEMPLATES, templateToTwin } from '../../lib/templates.js';
 import { BUILDING_TYPES, buildingToTwin } from '../../lib/levels.js';
 import { captureToTwin, downloadTwin, parseTwin, type RoomCapture } from '../../lib/twinIo.js';
 import { HomeScanPanel } from './HomeScanPanel.js';
+import { PhotoScanPanel } from './PhotoScanPanel.js';
 import { PositioningPanel } from './PositioningPanel.js';
 
 /**
@@ -53,6 +54,7 @@ export function ImportPanel() {
 
   return (
     <div className="panel-block">
+      <PhotoScanPanel />
       <HomeScanPanel />
       <PositioningPanel />
 
