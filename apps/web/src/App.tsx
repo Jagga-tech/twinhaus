@@ -93,7 +93,9 @@ export function App() {
 }
 
 function providerLabel(provider: LlmProviderId): string {
-  return { anthropic: 'Anthropic', openai: 'OpenAI', ollama: 'Ollama (local)' }[provider];
+  return { anthropic: 'Anthropic', openai: 'OpenAI', ollama: 'Ollama (local)', custom: 'Custom' }[
+    provider
+  ];
 }
 
 /** Short prefix for the connection pill, so it reflects the active device backend, not just HA. */

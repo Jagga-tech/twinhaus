@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Agent, AgentEvent, ControlAction, SafetyVerdict } from '@twinhaus/agent';
-import { useTwinStore } from '../../store/twinStore.js';
+import { providerNeedsKey, useTwinStore } from '../../store/twinStore.js';
 import { createAgent } from '../../lib/agentFactory.js';
 
 interface TranscriptItem {
@@ -104,7 +104,7 @@ export function ChatPanel() {
     const message = input.trim();
     if (!message || busy) return;
 
-    if (llmConfig.provider !== 'ollama' && !llmConfig.apiKey) {
+    if (providerNeedsKey(llmConfig.provider) && !llmConfig.apiKey) {
       appendItem({ role: 'tool', text: 'Add an API key in Settings first (or switch to Ollama).' });
       return;
     }

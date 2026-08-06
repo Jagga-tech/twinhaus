@@ -21,7 +21,16 @@ import type { Scene } from '../lib/scenes.js';
 import type { BrainMode } from '../lib/brain.js';
 import { observationFrom, type Observation } from '../lib/patterns.js';
 
-export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
+export type LlmProviderId = 'anthropic' | 'openai' | 'ollama' | 'custom';
+
+/**
+ * Whether a provider needs an API key. Cloud APIs do; a local Ollama daemon does not, and a custom
+ * OpenAI-compatible endpoint may or may not (LM Studio and vLLM often run keyless), so we treat the
+ * key as optional there rather than block on it.
+ */
+export function providerNeedsKey(provider: LlmProviderId): boolean {
+  return provider === 'anthropic' || provider === 'openai';
+}
 
 export interface LlmConfig {
   provider: LlmProviderId;

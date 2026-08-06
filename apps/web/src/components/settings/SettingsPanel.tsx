@@ -7,16 +7,33 @@ const MODEL_PLACEHOLDER: Record<LlmProviderId, string> = {
   anthropic: 'claude-opus-5',
   openai: 'gpt-4o',
   ollama: 'llama3.1',
+  custom: 'model id from your provider',
 };
 
 /**
  * Known-good model ids offered as autocomplete on the model field, so a typo like "claude-opus-4"
  * (which the API 404s) is easy to avoid. Free text is still allowed for other or newer models.
+ * Custom is left open, its model ids come from whatever endpoint you point at.
  */
 const MODEL_SUGGESTIONS: Record<LlmProviderId, string[]> = {
   anthropic: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5-20251001'],
   openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1'],
   ollama: ['llama3.1', 'llama3.2', 'qwen2.5'],
+  custom: [],
+};
+
+/** Label and placeholder for the base-URL field, per provider (Anthropic has no base-URL field). */
+const BASE_URL_LABEL: Record<LlmProviderId, string> = {
+  anthropic: '',
+  openai: 'Base URL (optional)',
+  ollama: 'Ollama URL',
+  custom: 'Endpoint base URL',
+};
+const BASE_URL_PLACEHOLDER: Record<LlmProviderId, string> = {
+  anthropic: '',
+  openai: 'https://api.openai.com/v1',
+  ollama: 'http://localhost:11434',
+  custom: 'https://openrouter.ai/api/v1',
 };
 
 /** Connect Home Assistant and pick an LLM provider, cloud APIs or fully local via Ollama. */
@@ -125,8 +142,9 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
       <section>
         <h3>AI provider</h3>
         <p className="hint">
-          Bring your own LLM. Anthropic or OpenAI for cloud, or Ollama for fully local inference, no
-          data leaves your machine.
+          Bring your own LLM. Anthropic or OpenAI for cloud, Ollama for fully local inference, or
+          Custom to point at any OpenAI-compatible endpoint (OpenRouter, Groq, Together, LM Studio,
+          vLLM).
         </p>
         <label>
           Provider
@@ -134,12 +152,18 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             value={llmConfig.provider}
             onChange={(event) => {
               const provider = event.target.value as LlmProviderId;
-              setLlmConfig({ provider, model: MODEL_PLACEHOLDER[provider] });
+              // Keep the user's model when switching to Custom; other providers get a sensible default.
+              setLlmConfig(
+                provider === 'custom'
+                  ? { provider }
+                  : { provider, model: MODEL_PLACEHOLDER[provider] },
+              );
             }}
           >
             <option value="anthropic">Anthropic</option>
             <option value="openai">OpenAI</option>
             <option value="ollama">Ollama (local)</option>
+            <option value="custom">Custom (OpenAI-compatible)</option>
           </select>
         </label>
         <label>
@@ -158,7 +182,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         {llmConfig.provider !== 'ollama' && (
           <label>
-            API key
+            {llmConfig.provider === 'custom' ? 'API key (optional)' : 'API key'}
             <input
               type="password"
               value={llmConfig.apiKey}
@@ -178,17 +202,19 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         )}
         {llmConfig.provider !== 'anthropic' && (
           <label>
-            {llmConfig.provider === 'ollama' ? 'Ollama URL' : 'Base URL (optional)'}
+            {BASE_URL_LABEL[llmConfig.provider]}
             <input
               value={llmConfig.baseUrl}
-              placeholder={
-                llmConfig.provider === 'ollama'
-                  ? 'http://localhost:11434'
-                  : 'https://api.openai.com/v1'
-              }
+              placeholder={BASE_URL_PLACEHOLDER[llmConfig.provider]}
               onChange={(event) => setLlmConfig({ baseUrl: event.target.value })}
             />
           </label>
+        )}
+        {llmConfig.provider === 'custom' && (
+          <p className="hint">
+            Any OpenAI-compatible endpoint works. Use the base that ends in /v1; the app calls
+            /chat/completions on it. Set the model to whatever id that provider expects.
+          </p>
         )}
       </section>
 
