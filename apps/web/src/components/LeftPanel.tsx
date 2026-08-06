@@ -9,12 +9,14 @@ import { FoundNearYou } from './discovery/FoundNearYou.js';
 import { DeviceCatalog } from './catalog/DeviceCatalog.js';
 import { BuildingSummaryPanel } from './panels/BuildingSummaryPanel.js';
 import { ScenesPanel } from './panels/ScenesPanel.js';
+import { BrainPanel } from './panels/BrainPanel.js';
 
-type Tab = 'plan' | 'devices' | 'found' | 'catalog' | 'simulate' | 'import' | 'events';
+type Tab = 'plan' | 'devices' | 'brain' | 'found' | 'catalog' | 'simulate' | 'import' | 'events';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'plan', label: 'Design' },
   { id: 'devices', label: 'Devices' },
+  { id: 'brain', label: 'Brain' },
   { id: 'found', label: 'Found near you' },
   { id: 'catalog', label: 'Catalog' },
   { id: 'simulate', label: 'Plan' },
@@ -56,6 +58,7 @@ export function LeftPanel({ onOpenWizard }: { onOpenWizard: () => void }) {
             <BuildingSummaryPanel />
           </>
         )}
+        {tab === 'brain' && <BrainPanel />}
         {tab === 'found' && <FoundNearYou />}
         {tab === 'catalog' && <DeviceCatalog />}
         {tab === 'simulate' && <SimulationPanel onOpenWizard={onOpenWizard} />}

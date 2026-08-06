@@ -18,6 +18,7 @@ import type {
 } from './types.js';
 import { DEFAULT_LEVEL, normalizeLevels, sortedLevels } from '../lib/levels.js';
 import type { Scene } from '../lib/scenes.js';
+import type { BrainMode } from '../lib/brain.js';
 
 export type LlmProviderId = 'anthropic' | 'openai' | 'ollama';
 
@@ -69,6 +70,10 @@ interface TwinState {
   energyRatePerKwh: number;
   /** Third-party agents registered as capabilities, each exposed to Homie as an `ask_<id>` tool. */
   externalAgents: ExternalAgent[];
+  /** Central-brain mode: off, suggest (surface decisions), or auto (run safe ones itself). */
+  brainMode: BrainMode;
+  /** Recent things the brain did or suggested, newest first (not persisted). */
+  brainLog: string[];
 
   // --- Onboarding (persisted) ---
   /** True once the user has finished or skipped the first-run WelcomeFlow. */
@@ -134,6 +139,8 @@ interface TwinState {
   setEnergyRate: (rate: number) => void;
   addExternalAgent: (agent: Omit<ExternalAgent, 'id'>) => void;
   removeExternalAgent: (id: string) => void;
+  setBrainMode: (mode: BrainMode) => void;
+  addBrainLog: (entry: string) => void;
   setWelcomeDismissed: (dismissed: boolean) => void;
   markAgentUsed: () => void;
 
@@ -192,6 +199,8 @@ export const useTwinStore = create<TwinState>()(
       scenes: [],
       energyRatePerKwh: 0,
       externalAgents: [],
+      brainMode: 'off',
+      brainLog: [],
       welcomeDismissed: false,
       agentUsed: false,
       activeLeftTab: 'plan',
@@ -367,6 +376,9 @@ export const useTwinStore = create<TwinState>()(
         }),
       removeExternalAgent: (id) =>
         set((state) => ({ externalAgents: state.externalAgents.filter((a) => a.id !== id) })),
+      setBrainMode: (mode) => set(() => ({ brainMode: mode })),
+      addBrainLog: (entry) =>
+        set((state) => ({ brainLog: [entry, ...state.brainLog].slice(0, 20) })),
       setWelcomeDismissed: (dismissed) => set(() => ({ welcomeDismissed: dismissed })),
       markAgentUsed: () => set(() => ({ agentUsed: true })),
 
@@ -431,6 +443,7 @@ export const useTwinStore = create<TwinState>()(
         scenes: state.scenes,
         energyRatePerKwh: state.energyRatePerKwh,
         externalAgents: state.externalAgents,
+        brainMode: state.brainMode,
       }),
     },
   ),
