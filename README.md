@@ -33,9 +33,11 @@ Your home already has the data. Home Assistant already talks to 2000+ devices. W
 
 - **Dashboards are lists. Homes are spaces.** A motion alert means more when you see _which door_ it came from, in 3D.
 - **Works with the home you already have.** Old house, rented apartment, zero smart devices, start with a floor plan and grow from there.
+- **Build it from a photo.** No floor plan and no LiDAR? Point your phone at a room, the AI reads its size and the smart devices in it, and it becomes an editable room in the twin. Scan room by room to grow the whole home.
+- **A brain, not just a chatbot.** A central brain supervises every connected system at once, settles the house when you leave, trims waste, and learns your daily rhythms into routines you can save with one tap.
 - **Add devices as they appear.** A "Found near you" tray surfaces devices Home Assistant has discovered but not yet configured, one click adds them and drops them straight into the twin. See [docs/DISCOVERY.md](docs/DISCOVERY.md).
 - **Simulate before you buy.** Place a virtual camera or sensor in the twin, check its coverage, _then_ spend money.
-- **Local-first.** Runs against your own Home Assistant instance. Bring your own LLM, cloud APIs or fully local via Ollama.
+- **Local-first, any model.** Runs against your own Home Assistant instance. Bring your own LLM, Anthropic or OpenAI in the cloud, fully local via Ollama, or any OpenAI-compatible endpoint (OpenRouter, Groq, Together, LM Studio, vLLM) via the Custom provider.
 - **HA-optional, not HA-hostile.** Home Assistant gives the widest device coverage, but it's one backend behind a small provider interface, not a hard requirement. Explore a simulated home with **no hub at all** (Demo), or control real devices without HA via **MQTT (zigbee2mqtt)** or **Matter** (through a local companion service). See [docs/BACKENDS.md](docs/BACKENDS.md).
 
 ## How it works
@@ -78,6 +80,17 @@ Then open `http://localhost:5173`, draw your floor plan, and connect your Home A
 - [x] **Guided onboarding**: a first-run WelcomeFlow that threads connect to build to control to locate to talk into one journey ([workflow](docs/WORKFLOW.md))
 - [x] **Scan your home**: no drawing, generate a room per Home Assistant area and auto-place every device where it already lives ([docs](docs/HOME-SCAN.md))
 - [x] **Position from distance**: trilaterate a device's live spot within a room from Bluetooth ranging (ESPHome proxies / ESPresense / Bermuda), with an honest confidence halo ([docs](docs/POSITIONING.md))
+- [x] **Central brain**: one supervisor over every connected backend at once, with Off / Suggest / Autopilot modes; safe actions (lights off when away, lock up, eco climate, close covers while heating) can run themselves, anything touching security or comfort is only ever suggested
+- [x] **Learns your habits**: watches how the home is actually used, spots the routines in it (the evening dim, the morning warm-up), and offers them back to run now or save as a scene
+- [x] **Build from a photo**: turn a phone photo of a room into an editable room plus the smart devices spotted in it, works with Claude, GPT, a local Ollama vision model, or any custom endpoint, with a clear message when a chosen model can't read images
+- [x] **Any model**: four built-in providers (Anthropic, OpenAI, Ollama) plus a Custom OpenAI-compatible provider so you can point at OpenRouter, Groq, Together, LM Studio, vLLM, or your own gateway
+
+### Next up
+
+- [ ] **Fire learned routines on time**: a small scheduler so a saved routine runs at its learned hour, not just when you tap it
+- [ ] **Sharper photo sizing**: drop several photos of one room from different angles so the size estimate triangulates instead of guessing from one shot
+- [ ] **Test connection**: a one-tap check next to the model field that confirms the endpoint, model, and key actually work before you rely on them
+- [ ] **LLM-as-brain option**: let the central brain reason with your LLM for open-ended situations, alongside today's fast, deterministic rulebook
 
 Full details in [docs/ROADMAP.md](docs/ROADMAP.md).
 
