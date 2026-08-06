@@ -37,7 +37,12 @@ export function sceneFromStates(
   return { name, entries };
 }
 
-function captureEntry(state: HaEntityState): SceneEntry | null {
+/**
+ * Reduce one device's live state to the single call that reproduces it, or null if the device is
+ * not controllable. Shared by scene capture and by the brain's habit learning so a learned routine
+ * always replays exactly the way a saved scene would.
+ */
+export function captureEntry(state: HaEntityState): SceneEntry | null {
   const domain = entityDomain(state.entity_id);
   if (!CONTROLLABLE.has(domain)) return null;
   const entityId = state.entity_id;
