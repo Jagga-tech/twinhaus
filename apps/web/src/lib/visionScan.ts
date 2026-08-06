@@ -51,7 +51,58 @@ export async function scanPhoto(options: VisionScanOptions): Promise<PhotoScanRe
     options.provider === 'anthropic'
       ? await callAnthropic(options, image)
       : await callOpenAiCompatible(options, image);
+  // A text-only model may return 200 but politely say it cannot see the image; catch that too.
+  if (isNoVisionReply(text)) throw new Error(visionUnsupportedHelp(options.model));
   return parsePhotoScan(text);
+}
+
+/** The one clear, actionable message we show whenever the chosen model cannot read images. */
+export function visionUnsupportedHelp(model: string): string {
+  const name = model.trim() ? `The model "${model.trim()}"` : 'This model';
+  return `${name} can't read images. Open Settings and pick a vision-capable model, for example Claude (any Claude 3 or newer), OpenAI GPT-4o, or a local Ollama vision model like llava.`;
+}
+
+/**
+ * Decide whether a failed API response means the model cannot read images (as opposed to a bad key,
+ * a missing model, or a rate limit). Providers phrase this differently, so we look for the response
+ * mentioning an image or vision alongside a "not supported / invalid" signal. Returns the friendly
+ * help message when it matches, or null to let the caller surface the raw error.
+ */
+export function visionUnsupportedMessage(model: string, body: string): string | null {
+  const text = body.toLowerCase();
+  const mentionsImage =
+    text.includes('image') || text.includes('vision') || text.includes('multimodal');
+  const mentionsUnsupported = [
+    'not support',
+    "doesn't support",
+    'does not support',
+    'unsupported',
+    'only supported',
+    'cannot process',
+    'can not process',
+    'no vision',
+    'not a vision',
+    'invalid',
+  ].some((phrase) => text.includes(phrase));
+  return mentionsImage && mentionsUnsupported ? visionUnsupportedHelp(model) : null;
+}
+
+/** Detect a 200-OK reply where a text-only model says, in prose, that it cannot see the image. */
+export function isNoVisionReply(text: string): boolean {
+  const lower = text.toLowerCase();
+  return [
+    'cannot see',
+    "can't see",
+    'unable to see',
+    'unable to view',
+    'cannot view',
+    "can't view",
+    'do not have the ability to see',
+    "don't have the ability to see",
+    'cannot process image',
+    'as a text-based',
+    'text-only model',
+  ].some((phrase) => lower.includes(phrase));
 }
 
 /** Claude's Messages API: the image rides in a dedicated image block. */
@@ -82,7 +133,11 @@ async function callAnthropic(options: VisionScanOptions, image: EncodedImage): P
     }),
   });
   if (!response.ok) {
-    throw new Error(`Anthropic API error (${response.status}): ${await response.text()}`);
+    const body = await response.text();
+    throw new Error(
+      visionUnsupportedMessage(options.model, body) ??
+        `Anthropic API error (${response.status}): ${body}`,
+    );
   }
   const data = (await response.json()) as { content: Array<{ type: string; text?: string }> };
   return data.content
@@ -118,8 +173,10 @@ async function callOpenAiCompatible(
     }),
   });
   if (!response.ok) {
+    const body = await response.text();
     throw new Error(
-      `${label(options.provider)} API error (${response.status}): ${await response.text()}`,
+      visionUnsupportedMessage(options.model, body) ??
+        `${label(options.provider)} API error (${response.status}): ${body}`,
     );
   }
   const data = (await response.json()) as {
